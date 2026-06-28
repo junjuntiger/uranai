@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>九星気学 占い</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Hiragino Mincho ProN','Yu Mincho','MS Mincho',serif;background:#f5f0e8;color:#2c2c2c;min-height:100vh}
+.page{max-width:720px;margin:0 auto;padding:2rem 1rem 4rem}
+.hero{text-align:center;margin-bottom:2rem;padding:2rem 0 1.5rem}
+.hero-title{font-size:32px;font-weight:500;color:#2c2c2c;letter-spacing:0.2em;margin-bottom:6px}
+.hero-sub{font-size:12px;color:#888;letter-spacing:0.12em}
+.input-card{background:#fff;border:0.5px solid rgba(0,0,0,0.12);border-radius:12px;padding:1.5rem;margin-bottom:2rem}
+.input-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.input-row label{font-size:13px;color:#666;min-width:60px;font-family:'Hiragino Sans','Yu Gothic',sans-serif}
+.input-row input{flex:1;min-width:160px;border:0.5px solid rgba(0,0,0,0.2);border-radius:6px;padding:8px 12px;font-size:14px;font-family:'Hiragino Sans','Yu Gothic',sans-serif;outline:none;background:#fafafa}
+.input-row input:focus{border-color:#8b6914;background:#fff}
+.btn-primary{background:#2c2c2c;border:none;border-radius:6px;padding:9px 28px;font-size:14px;font-weight:500;color:#f5f0e8;cursor:pointer;letter-spacing:0.1em;font-family:'Hiragino Sans','Yu Gothic',sans-serif;transition:background 0.2s}
+.btn-primary:hover{background:#533AB7}
+.result{display:none}
+.section-head{font-size:18px;font-weight:500;color:#2c2c2c;border-bottom:1px solid rgba(0,0,0,0.15);padding-bottom:8px;margin:2rem 0 1rem;letter-spacing:0.06em}
+.subsub{font-size:12px;color:#888;margin-bottom:12px;font-family:'Hiragino Sans','Yu Gothic',sans-serif}
+.star2col{display:flex;gap:20px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.star-pill{display:flex;align-items:center;gap:8px}
+.star-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.star-pill-label{font-size:13px;color:#666;font-family:'Hiragino Sans','Yu Gothic',sans-serif}
+.star-pill-name{font-size:16px;font-weight:500;color:#2c2c2c}
+.pill-btn-row{display:flex;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap}
+.pill-btn{border-radius:20px;border:0.5px solid rgba(0,0,0,0.2);background:#fff;padding:5px 16px;font-size:12px;cursor:pointer;color:#555;display:flex;align-items:center;gap:6px;font-family:'Hiragino Sans','Yu Gothic',sans-serif;transition:background 0.15s}
+.pill-btn:hover{background:#f0ece0}
+.pill-btn .dot{width:10px;height:10px;border-radius:50%}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+@media(max-width:520px){.detail-grid{grid-template-columns:1fr}}
+.section-card{background:#fff;border:0.5px solid rgba(0,0,0,0.10);border-radius:12px;padding:1.25rem}
+.section-card-title{font-size:11px;color:#999;letter-spacing:0.14em;margin-bottom:10px;font-family:'Hiragino Sans','Yu Gothic',sans-serif}
+.kv-table{width:100%;font-size:12px;border-collapse:collapse;font-family:'Hiragino Sans','Yu Gothic',sans-serif}
+.kv-table td{padding:6px 0;vertical-align:top}
+.kv-table td:first-child{color:#888;width:46%;padding-right:8px}
+.kv-table td:last-child{color:#2c2c2c;font-weight:500}
+.kv-table tr{border-bottom:0.5px solid rgba(0,0,0,0.08)}
+.kv-table tr:last-child{border:none}
+.compass-wrap{display:flex;justify-content:center}
+.tab-row{display:flex;gap:8px;margin-bottom:10px}
+.tab-btn{font-size:11px;padding:3px 12px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.15);background:transparent;color:#888;cursor:pointer;font-family:'Hiragino Sans','Yu Gothic',sans-serif;transition:background 0.15s}
+.tab-btn.active{background:#f0ece0;color:#2c2c2c;border-color:rgba(0,0,0,0.25)}
+.unsei-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:0.5px solid rgba(0,0,0,0.08)}
+.unsei-row:last-child{border:none}
+.unsei-label{font-size:12px;color:#888;font-family:'Hiragino Sans','Yu Gothic',sans-serif}
+.unsei-val{font-size:12px;font-weight:500;color:#2c2c2c;text-align:right;font-family:'Hiragino Sans','Yu Gothic',sans-serif}
+.badge{font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px}
+.b-kichi{background:#c9a84c22;color:#8b6914}
+.b-sho{background:#1d9e7522;color:#0f6e56}
+.b-kyo{background:#c0392b22;color:#922b21}
+.b-chu{background:#37a4dd22;color:#185fa5}
+.houiku-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.hou-item{font-size:11px;padding:4px 8px;border-radius:4px;border:0.5px solid rgba(0,0,0,0.1);color:#888;font-family:'Hiragino Sans','Yu Gothic',sans-serif}
+.hou-good{border-color:#c9a84c66;color:#8b6914;background:#c9a84c0d}
+.hou-bad{border-color:#c0392b44;color:#922b21;background:#c0392b08}
+.personality{background:#fff;border:0.5px solid rgba(0,0,0,0.10);border-radius:12px;padding:1.5rem;margin-top:1.5rem}
+.pers-title{font-size:18px;font-weight:500;color:#2c2c2c;border-bottom:0.5px solid rgba(0,0,0,0.12);padding-bottom:8px;margin-bottom:14px;letter-spacing:0.06em}
+.pers-para{font-size:13px;color:#555;line-height:2;margin-bottom:12px;font-family:'Hiragino Sans','Yu Gothic',sans-serif}
+.pers-para:last-child{margin-bottom:0}
+.pers-high{color:#2c2c2c;font-weight:500}
+footer{text-align:center;font-size:11px;color:#bbb;margin-top:3rem;font-family:'Hiragino Sans','Yu Gothic',sans-serif;letter-spacing:0.08em}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="hero">
+    <div class="hero-title">九 星 気 学</div>
+    <div class="hero-sub">生年月日から本命星・月命星・運勢・方位を導く</div>
+  </div>
+
+  <div class="input-card">
+    <div class="input-row">
+      <label>生年月日</label>
+      <input type="date" id="bdate" value="1990-01-01">
+      <button class="btn-primary" onclick="calc()">鑑 定</button>
+    </div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="section-head">本命星と月命星</div>
+    <div class="subsub" id="birthLabel"></div>
+    <div class="star2col" id="starRow"></div>
+    <div class="pill-btn-row" id="pillRow"></div>
+
+    <div class="section-head">九星の詳細</div>
+    <div class="subsub" id="detailLabel"></div>
+    <div class="detail-grid">
+      <div>
+        <div class="section-card" style="margin-bottom:1rem">
+          <div class="section-card-title">基 本 情 報</div>
+          <table class="kv-table" id="basicTable"></table>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">暦 情 報</div>
+          <table class="kv-table" id="calTable"></table>
+        </div>
+      </div>
+      <div>
+        <div class="section-card" style="margin-bottom:1rem">
+          <div class="section-card-title">後天定位盤の位置</div>
+          <div class="compass-wrap">
+            <svg id="compass" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="後天定位盤"></svg>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">吉 凶 方 位</div>
+          <div class="houiku-grid" id="houGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card" style="margin-bottom:1rem">
+      <div class="section-card-title">年 月 運</div>
+      <div class="tab-row">
+        <button class="tab-btn active" onclick="showTab('year',this)">年運</button>
+        <button class="tab-btn" onclick="showTab('month',this)">月運</button>
+      </div>
+      <div id="tab-year"></div>
+      <div id="tab-month" style="display:none"></div>
+    </div>
+
+    <div class="personality" id="persCard"></div>
+
+    <div class="personality" id="aiCard" style="display:none;margin-top:1rem">
+      <div class="pers-title" id="aiCardTitle">AI 総合鑑定</div>
+      <div id="aiResult" style="font-size:13px;color:#555;line-height:2;font-family:'Hiragino Sans','Yu Gothic',sans-serif"></div>
+    </div>
+  </div>
+
+  <footer>© いきるかい ｜ 九星気学鑑定</footer>
+</div>
+
+<script>
+const STARS=[
+  {n:1,name:'一白水星',elem:'水',color:'#185fa5',bg:'#E6F1FB',
+   pers:['一白水星は<b>知性と流れ</b>を象徴する星です。','柔軟な適応力と深い思慮で周囲を引き付けます。表面は穏やかでも内に強い意志を秘めており、人の感情を敏感に読み取る洞察力があります。','交渉や調整役として活躍し、人間関係の橋渡しが得意です。しかし優柔不断に見られることもあり、自分の意見を発信する勇気が運を開きます。','晩年運が強く、若い頃の苦労が後の豊かさへとつながります。水のように低いところへ流れながら、やがて大きな器を満たす星です。']},
+  {n:2,name:'二黒土星',elem:'土',color:'#8b6914',bg:'#FAEEDA',
+   pers:['二黒土星は<b>勤勉と奉仕</b>を象徴する星です。','地に足ついた努力と粘り強さで周囲の信頼を獲得します。縁の下の力持ちとして組織を支え、コツコツと実績を積み上げる才能があります。','他者への奉仕精神が旺盛で、世話焼きな一面が人に慕われる要因となります。ただし自己犠牲が過ぎると消耗しやすく、自分を大切にするバランスが重要です。','晩年にかけて努力が実り、安定した豊かさを手にします。大地のように揺るぎない安心感が、この星の最大の魅力です。']},
+  {n:3,name:'三碧木星',elem:'木',color:'#3B6D11',bg:'#EAF3DE',
+   pers:['三碧木星は<b>行動と発展</b>を象徴する星です。','行動力と積極性で新しい道を切り開くパイオニアタイプです。アイデアが豊富で好奇心旺盛、新しいことへの挑戦を楽しめる生命力に満ちた星です。','直感的で決断が速く、勢いで突き進む力があります。一方で飽きっぽい面もあり、継続する仕組みを作ることで才能が開花します。','若い頃から活躍の機会が多く、早熟な傾向があります。春の若木のように、成長の勢いが人生を豊かにする星です。']},
+  {n:4,name:'四緑木星',elem:'木',color:'#0f6e56',bg:'#E1F5EE',
+   pers:['四緑木星は<b>信用と縁</b>を象徴する星です。','風のように広がる人脈と信頼関係が最大の財産です。誠実さと調和を重んじる性格が周囲に安心感を与え、自然と人が集まってきます。','旅行や移動との縁が深く、遠方との繋がりが発展のきっかけになることが多いです。変化を恐れず流れに乗ることで運気が高まります。','信用を積み重ねることで大きな仕事を任されるようになります。根を張りながら枝葉を広げる樹木のように、着実に成長する星です。']},
+  {n:5,name:'五黄土星',elem:'土',color:'#533AB7',bg:'#EEEDFE',
+   pers:['五黄土星は<b>圧倒的なパワーと強い意志</b>が特徴の星です。','明確な意志をもち堂々としており、どんどん周りを引っ張っていくリーダータイプです。多少強引でも突き進めるだけの胆力を備えているので、周囲からは非常に頼られます。困難なこともやり遂げる粘り強さもあり、総合的な地力では他の九星を圧倒します。','しかし基本的に自分中心で周囲に合わせるということを嫌うので、敵対する人には容赦がありません。誰に対しても恐れず平気で噛み付いていくような危なっかしい面があり、対立や孤立も恐れないので、敵に回すと厄介なタイプです。そのような性格が災いして、自己中心的・頑固者といったレッテルを貼られてしまうこともあるでしょう。','その反面、身内や頼ってくる人には寛大で、義理人情に厚く面倒見が良いため人望を集めます。敵も多いけれど味方も多い星です。','運気は晩年運となります。若い時は強すぎる意志のせいで何かと苦労するでしょうが、持ち前のパワーで乗り越えて運を手繰り寄せていきます。どんな困難にも負けない強靭な意志とパワーで生きていけるのが五黄土星です。']},
+  {n:6,name:'六白金星',elem:'金',color:'#5F5E5A',bg:'#F1EFE8',
+   pers:['六白金星は<b>権威と完璧</b>を象徴する星です。','高い理想と判断力で指導力を発揮します。プライドが高く完璧主義な面がありますが、それが仕事の質を高め、周囲から一目置かれる存在となります。','天のように大きな視野で物事を捉え、先を見通す力があります。組織のトップや専門家として活躍しやすい星です。','権威や地位との縁が深く、努力次第で社会的な成功を手にすることができます。金属のように磨けば磨くほど輝く、向上心あふれる星です。']},
+  {n:7,name:'七赤金星',elem:'金',color:'#993C1D',bg:'#FAECE7',
+   pers:['七赤金星は<b>喜悦と弁舌</b>を象徴する星です。','明るさと社交性で人を喜ばせる才能を持っています。話術に長け、場を和ませる能力が対人関係で大きな武器となります。','金銭との縁が深く、商才があります。楽しみながら仕事をこなす器用さがあり、サービス業や接客、芸術分野で才能を発揮しやすいです。','享楽的な面も持ち合わせているため、散財や遊びに流されないよう注意が必要です。秋の実りのように、喜びを分かち合いながら豊かさをつかむ星です。']},
+  {n:8,name:'八白土星',elem:'土',color:'#3266ad',bg:'#E6F1FB',
+   pers:['八白土星は<b>変化と積み上げ</b>を象徴する星です。','変化の中で堅実に力を蓄え、大きな変革を起こす潜在力があります。山のように動じない忍耐力と、蓄積したエネルギーを一気に放出する爆発力を兼ね備えています。','不動産や相続との縁が深く、地道な努力が形ある財産として実る傾向があります。変化を機会と捉える視点が運を開きます。','中年以降に運気が開花し、苦労が報われる時期が訪れます。山頂からの眺めのように、高い視点から人生を豊かにする星です。']},
+  {n:9,name:'九紫火星',elem:'火',color:'#993556',bg:'#FBEAF0',
+   pers:['九紫火星は<b>文明と美と知性</b>を象徴する星です。','直感と美的感覚に優れ、真実を見抜く鋭い洞察力があります。知的好奇心が旺盛で、芸術・学術・精神世界など高次元の分野で才能を発揮します。','注目を集める存在感があり、表舞台での活躍と名誉との縁が深いです。一方で感情の起伏が激しく、自分を追い込みやすい面があります。','炎のように周囲を照らし温める存在ですが、燃え尽きないよう休息を大切にすることが重要です。輝きを放ちながら世を照らす、華やかな運を持つ星です。']},
+];
+
+const KICHI_MAP={
+  '一白水星':{good:['北','南東','東'],bad:['南','南西']},
+  '二黒土星':{good:['南西','北東','西'],bad:['東','南東']},
+  '三碧木星':{good:['東','南','北'],bad:['西','北西']},
+  '四緑木星':{good:['南東','北','東'],bad:['西','北西']},
+  '五黄土星':{good:['南西','北東','西'],bad:['東','南東']},
+  '六白金星':{good:['北西','西','南西'],bad:['東','南']},
+  '七赤金星':{good:['西','北西','北東'],bad:['東','南東']},
+  '八白土星':{good:['北東','南西','西'],bad:['南','東']},
+  '九紫火星':{good:['南','東','南東'],bad:['北','北西']},
+};
+
+function digitSum(n){
+  while(n>=10){let s=0;while(n>0){s+=n%10;n=Math.floor(n/10);}n=s;}
+  return n;
+}
+
+// 本命星: 11式（各桁の和 → 11から引く）
+function getStarNum(y,m,d){
+  let adjY=(m<2||(m===2&&d<=3))?y-1:y;
+  let ds=digitSum(adjY);
+  let s=11-ds; while(s<=0)s+=9; while(s>9)s-=9;
+  return s;
+}
+
+// 年盤（年運）: 10式
+function getYearBan(y){
+  let ds=digitSum(y);
+  let s=10-ds; while(s<=0)s+=9; while(s>9)s-=9;
+  return s;
+}
+
+// 月命星: 節入り日テーブル基準
+const SEKKI=[6,4,6,5,6,6,7,7,8,8,7,7];
+function getMonthStar(y,m,d,honmeiNum){
+  let adjM=m;
+  if(d < SEKKI[m-1]) adjM=m-1;
+  if(adjM<1) adjM=12;
+  // 本命星グループ: 1,4,7→寅月基準=8, 2,5,8→寅月基準=2, 3,6,9→寅月基準=5
+  let base;
+  if([1,4,7].includes(honmeiNum)) base=8;
+  else if([2,5,8].includes(honmeiNum)) base=2;
+  else base=5;
+  let ms=base-(adjM-2); while(ms<1)ms+=9; while(ms>9)ms-=9;
+  return ms;
+}
+
+function getDayStar(y,m,d){
+  const epoch=new Date(2000,0,7);
+  const target=new Date(y,m-1,d);
+  const diff=Math.round((target-epoch)/86400000);
+  let s=((diff%9)+9)%9+1; if(s>9)s-=9;
+  return s;
+}
+
+function getStar(n){return STARS[n-1]}
+
+const KANSHI_Y=['甲子','乙丑','丙寅','丁卯','戊辰','己巳','庚午','辛未','壬申','癸酉','甲戌','乙亥','丙子','丁丑','戊寅','己卯','庚辰','辛巳','壬午','癸未','甲申','乙酉','丙戌','丁亥','戊子','己丑','庚寅','辛卯','壬辰','癸巳','甲午','乙未','丙申','丁酉','戊戌','己亥','庚子','辛丑','壬寅','癸卯','甲辰','乙巳','丙午','丁未','戊申','己酉','庚戌','辛亥','壬子','癸丑','甲寅','乙卯','丙辰','丁巳','戊午','己未','庚申','辛酉','壬戌','癸亥'];
+function getYearKanshi(y){return KANSHI_Y[(y-4)%60]}
+
+// 六曜: 旧暦(朔)ベースで正確に計算
+function _jd(y,m,d){
+  let a=Math.floor((14-m)/12);
+  let yr=y+4800-a; let mo=m+12*a-3;
+  return d+Math.floor((153*mo+2)/5)+365*yr+Math.floor(yr/4)-Math.floor(yr/100)+Math.floor(yr/400)-32045;
+}
+function _newMoonJD(k){
+  let T=k/1236.85;
+  return 2451550.09766+29.530588861*k+0.00015437*T*T-0.000000150*T*T*T;
+}
+const ROKKI=['大安','赤口','先勝','友引','先負','仏滅'];
+function getRokki(y,m,d){
+  let targetJD=_jd(y,m,d);
+  let k=Math.round((y+(m-1)/12-2000)*12.3685);
+  while(_newMoonJD(k+1)<=targetJD)k++;
+  while(_newMoonJD(k)>targetJD)k--;
+  let sakuJD=_newMoonJD(k);
+  let kyuDay=Math.floor(targetJD-sakuJD)+1;
+  let kyuMonth=m-1; if(kyuMonth<1)kyuMonth+=12;
+  return ROKKI[(kyuMonth+kyuDay)%6];
+}
+
+function getNichiYoshi(y,m,d){
+  const t=new Date(y,m-1,d);
+  const day=t.getDay();
+  if((m===1||m===2||m===5||m===6)&&(day===0||day===4)) return '一粒万倍日';
+  if((m===3||m===4||m===7||m===8)&&(day===0||day===3)) return '一粒万倍日';
+  return '-';
+}
+
+// 傾斜: 月命星の対宮（1↔9, 2↔8, 3↔7, 4↔6, 5↔5）
+const MIYA_NAME=['','坎宮','坤宮','震宮','巽宮','中宮','乾宮','兌宮','艮宮','離宮'];
+const TAIKYU=[0,9,8,7,6,5,4,3,2,1];
+function getKessei(honmei,monthStar){
+  return MIYA_NAME[TAIKYU[monthStar]]+'傾斜';
+}
+
+const UNSEI_TEXT=['▲低迷期。充電と内省を。','△変化の兆し。慎重に。','○縁が広がる年。','◎発展・行動の好機！','△調整期。バランスを。','○安定と充実。','◎大きな収穫期。','△見直しと準備を。','▲浄化期。手放す勇気を。'];
+const MONTH_UNSEI=['○縁と出会い多し','▲支出注意','◎決断好機','△体調管理を','○人間関係良好','▲過信に注意','◎収穫・成果の月','△焦らず丁寧に','○学びの月'];
+
+function nenun(star,year){
+  return getYearBan(year);
+}
+
+const KOTENTEN_POS=[
+  {n:1,dir:'北',  angle:270,r:52},
+  {n:2,dir:'南西',angle:135,r:52},
+  {n:3,dir:'東',  angle:0,  r:52},
+  {n:4,dir:'南東',angle:45, r:52},
+  {n:5,dir:'中',  angle:0,  r:0},
+  {n:6,dir:'北西',angle:225,r:52},
+  {n:7,dir:'西',  angle:180,r:52},
+  {n:8,dir:'北東',angle:315,r:52},
+  {n:9,dir:'南',  angle:90, r:52},
+];
+
+function drawCompass(honmeiNum,monthNum){
+  const svg=document.getElementById('compass');
+  svg.innerHTML='';
+  const cx=100,cy=100,R=88,rm=58,rc=26;
+  const borderCol='rgba(0,0,0,0.10)';
+
+  for(let i=0;i<8;i++){
+    const a1=((i*45)-22.5-90)*Math.PI/180;
+    const a2=((i+1)*45-22.5-90)*Math.PI/180;
+    const x1=cx+R*Math.cos(a1),y1=cy+R*Math.sin(a1);
+    const x2=cx+R*Math.cos(a2),y2=cy+R*Math.sin(a2);
+    const ix1=cx+rm*Math.cos(a1),iy1=cy+rm*Math.sin(a1);
+    const ix2=cx+rm*Math.cos(a2),iy2=cy+rm*Math.sin(a2);
+    const pathD=`M${ix1},${iy1} L${x1},${y1} A${R},${R},0,0,1,${x2},${y2} L${ix2},${iy2} A${rm},${rm},0,0,0,${ix1},${iy1}Z`;
+    const el=document.createElementNS('http://www.w3.org/2000/svg','path');
+    el.setAttribute('d',pathD);
+    el.setAttribute('fill','rgba(0,0,0,0.025)');
+    el.setAttribute('stroke',borderCol);
+    el.setAttribute('stroke-width','0.5');
+    svg.appendChild(el);
+  }
+
+  KOTENTEN_POS.forEach(p=>{
+    const s=getStar(p.n);
+    const isHonmei=p.n===honmeiNum;
+    const isMonth=p.n===monthNum;
+    if(p.n===5){
+      const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',rc);
+      c.setAttribute('fill',isHonmei?s.color:'rgba(0,0,0,0.04)');
+      c.setAttribute('stroke',isHonmei?s.color:borderCol);
+      c.setAttribute('stroke-width',isHonmei?'1.5':'0.5');
+      svg.appendChild(c);
+      const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x',cx);t.setAttribute('y',cy+1);
+      t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','middle');
+      t.setAttribute('font-size','14');t.setAttribute('font-weight','500');
+      t.setAttribute('fill',isHonmei?'#fff':s.color);
+      t.textContent=p.n;
+      svg.appendChild(t);
+      return;
+    }
+    const rad=p.angle*Math.PI/180;
+    const px=cx+p.r*Math.cos(rad),py=cy+p.r*Math.sin(rad);
+    const circ=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circ.setAttribute('cx',px);circ.setAttribute('cy',py);circ.setAttribute('r',rc-8);
+    circ.setAttribute('fill',isHonmei?s.color:isMonth?s.color+'44':'transparent');
+    circ.setAttribute('stroke',isHonmei||isMonth?s.color:borderCol);
+    circ.setAttribute('stroke-width',isHonmei?'1.5':isMonth?'1':'0.5');
+    svg.appendChild(circ);
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',px);t.setAttribute('y',py+1);
+    t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','middle');
+    t.setAttribute('font-size','11');t.setAttribute('font-weight',isHonmei?'500':'400');
+    t.setAttribute('fill',isHonmei?'#fff':s.color);
+    t.textContent=p.n;
+    svg.appendChild(t);
+  });
+
+  const dirs=[{l:'南',x:cx,y:cy-R+8},{l:'北',x:cx,y:cy+R-8},{l:'東',x:cx+R-8,y:cy},{l:'西',x:cx-R+8,y:cy}];
+  dirs.forEach(d=>{
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',d.x);t.setAttribute('y',d.y);
+    t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','middle');
+    t.setAttribute('font-size','9');t.setAttribute('fill','rgba(0,0,0,0.3)');
+    t.textContent=d.l;
+    svg.appendChild(t);
+  });
+}
+
+function calc(){
+  const val=document.getElementById('bdate').value;
+  if(!val)return;
+  const [y,m,d]=val.split('-').map(Number);
+  const honmei=getStarNum(y,m,d);
+  const msNum=getMonthStar(y,m,d,honmei);
+  const dayStar=getDayStar(y,m,d);
+  const hS=getStar(honmei),mS=getStar(msNum),dS=getStar(dayStar);
+  const now=new Date();
+  const cy=now.getFullYear(),cm=now.getMonth()+1;
+  const age=cy-y-(now.getMonth()<m||(now.getMonth()===m-1&&now.getDate()<d)?1:0);
+
+  document.getElementById('result').style.display='block';
+  document.getElementById('birthLabel').textContent=`${y}年${m}月${d}日生まれの方`;
+  document.getElementById('detailLabel').textContent=`${y}年${m}月${d}日生まれの方の基本情報`;
+
+  document.getElementById('starRow').innerHTML=`
+    <div class="star-pill"><span class="star-dot" style="background:${hS.color}"></span><span class="star-pill-label">本命星：</span><span class="star-pill-name">●${hS.name}</span></div>
+    <div class="star-pill"><span class="star-dot" style="background:${mS.color}"></span><span class="star-pill-label">月命星：</span><span class="star-pill-name">●${mS.name}</span></div>`;
+
+  document.getElementById('pillRow').innerHTML=`
+    <button class="pill-btn" onclick="scrollToPers()"><span class="dot" style="background:${hS.color}"></span>●${hS.name}の詳細 ›</button>
+    <button class="pill-btn"><span class="dot" style="background:${mS.color}"></span>●${mS.name}の詳細 ›</button>`;
+
+  const kichi=KICHI_MAP[hS.name];
+  document.getElementById('basicTable').innerHTML=`
+    <tr><td>生年月日</td><td>${y}年${m}月${d}日（${age}歳）</td></tr>
+    <tr><td>本命星</td><td>${hS.name}</td></tr>
+    <tr><td>月命星</td><td>${mS.name}</td></tr>
+    <tr><td>日命星</td><td>${dS.name}</td></tr>
+    <tr><td>傾斜</td><td>${getKessei(honmei,msNum)}</td></tr>
+    <tr><td>最大吉方</td><td>${kichi?kichi.good.join('、'):'-'}</td></tr>`;
+
+  document.getElementById('calTable').innerHTML=`
+    <tr><td>年の干支</td><td>${getYearKanshi(y)}</td></tr>
+    <tr><td>六曜</td><td>${getRokki(y,m,d)}</td></tr>
+    <tr><td>日の吉凶</td><td>${getNichiYoshi(y,m,d)}</td></tr>
+    <tr><td>陰遁/陽遁</td><td>${(m>=2&&m<=7)?'陽遁':'陰遁'}</td></tr>`;
+
+  drawCompass(honmei,msNum);
+
+  const houEl=document.getElementById('houGrid');
+  const all=['北','北東','東','南東','南','南西','西','北西'];
+  let hHtml='';
+  if(kichi){
+    kichi.good.forEach(d=>{hHtml+=`<div class="hou-item hou-good">✦ ${d}（吉）</div>`;});
+    kichi.bad.forEach(d=>{hHtml+=`<div class="hou-item hou-bad">✕ ${d}（凶）</div>`;});
+    all.forEach(d=>{if(!kichi.good.includes(d)&&!kichi.bad.includes(d))hHtml+=`<div class="hou-item">　${d}（普通）</div>`;});
+  }
+  houEl.innerHTML=hHtml;
+
+  buildYear(honmei,cy);
+  buildMonth(honmei,cy,cm);
+
+  const persEl=document.getElementById('persCard');
+  persEl.innerHTML=`<div class="pers-title">${hS.name}の性格</div>`
+    +hS.pers.map(p=>`<p class="pers-para">${p.replace(/<b>(.*?)<\/b>/g,'<span class="pers-high">$1</span>')}</p>`).join('');
+
+  // AI総合鑑定
+  const kessei=getKessei(honmei,msNum);
+  buildAiKandatei(hS.name, mS.name, dS.name, kessei);
+}
+
+async function buildAiKandatei(honmeiName, monthName, dayName, kessei){
+  const aiCard=document.getElementById('aiCard');
+  const aiResult=document.getElementById('aiResult');
+  aiCard.style.display='block';
+  aiResult.innerHTML='<span style="color:#bbb;font-size:12px">鑑定中...</span>';
+
+  const prompt=`あなたは九星気学の専門家です。以下の情報をもとに、この人の性格・才能・人生の傾向・対人関係・注意点を総合的に鑑定してください。
+
+本命星: ${honmeiName}
+月命星: ${monthName}
+日命星: ${dayName}
+傾斜: ${kessei}
+
+【鑑定のポイント】
+- 本命星は人生全体の根本的な性質を表す
+- 月命星は内面・感情・対人関係の傾向を表す
+- 日命星はその日の気質・即興性・日常の行動を表す
+- 傾斜は本命星と月命星の組み合わせから生まれる特有の方向性を表す
+
+これらの星の組み合わせから生まれる独自の個性・強み・弱み・人生のテーマを400〜500字で、読みやすく段落に分けて日本語で書いてください。`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '鑑定結果を取得できませんでした。';
+    aiResult.innerHTML = text.split('\n\n').map(p=>p.trim()).filter(p=>p)
+      .map(p=>`<p style="margin-bottom:12px">${p}</p>`).join('');
+  } catch(e) {
+    aiResult.innerHTML='<span style="color:#c0392b;font-size:12px">鑑定の取得に失敗しました。</span>';
+  }
+}
+
+function buildYear(star,cy){
+  let html='';
+  for(let i=-1;i<=2;i++){
+    const yr=cy+i;
+    const n=nenun(star,yr);
+    const u=UNSEI_TEXT[(n-1)%9];
+    const badge=u.startsWith('◎')?'b-kichi':u.startsWith('○')?'b-sho':u.startsWith('▲')?'b-kyo':'b-chu';
+    const label=u.startsWith('◎')?'大吉':u.startsWith('○')?'吉':u.startsWith('▲')?'注意':'小吉';
+    html+=`<div class="unsei-row"><span class="unsei-label">${yr}年（${i===0?'今年':i<0?Math.abs(i)+'年前':i+'年後'}）</span><span class="unsei-val">${getStar(n).name.replace('星','')}<span class="badge ${badge}">${label}</span></span></div>`;
+  }
+  document.getElementById('tab-year').innerHTML=html;
+}
+
+function buildMonth(star,cy,cm){
+  let html='';
+  for(let i=0;i<6;i++){
+    let mo=cm+i,yr=cy;
+    if(mo>12){mo-=12;yr++;}
+    const n=nenun(star,yr);
+    let ms=(n+(mo-1))%9+1; if(ms<1)ms+=9; if(ms>9)ms-=9;
+    const u=MONTH_UNSEI[(ms-1)%9];
+    const badge=u.startsWith('◎')?'b-kichi':u.startsWith('○')?'b-sho':u.startsWith('▲')?'b-kyo':'b-chu';
+    const label=u.startsWith('◎')?'大吉':u.startsWith('○')?'吉':u.startsWith('▲')?'注意':'小吉';
+    html+=`<div class="unsei-row"><span class="unsei-label">${yr}年${mo}月</span><span class="unsei-val">${u.slice(1)}<span class="badge ${badge}">${label}</span></span></div>`;
+  }
+  document.getElementById('tab-month').innerHTML=html;
+}
+
+function showTab(tab,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-year').style.display=tab==='year'?'block':'none';
+  document.getElementById('tab-month').style.display=tab==='month'?'block':'none';
+}
+
+function scrollToPers(){
+  document.getElementById('persCard').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>

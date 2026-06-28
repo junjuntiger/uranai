@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>算命学 | 命式鑑定</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Noto+Sans+JP:wght@300;400&display=swap');
+  :root{--bg:#0e0c0a;--bg2:#1a1612;--bg3:#252018;--gold:#c9a84c;--gold2:#e8c96a;--green:#5a8a3c;--green2:#7ab554;--text:#e8e0d0;--muted:#9a9080;--border:#3a3020;--red:#c84c4c;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;min-height:100vh;font-size:14px;}
+  header{text-align:center;padding:40px 20px 30px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#1a1008 0%,var(--bg) 100%);}
+  header h1{font-family:'Noto Serif JP',serif;font-size:2rem;font-weight:300;letter-spacing:0.3em;color:var(--gold2);}
+  header p{color:var(--muted);margin-top:8px;letter-spacing:0.15em;font-size:0.8rem;}
+  .container{max-width:900px;margin:0 auto;padding:30px 20px 60px;}
+  .input-card{background:var(--bg2);border:1px solid var(--border);border-radius:2px;padding:28px;margin-bottom:30px;}
+  .input-card h2{font-family:'Noto Serif JP',serif;font-size:1rem;color:var(--gold);letter-spacing:0.2em;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .form-row{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;}
+  .form-group{display:flex;flex-direction:column;gap:6px;}
+  .form-group label{color:var(--muted);font-size:0.75rem;letter-spacing:0.1em;}
+  .form-group select,.form-group input{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:2px;font-family:'Noto Sans JP',sans-serif;font-size:0.9rem;appearance:none;-webkit-appearance:none;cursor:pointer;}
+  .form-group select:focus,.form-group input:focus{outline:none;border-color:var(--gold);}
+  .form-group select{min-width:80px;}
+  .form-group input[type="number"]{width:90px;}
+  .gender-group{display:flex;gap:12px;}
+  .gender-btn{padding:8px 20px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);border-radius:2px;cursor:pointer;font-size:0.85rem;font-family:'Noto Sans JP',sans-serif;transition:all 0.2s;}
+  .gender-btn.active{background:var(--green);border-color:var(--green2);color:#fff;}
+  .calc-btn{padding:10px 32px;background:var(--gold);border:none;color:#1a1008;font-family:'Noto Serif JP',serif;font-size:0.95rem;letter-spacing:0.15em;border-radius:2px;cursor:pointer;transition:all 0.2s;margin-left:auto;}
+  .calc-btn:hover{background:var(--gold2);}
+  #result{display:none;}
+  .result-header{text-align:center;margin-bottom:24px;}
+  .result-header .birthday{font-family:'Noto Serif JP',serif;font-size:1.3rem;color:var(--gold2);letter-spacing:0.2em;}
+  .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+  @media(max-width:640px){.result-grid{grid-template-columns:1fr;}}
+  .result-card{background:var(--bg2);border:1px solid var(--border);border-radius:2px;padding:20px;}
+  .result-card h3{font-family:'Noto Serif JP',serif;font-size:0.85rem;color:var(--gold);letter-spacing:0.2em;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  /* 干支表 */
+  .kanshi-table{width:100%;border-collapse:collapse;}
+  .kanshi-table th{color:var(--muted);font-size:0.72rem;font-weight:300;padding:6px 8px;text-align:center;border-bottom:1px solid var(--border);}
+  .kanshi-table td{padding:8px;text-align:center;font-family:'Noto Serif JP',serif;font-size:1.2rem;color:var(--gold2);}
+  .kanshi-table .small{font-size:0.72rem;color:var(--muted);font-family:'Noto Sans JP',sans-serif;}
+  .chusatsu-badge{display:inline-block;background:var(--bg3);border:1px solid var(--gold);color:var(--gold);padding:4px 14px;font-size:0.8rem;letter-spacing:0.15em;border-radius:2px;margin-top:12px;}
+  /* 人体図 */
+  .col-header{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:4px;}
+  .col-header span{text-align:center;font-size:0.68rem;color:var(--muted);}
+  .jintai-section{margin-bottom:8px;}
+  .jintai-label{font-size:0.66rem;color:var(--muted);margin-bottom:3px;}
+  .jintai-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+  .jintai-cell{background:var(--bg3);border:1px solid var(--border);padding:9px 4px;text-align:center;font-family:'Noto Serif JP',serif;font-size:0.82rem;min-height:44px;display:flex;align-items:center;justify-content:center;}
+  .jintai-cell.empty{background:transparent;border:1px dashed rgba(58,48,32,0.3);}
+  .jintai-cell.tsuhen{color:var(--green2);}
+  .jintai-cell.jusei{color:var(--gold);}
+  /* 特徴カード */
+  .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+  @media(max-width:640px){.feature-grid{grid-template-columns:1fr;}}
+  .feature-card{background:var(--bg2);border:1px solid var(--border);border-radius:2px;padding:20px;}
+  .feature-card h3{font-family:'Noto Serif JP',serif;font-size:0.85rem;color:var(--gold);letter-spacing:0.2em;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  .feature-card p{line-height:1.85;font-size:0.82rem;color:var(--text);margin-bottom:8px;}
+  .feature-card .label{color:var(--gold);font-size:0.72rem;margin-bottom:4px;display:block;}
+  .profile-row{display:flex;gap:8px;margin-bottom:10px;align-items:flex-start;}
+  .profile-icon{font-size:1.1rem;margin-top:1px;}
+  .profile-text{flex:1;font-size:0.82rem;line-height:1.75;}
+  .profile-title{color:var(--gold2);font-weight:600;margin-bottom:2px;}
+  .tag{display:inline-block;background:rgba(90,138,60,0.2);border:1px solid var(--green);color:var(--green2);padding:2px 10px;font-size:0.72rem;border-radius:20px;margin:2px;}
+  .tags{margin-top:10px;}
+  .warn-tag{background:rgba(200,76,76,0.1);border-color:var(--red);color:var(--red);}
+  /* 大運 */
+  .daiu-table{width:100%;border-collapse:collapse;}
+  .daiu-table th{color:var(--muted);font-size:0.72rem;font-weight:300;padding:6px 8px;text-align:center;border-bottom:1px solid var(--border);}
+  .daiu-table td{padding:8px 10px;text-align:center;border-bottom:1px solid rgba(58,48,32,0.5);font-size:0.85rem;}
+  .daiu-table .age{color:var(--muted);font-size:0.75rem;}
+  .daiu-table .kst{color:var(--gold2);font-family:'Noto Serif JP',serif;font-size:1rem;}
+  .daiu-table .star{color:var(--green2);font-size:0.8rem;}
+  .daiu-table .jsstar{color:var(--gold);font-size:0.8rem;}
+  .daiu-table tr.current{background:rgba(90,138,60,0.12);}
+  .daiu-desc{font-size:0.72rem;color:var(--muted);margin-top:2px;}
+  footer{text-align:center;padding:20px;color:var(--muted);font-size:0.72rem;border-top:1px solid var(--border);letter-spacing:0.1em;}
+  .ornament{color:var(--gold);opacity:0.4;letter-spacing:0.3em;font-size:0.7rem;margin:6px 0;}
+  .divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
+</style>
+</head>
+<body>
+<header>
+  <div class="ornament">✦ ✦ ✦</div>
+  <h1>算　命　学</h1>
+  <p>生年月日から命式・人体図・大運を算出します</p>
+</header>
+<div class="container">
+  <div class="input-card">
+    <h2>◆ 生年月日を入力</h2>
+    <div class="form-row">
+      <div class="form-group"><label>年（西暦）</label><input type="number" id="year" value="1968" min="1900" max="2100"></div>
+      <div class="form-group"><label>月</label>
+        <select id="month">
+          <option value="1">1月</option><option value="2" selected>2月</option><option value="3">3月</option><option value="4">4月</option>
+          <option value="5">5月</option><option value="6">6月</option><option value="7">7月</option><option value="8">8月</option>
+          <option value="9">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+        </select>
+      </div>
+      <div class="form-group"><label>日</label><select id="day"></select></div>
+      <div class="form-group"><label>性別</label>
+        <div class="gender-group">
+          <button class="gender-btn" id="btn-male" onclick="setGender('male')">男性</button>
+          <button class="gender-btn active" id="btn-female" onclick="setGender('female')">女性</button>
+        </div>
+      </div>
+      <button class="calc-btn" onclick="calculate()">鑑　定</button>
+    </div>
+  </div>
+
+  <div id="result">
+    <div class="result-header">
+      <div class="ornament">✦ ✦ ✦</div>
+      <div class="birthday" id="result-title"></div>
+      <div style="color:var(--muted);font-size:0.8rem;margin-top:6px;" id="result-sub"></div>
+    </div>
+
+    <!-- 命式 + 人体図 -->
+    <div class="result-grid">
+      <div class="result-card">
+        <h3>宿 命 干 支</h3>
+        <table class="kanshi-table">
+          <thead><tr><th>年柱</th><th>月柱</th><th>日柱</th></tr></thead>
+          <tbody>
+            <tr id="tenkan-row"></tr>
+            <tr id="chishi-row"></tr>
+            <tr><td class="small">年</td><td class="small">月</td><td class="small">日（日干）</td></tr>
+          </tbody>
+        </table>
+        <div style="text-align:center"><span class="chusatsu-badge" id="chusatsu-badge"></span></div>
+      </div>
+      <div class="result-card">
+        <h3>人 体 図</h3>
+        <div class="col-header"><span>年</span><span>月</span><span>日</span></div>
+        <div class="jintai-section">
+          <div class="jintai-label">天干 通変星</div>
+          <div class="jintai-grid" id="jt-top"></div>
+        </div>
+        <div class="jintai-section">
+          <div class="jintai-label">地支 通変星（土の蔵干）</div>
+          <div class="jintai-grid" id="jt-mid"></div>
+        </div>
+        <div class="jintai-section">
+          <div class="jintai-label">地支 十二大従星 ／ 月干通変</div>
+          <div class="jintai-grid" id="jt-bot"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 特徴解説 -->
+    <div class="feature-grid">
+      <div class="feature-card" id="personality-card">
+        <h3>✦ 基 本 性 格</h3>
+        <div id="personality-content"></div>
+      </div>
+      <div class="feature-card" id="talent-card">
+        <h3>✦ 才 能 と 適 性</h3>
+        <div id="talent-content"></div>
+      </div>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card" id="relation-card">
+        <h3>✦ 人 間 関 係</h3>
+        <div id="relation-content"></div>
+      </div>
+      <div class="feature-card" id="caution-card">
+        <h3>✦ 注 意 点</h3>
+        <div id="caution-content"></div>
+      </div>
+    </div>
+
+    <!-- 大運 -->
+    <div class="result-card">
+      <h3>大 運 の 流 れ</h3>
+      <table class="daiu-table">
+        <thead><tr><th>年齢</th><th>大運干支</th><th>十大主星</th><th>十二大従星</th></tr></thead>
+        <tbody id="daiu-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<footer>算命学 命式鑑定 ｜ いきるかい 占いシリーズ</footer>
+
+<script>
+const JK  = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const JS  = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+
+// 大運従星（長生基準・逆算確定）
+const JUDAI_C = ['天車星','天南星','天貴星','天禄星','天将星','天堂星','天胡星','天極星','天庫星','天馳星','天報星','天印星'];
+// 人体図下段従星（帝旺基準・逆算確定）
+const JUDAI_T = ['天将星','天堂星','天貴星','天禄星','天車星','天南星','天胡星','天極星','天庫星','天馳星','天報星','天印星'];
+
+// ★修正: 正官=牽牛星、偏官=車騎星
+const SANMEI = {
+  '比肩':'貫索星','劫財':'石門星','食神':'鳳閣星','傷官':'調舒星',
+  '偏財':'禄存星','正財':'司禄星','偏官':'車騎星','正官':'牽牛星',
+  '偏印':'龍高星','印綬':'玉堂星'
+};
+
+const CHOSHO = {'甲':'亥','丙':'寅','戊':'寅','庚':'巳','壬':'申'};
+const TEIO   = {'甲':'卯','乙':'寅','丙':'午','丁':'巳','戊':'午','己':'巳','庚':'酉','辛':'申','壬':'子','癸':'亥'};
+const IN2YO  = {'乙':'甲','丁':'丙','己':'戊','辛':'庚','癸':'壬'};
+const TSUCHI = {'子':null,'丑':'己','寅':'戊','卯':null,'辰':'戊','巳':'戊','午':'己','未':'己','申':'戊','酉':null,'戌':'戊','亥':null};
+
+function tsuhen(nichi, aite) {
+  if (!aite) return '';
+  const d=JK.indexOf(nichi), a=JK.indexOf(aite);
+  const diff=(a-d+10)%10;
+  const e={0:'比肩',2:'食神',4:'偏財',6:'偏官',8:'偏印'};
+  const o={1:'劫財',3:'傷官',5:'正財',7:'正官',9:'印綬'};
+  return diff%2===0?(e[diff]||''):(o[diff]||'');
+}
+function judaiC(nichi,chi){
+  const isYo=JK.indexOf(nichi)%2===0, yo=isYo?nichi:IN2YO[nichi];
+  const ci=JS.indexOf(CHOSHO[yo]),ti=JS.indexOf(chi);
+  return JUDAI_C[isYo?(ti-ci+12)%12:(ci-ti+12)%12]||'';
+}
+function judaiT(base,chi){
+  const isYo=JK.indexOf(base)%2===0;
+  const ci=JS.indexOf(TEIO[base]),ti=JS.indexOf(chi);
+  return JUDAI_T[isYo?(ti-ci+12)%12:(ci-ti+12)%12]||'';
+}
+function toJD(y,m,d){if(m<=2){y--;m+=12;}const A=Math.floor(y/100);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+2-A+Math.floor(A/4)-1524;}
+
+const BASE_JD=2439851;
+function dayKS(y,m,d){const df=toJD(y,m,d)-BASE_JD;return{ten:JK[((df%10)+10)%10],chi:JS[((df%12)+12)%12]};}
+function yearKS(y,m,d){let yr=y;if(m<2||(m===2&&d<4))yr--;return{ten:JK[((yr-4)%10+10)%10],chi:JS[((yr-4)%12+12)%12]};}
+const SEKKI={1:6,2:4,3:6,4:5,5:6,6:6,7:7,8:8,9:8,10:8,11:7,12:7};
+const MChi=['寅','卯','辰','巳','午','未','申','酉','戌','亥','子','丑'];
+const MBase={'甲':2,'己':2,'乙':4,'庚':4,'丙':6,'辛':6,'丁':8,'壬':8,'戊':0,'癸':0};
+function monthKS(nTen,m,d){const mi=d>=(SEKKI[m]||6)?(m-2+12)%12:(m-3+12)%12;return{ten:JK[(MBase[nTen]+mi)%10],chi:MChi[mi]};}
+function chusatsu(chi){const p=[['戌','亥'],['申','酉'],['午','未'],['辰','巳'],['寅','卯'],['子','丑']];return p[Math.floor(JS.indexOf(chi)/2)].join('')+'天中殺';}
+
+function calcDaiu(nTen,tTen,tChi,gender){
+  const isYo=JK.indexOf(nTen)%2===0,isMale=gender==='male';
+  const junko=(isYo&&isMale)||(!isYo&&!isMale);
+  const ki=JK.indexOf(tTen),ci=JS.indexOf(tChi);
+  return Array.from({length:9},(_,i)=>({age:1+i*10,kan:JK[junko?(ki+i+1)%10:((ki-i-1+100)%10)],chi:JS[junko?(ci+i+1)%12:((ci-i-1+120)%12)]}));
+}
+
+function buildJintai(nK,nC,tK,tC,niK,niC){
+  const top=['',SANMEI[tsuhen(niK,nK)]||'',judaiC(niK,nC)];
+  const niC_t=TSUCHI[niC],tC_t=TSUCHI[tC],nC_t=TSUCHI[nC];
+  const mid=[
+    niC_t?(SANMEI[tsuhen(niK,niC_t)]||''):'',
+    tC_t ?(SANMEI[tsuhen(niK,tC_t)] ||''):'',
+    nC_t ?(SANMEI[tsuhen(niK,nC_t)] ||''):'',
+  ];
+  const bot=[judaiT(niK,niC),SANMEI[tsuhen(niK,tK)]||'',judaiT(nK,nC)];
+  return {top,mid,bot};
+}
+function renderGrid(id,cells,cls){
+  const el=document.getElementById(id);el.innerHTML='';
+  cells.forEach(c=>{const d=document.createElement('div');d.className='jintai-cell '+(c?cls:'empty');d.textContent=c||'　';el.appendChild(d);});
+}
+
+// ===== 特徴解説データ =====
+const GOYO = {'甲':'木','乙':'木','丙':'火','丁':'火','戊':'土','己':'土','庚':'金','辛':'金','壬':'水','癸':'水'};
+const KAN_DETAIL = {
+  '甲':{name:'甲木（陽木）',key:'大木・向上心・理想',text:'天に向かって伸びる大樹のような人。高い理想と強い向上心を持ち、困難に屈せず真っ直ぐに進む。リーダー気質で決断力があり、自分の信念を曲げない強さがある。',talent:'組織を牽引するリーダー、教育者、経営者、クリエイター',relation:'面倒見が良く頼られるが、融通が利かない面も。',caution:'頑固になりすぎず、柔軟性を持つことで運が開く。'},
+  '乙':{name:'乙木（陰木）',key:'草花・柔軟・適応力',text:'風に揺れる草花のように、しなやかで環境に適応する力がある。表面は穏やかでも芯は強く、粘り強く目標に向かう。人の心を読む感受性が豊か。',talent:'人をサポートする役割、カウンセラー、デザイナー、交渉役',relation:'人当たりが良く協調性が高い。',caution:'自分を犠牲にしすぎず、自己主張することも大切。'},
+  '丙':{name:'丙火（陽火）',key:'太陽・情熱・明朗',text:'太陽のように輝き、周囲を照らす存在。情熱的で明るく、人々を元気づける天性の魅力がある。正直で裏表がなく、何事にも全力で取り組む。',talent:'芸術・エンターテインメント・教育・接客・リーダーポジション',relation:'誰とでも仲良くなれるが、熱しやすく冷めやすい一面も。',caution:'感情的になりすぎず、持続力を意識すると吉。'},
+  '丁':{name:'丁火（陰火）',key:'灯火・繊細・集中力',text:'ろうそくの炎のように、温かく細やかな光を持つ人。深い集中力と観察眼があり、一つのことを徹底して追求する。感受性が豊かで芸術的センスに溢れる。',talent:'職人・芸術家・研究者・医療・カウンセリング',relation:'信頼できる人を大切にする。深い絆を育む。',caution:'神経質になりすぎず、大局を見る視点を持つと吉。'},
+  '戊':{name:'戊土（陽土）',key:'大地・安定・包容力',text:'大地のように揺るぎない安定感と包容力を持つ人。どっしりと構え、周囲から頼られる存在。物事を長期的視点で見据え、地道に積み上げる力がある。',talent:'管理職・不動産・農業・建設・金融・福祉',relation:'面倒見が良く、人から慕われる。',caution:'変化を恐れず、新しいことにも積極的に挑戦することが開運の鍵。'},
+  '己':{name:'己土（陰土）',key:'田畑・奉仕・誠実',text:'田畑のように、人を育て実りをもたらす人。誠実で真面目、人の役に立つことに喜びを感じる。細かいところに気がつき、縁の下の力持ちとして組織を支える。',talent:'医療・介護・教育・事務・料理・人事',relation:'気配り上手で人間関係を円滑にする。',caution:'自己犠牲が過ぎると消耗する。自分の時間も大切に。'},
+  '庚':{name:'庚金（陽金）',key:'剣・決断力・正義感',text:'鍛えられた剣のように鋭く、強い意志と決断力を持つ人。正義感が強く、筋を通すことにこだわる。物事を白黒はっきりさせたいタイプ。',talent:'法律・軍・警察・金融・外科医・評論家・スポーツ',relation:'義理人情を大切にする。信頼は時間をかけて育む。',caution:'融通が利かない面があるので、他者の意見も尊重すると運が広がる。'},
+  '辛':{name:'辛金（陰金）',key:'宝石・美意識・繊細',text:'磨かれた宝石のように、高い美意識と洗練された感性を持つ人。外見への関心が高く、エレガントな雰囲気を持つ。細部へのこだわりが強い。',talent:'ファッション・美容・芸術・宝飾・デザイン・通訳',relation:'選り好みをするが、親しい人には深い愛情を注ぐ。',caution:'完璧主義が自分を苦しめることも。ある程度の妥協も必要。'},
+  '壬':{name:'壬水（陽水）',key:'大海・自由・知性',text:'大海のように広大な心と深い知性を持つ人。自由を愛し、規則や慣習に縛られることを嫌う。好奇心旺盛で様々な分野に関心を持ち、情報収集が得意。',talent:'研究・IT・マスコミ・貿易・旅行・哲学',relation:'広く浅く付き合う傾向。特定の人との深い関係は時間がかかる。',caution:'流されやすい面も。目標を定めて地に足をつけることが大切。'},
+  '癸':{name:'癸水（陰水）',key:'清水・純粋・直感',text:'清らかな水のように純粋で、鋭い直感力を持つ人。感受性が極めて豊かで、他者の感情を敏感に察知する。霊的・精神的な世界への関心も高い。',talent:'占い・スピリチュアル・音楽・詩・福祉・心理学',relation:'感情移入しやすく共感力が高い。',caution:'感受性が高すぎて疲弊することがある。適度に感情を手放す習慣を。'},
+};
+
+const STAR_DETAIL = {
+  '貫索星':{text:'独立心が強く、自分のペースを守る。一国一城の主タイプ。',plus:'自主性・粘り強さ',minus:'頑固・融通が利かない'},
+  '石門星':{text:'人との調和を重んじ、仲間を大切にする。集団の中で力を発揮。',plus:'協調性・リーダーシップ',minus:'八方美人になりがち'},
+  '鳳閣星':{text:'表現することが喜び。食・芸術・子どもへの縁が深い。のびのびした人生を好む。',plus:'創造力・表現力',minus:'計画性の欠如'},
+  '調舒星':{text:'繊細な感受性と芸術的才能。孤高の天才タイプ。',plus:'感受性・独創性',minus:'孤独感・神経質'},
+  '禄存星':{text:'人の世話をすることで運が開く。奉仕精神旺盛。',plus:'面倒見・社交性',minus:'尽くしすぎて疲弊'},
+  '司禄星':{text:'堅実で家庭を大切にする。コツコツ積み上げる力がある。',plus:'堅実・蓄財力',minus:'変化への抵抗'},
+  '牽牛星':{text:'名誉と誇りを重んじる。完璧主義でプロ意識が高い。',plus:'責任感・プロ意識',minus:'プライドが高い'},
+  '車騎星':{text:'行動力と突破力。スピード感があり、新しいことに果敢に挑戦。',plus:'行動力・決断力',minus:'衝動的・継続性に欠ける'},
+  '龍高星':{text:'探求心と学習意欲が旺盛。独自の世界観を持つ知識人。',plus:'知識欲・独創性',minus:'理屈っぽい・実用性に欠ける'},
+  '玉堂星':{text:'伝統と格式を重んじる。教育・文化への深い造詣。',plus:'品格・継承力',minus:'保守的・変化が苦手'},
+};
+
+const JUDAI_DETAIL = {
+  '天将星':'帝旺位。人生最大のエネルギー。統率力とカリスマを発揮する時期。',
+  '天堂星':'衰位。充足と穏やかな成熟。人生の豊かさを享受できる時期。',
+  '天貴星':'冠帯位。社会的に認められ信頼を得る成長の時期。',
+  '天禄星':'建禄位。自力で道を切り開く実力発揮の安定期。',
+  '天車星':'長生位。新たな始まり。可能性に満ちたスタートのエネルギー。',
+  '天南星':'沐浴位。荒削りだが個性的な魅力が光る磨かれる時期。',
+  '天胡星':'病位。型破りな発想と奇才的センス。独特の視点が生きる。',
+  '天極星':'死位。内省と充電の時期。表面より内側を深める。',
+  '天庫星':'墓位。過去の縁と先人の知恵を継ぐ蓄積の力。',
+  '天馳星':'絶位。変化とスピード。移動・変化を恐れず飛び回る。',
+  '天報星':'胎位。潜在力の結集。次のステージへの準備期。',
+  '天印星':'養位。純粋さと育まれる力。直感の鋭さが光る。',
+};
+
+function buildFeatures(niK, nK, nC, tK, tC, niC, top, mid, bot, cs) {
+  const kanDet = KAN_DETAIL[niK] || {};
+  const allStars = [...top,...mid,...bot].filter(Boolean);
+  const cnt={};
+  allStars.forEach(s=>cnt[s]=(cnt[s]||0)+1);
+  const sorted=Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
+  const topStars = sorted.slice(0,3).map(([s])=>s);
+
+  // 基本性格
+  let per = `<div class="profile-row"><div class="profile-icon">🌟</div><div class="profile-text"><div class="profile-title">${kanDet.name||niK}</div>${kanDet.text||''}</div></div>`;
+  per += `<div class="tags">`;
+  per += `<span class="tag">${kanDet.key||''}</span>`;
+  topStars.forEach(s=>per+=`<span class="tag">${s}</span>`);
+  per += `</div>`;
+  document.getElementById('personality-content').innerHTML = per;
+
+  // 才能と適性
+  let tal = '';
+  if(kanDet.talent) tal += `<div class="profile-row"><div class="profile-icon">💼</div><div class="profile-text"><div class="profile-title">適職・才能分野</div>${kanDet.talent}</div></div>`;
+  topStars.forEach(s=>{
+    const sd=STAR_DETAIL[s];
+    if(sd) tal+=`<div class="profile-row"><div class="profile-icon">⭐</div><div class="profile-text"><div class="profile-title">${s}の才能</div>${sd.text}<br><span style="color:var(--green2);font-size:0.75rem;">強み: ${sd.plus}</span></div></div>`;
+  });
+  document.getElementById('talent-content').innerHTML = tal;
+
+  // 人間関係
+  let rel = '';
+  if(kanDet.relation) rel += `<div class="profile-row"><div class="profile-icon">🤝</div><div class="profile-text"><div class="profile-title">対人傾向</div>${kanDet.relation}</div></div>`;
+  // 石門星・禄存星があれば特記
+  if(allStars.includes('石門星')) rel+=`<div class="profile-row"><div class="profile-icon">👥</div><div class="profile-text"><div class="profile-title">石門星の影響</div>仲間との絆を最も重視する命式。チームの中でこそ輝く。</div></div>`;
+  if(allStars.includes('禄存星')) rel+=`<div class="profile-row"><div class="profile-icon">🌿</div><div class="profile-text"><div class="profile-title">禄存星の影響</div>周囲の人を助けることで自分の運も高まる。奉仕が開運の鍵。</div></div>`;
+  if(!rel) rel=`<p>日干 ${niK} の対人傾向：他者との交流を通じてエネルギーを高める。</p>`;
+  document.getElementById('relation-content').innerHTML = rel;
+
+  // 注意点
+  let cau = '';
+  if(kanDet.caution) cau += `<div class="profile-row"><div class="profile-icon">⚡</div><div class="profile-text"><div class="profile-title">日干からの注意点</div>${kanDet.caution}</div></div>`;
+  cau += `<div class="profile-row"><div class="profile-icon">🌑</div><div class="profile-text"><div class="profile-title">${cs}</div>この天中殺の干支の年・月は力が発揮されにくい宿命的空白期。大きな決断や新規事業は避け、内面を磨く準備期間に充てると吉。</div></div>`;
+  topStars.forEach(s=>{
+    const sd=STAR_DETAIL[s];
+    if(sd&&sd.minus) cau+=`<div class="profile-row"><div class="profile-icon">⚠</div><div class="profile-text"><div class="profile-title">${s}の課題</div>${sd.minus}</div></div>`;
+  });
+  document.getElementById('caution-content').innerHTML = cau;
+}
+
+// ===== UI =====
+let gender='female';
+function setGender(g){gender=g;document.getElementById('btn-male').classList.toggle('active',g==='male');document.getElementById('btn-female').classList.toggle('active',g==='female');}
+function fillDays(){
+  const y=parseInt(document.getElementById('year').value),m=parseInt(document.getElementById('month').value);
+  const sel=document.getElementById('day');const cur=parseInt(sel.value)||6;sel.innerHTML='';
+  const max=new Date(y,m,0).getDate();
+  for(let d=1;d<=max;d++){const o=document.createElement('option');o.value=d;o.textContent=d+'日';if(d===Math.min(cur,max))o.selected=true;sel.appendChild(o);}
+}
+document.getElementById('year').addEventListener('change',fillDays);
+document.getElementById('month').addEventListener('change',fillDays);
+fillDays();
+
+function calculate(){
+  const y=parseInt(document.getElementById('year').value);
+  const m=parseInt(document.getElementById('month').value);
+  const d=parseInt(document.getElementById('day').value);
+
+  const nen=yearKS(y,m,d),tsu=monthKS(nen.ten,m,d),nichi=dayKS(y,m,d);
+
+  document.getElementById('result-title').textContent=`${y}年${m}月${d}日　${gender==='male'?'男性':'女性'}`;
+  const goyo=GOYO[nichi.ten]||'';
+  const yinyo=JK.indexOf(nichi.ten)%2===0?'陽':'陰';
+  document.getElementById('result-sub').textContent=`日干：${nichi.ten}（${nichi.ten}${yinyo}${goyo}）`;
+
+  document.getElementById('tenkan-row').innerHTML=`<td>${nen.ten}</td><td>${tsu.ten}</td><td>${nichi.ten}</td>`;
+  document.getElementById('chishi-row').innerHTML=`<td>${nen.chi}</td><td>${tsu.chi}</td><td>${nichi.chi}</td>`;
+  document.getElementById('chusatsu-badge').textContent='天中殺：'+chusatsu(nen.chi);
+
+  const jt=buildJintai(nen.ten,nen.chi,tsu.ten,tsu.chi,nichi.ten,nichi.chi);
+  renderGrid('jt-top',jt.top,'tsuhen');
+  renderGrid('jt-mid',jt.mid,'tsuhen');
+  renderGrid('jt-bot',jt.bot,'jusei');
+
+  buildFeatures(nichi.ten,nen.ten,nen.chi,tsu.ten,tsu.chi,nichi.chi,jt.top,jt.mid,jt.bot,chusatsu(nen.chi));
+
+  // 大運
+  const daiu=calcDaiu(nen.ten,tsu.ten,tsu.chi,gender);
+  const tbody=document.getElementById('daiu-body');tbody.innerHTML='';
+  const curAge=new Date().getFullYear()-y;
+  daiu.forEach(dv=>{
+    const isCur=dv.age<=curAge&&curAge<dv.age+10;
+    const tr=document.createElement('tr');if(isCur)tr.className='current';
+    const shu=SANMEI[tsuhen(nichi.ten,dv.kan)]||'';
+    const ju=judaiC(nichi.ten,dv.chi);
+    const jdesc=JUDAI_DETAIL[ju]||'';
+    tr.innerHTML=`<td class="age">${dv.age}〜${dv.age+9}歳${isCur?'<br>◀現在':''}</td><td class="kst">${dv.kan}${dv.chi}</td><td class="star">${shu}</td><td class="jsstar">${ju}${isCur?`<div class="daiu-desc">${jdesc}</div>`:''}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('result').style.display='block';
+  document.getElementById('result').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>

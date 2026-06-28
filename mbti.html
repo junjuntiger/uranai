@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBTI 16タイプ性格診断｜占い・鑑定ツール</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+
+  :root{
+    --accent:#5a6a9a;
+    --accent-light:#eef0f8;
+    --ink:#2a2420;
+    --sub:#9a8a80;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  body{
+    font-family:'Noto Sans JP',sans-serif;
+    background:#fdf6f0;
+    color:var(--ink);
+    min-height:100vh;
+  }
+
+  .top-link{
+    display:block;
+    text-align:center;
+    padding:14px 1rem 0;
+    font-size:12px;
+    color:var(--sub);
+    text-decoration:none;
+    letter-spacing:0.05em;
+  }
+  .top-link:hover{color:var(--accent)}
+
+  header{
+    text-align:center;
+    padding:2rem 1rem 1.75rem;
+    background:linear-gradient(160deg,#fff8f0 0%,#fdf0e8 100%);
+  }
+
+  .header-emoji{
+    font-size:36px;
+    margin-bottom:12px;
+    display:block;
+  }
+
+  header h1{
+    font-family:'Noto Serif JP',serif;
+    font-size:23px;
+    font-weight:700;
+    letter-spacing:0.1em;
+    color:var(--ink);
+    margin-bottom:8px;
+  }
+
+  header p{
+    font-size:13px;
+    color:var(--sub);
+    letter-spacing:0.06em;
+  }
+
+  main{
+    max-width:560px;
+    margin:0 auto;
+    padding:2rem 1.25rem 4rem;
+  }
+
+  .panel{
+    background:white;
+    border-radius:18px;
+    padding:2.25rem 1.75rem;
+    box-shadow:0 2px 16px rgba(0,0,0,0.06);
+  }
+
+  .panel[hidden]{display:none}
+
+  /* ---- intro ---- */
+  .intro-icon{
+    width:64px;height:64px;
+    border-radius:16px;
+    background:var(--accent-light);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 1.25rem;
+  }
+  .intro-icon svg{width:36px;height:36px}
+
+  .panel h2{
+    font-family:'Noto Serif JP',serif;
+    font-size:17px;
+    text-align:center;
+    margin-bottom:0.9rem;
+    letter-spacing:0.04em;
+  }
+
+  .intro-text{
+    font-size:13px;
+    line-height:2;
+    color:#5a4f48;
+    margin-bottom:1.25rem;
+  }
+
+  .axis-legend{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-bottom:1.5rem;
+  }
+  .axis-legend div{
+    background:var(--accent-light);
+    border-radius:10px;
+    padding:8px 10px;
+    font-size:11.5px;
+    color:#4a4a5a;
+    letter-spacing:0.03em;
+    text-align:center;
+  }
+
+  .intro-meta{
+    text-align:center;
+    font-size:11.5px;
+    color:var(--sub);
+    letter-spacing:0.08em;
+    margin-bottom:1.5rem;
+  }
+
+  .primary-btn{
+    display:block;
+    width:100%;
+    border:none;
+    background:var(--accent);
+    color:white;
+    font-family:'Noto Sans JP',sans-serif;
+    font-size:14px;
+    font-weight:500;
+    letter-spacing:0.1em;
+    padding:14px;
+    border-radius:24px;
+    cursor:pointer;
+    transition:transform 0.15s, box-shadow 0.15s;
+    text-align:center;
+    text-decoration:none;
+  }
+  .primary-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 18px rgba(90,106,154,0.3);
+  }
+
+  .secondary-btn{
+    display:block;
+    width:100%;
+    border:1px solid #e3dad2;
+    background:white;
+    color:var(--ink);
+    font-family:'Noto Sans JP',sans-serif;
+    font-size:13px;
+    letter-spacing:0.08em;
+    padding:12px;
+    border-radius:24px;
+    cursor:pointer;
+    margin-bottom:10px;
+  }
+  .secondary-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* ---- quiz ---- */
+  .progress-wrap{
+    height:5px;
+    background:#f1e9e0;
+    border-radius:3px;
+    overflow:hidden;
+    margin-bottom:8px;
+  }
+  .progress-bar{
+    height:100%;
+    width:0%;
+    background:var(--accent);
+    border-radius:3px;
+    transition:width 0.3s ease;
+  }
+  .progress-label{
+    font-size:11px;
+    color:var(--sub);
+    letter-spacing:0.08em;
+    margin-bottom:1.75rem;
+  }
+
+  #questionText{
+    font-family:'Noto Serif JP',serif;
+    font-size:16.5px;
+    line-height:1.7;
+    margin-bottom:1.75rem;
+    min-height:60px;
+  }
+
+  .options{display:flex;flex-direction:column;gap:10px}
+
+  .option-btn{
+    text-align:left;
+    border:1.5px solid #ece2d8;
+    background:#fffdfb;
+    padding:14px 16px;
+    border-radius:14px;
+    font-family:'Noto Sans JP',sans-serif;
+    font-size:13.5px;
+    color:var(--ink);
+    line-height:1.6;
+    cursor:pointer;
+    transition:border-color 0.15s, background 0.15s, transform 0.1s;
+  }
+  .option-btn:hover{
+    border-color:var(--accent);
+    background:var(--accent-light);
+    transform:translateY(-1px);
+  }
+
+  /* ---- result ---- */
+  .result-code{
+    text-align:center;
+    font-family:'Noto Serif JP',serif;
+    font-size:13px;
+    letter-spacing:0.35em;
+    color:var(--accent);
+    margin-bottom:6px;
+  }
+  .result-title{
+    text-align:center;
+    font-family:'Noto Serif JP',serif;
+    font-size:22px;
+    font-weight:700;
+    margin-bottom:1rem;
+  }
+  .result-desc{
+    font-size:13.5px;
+    line-height:1.9;
+    color:#5a4f48;
+    margin-bottom:1.25rem;
+    text-align:center;
+  }
+  .tags{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:1.75rem;
+  }
+  .tags span{
+    background:var(--accent-light);
+    color:var(--accent);
+    font-size:11px;
+    letter-spacing:0.05em;
+    padding:5px 12px;
+    border-radius:20px;
+  }
+
+  .axis-bars{margin-bottom:1.75rem}
+  .axis-row{margin-bottom:14px}
+  .axis-labels{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:var(--sub);
+    margin-bottom:5px;
+    letter-spacing:0.02em;
+  }
+  .axis-labels .strong{color:var(--ink);font-weight:500}
+  .axis-track{
+    height:6px;
+    background:#f1e9e0;
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .axis-fill{
+    height:100%;
+    background:var(--accent);
+    border-radius:3px;
+  }
+
+  .result-actions{margin-top:1.5rem}
+
+  footer{
+    text-align:center;
+    padding:2rem;
+    font-size:11px;
+    color:#c0b8b0;
+    letter-spacing:0.1em;
+  }
+
+  @media(max-width:420px){
+    .panel{padding:1.75rem 1.25rem}
+    header h1{font-size:20px}
+  }
+</style>
+</head>
+<body>
+
+<a class="top-link" href="index.html">← 占い・鑑定ツール トップへ</a>
+
+<header>
+  <span class="header-emoji">🧩</span>
+  <h1>MBTI 16タイプ性格診断</h1>
+  <p>4つの指標から導く、あなたの思考と行動のパターン</p>
+</header>
+
+<main>
+
+  <!-- 導入 -->
+  <section class="panel" id="intro">
+    <div class="intro-icon">
+      <svg viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="4" width="12" height="12" rx="2" stroke="#5a6a9a" stroke-width="1.4" fill="none"/>
+        <rect x="18" y="4" width="12" height="12" rx="2" stroke="#5a6a9a" stroke-width="1.4" fill="none"/>
+        <rect x="4" y="18" width="12" height="12" rx="2" stroke="#5a6a9a" stroke-width="1.4" fill="none"/>
+        <rect x="18" y="18" width="12" height="12" rx="2" fill="#5a6a9a" opacity="0.45"/>
+      </svg>
+    </div>
+    <h2>あなたは、どのタイプ？</h2>
+    <p class="intro-text">
+      MBTIは「外向／内向」「感覚／直観」「思考／感情」「判断／知覚」という4つの指標の組み合わせで、人の性格を16タイプに分類する考え方です。質問にひとつずつ直感で答えていくだけで、あなたの思考のクセや行動パターンが見えてきます。
+    </p>
+    <div class="axis-legend">
+      <div>外向 E ⇄ I 内向</div>
+      <div>感覚 S ⇄ N 直観</div>
+      <div>思考 T ⇄ F 感情</div>
+      <div>判断 J ⇄ P 知覚</div>
+    </div>
+    <div class="intro-meta">全28問・所要時間 約3分</div>
+    <button class="primary-btn" id="startBtn">診断をはじめる</button>
+  </section>
+
+  <!-- 質問 -->
+  <section class="panel" id="quiz" hidden>
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="progress-label" id="progressLabel">Q1 / 28</div>
+    <div id="questionText"></div>
+    <div class="options">
+      <button class="option-btn" id="optA"></button>
+      <button class="option-btn" id="optB"></button>
+    </div>
+  </section>
+
+  <!-- 結果 -->
+  <section class="panel" id="result" hidden>
+    <div class="result-code" id="resultCode"></div>
+    <div class="result-title" id="resultTitle"></div>
+    <p class="result-desc" id="resultDesc"></p>
+    <div class="tags" id="resultTags"></div>
+    <div class="axis-bars" id="axisBars"></div>
+    <div class="result-actions">
+      <button class="secondary-btn" id="retryBtn">もう一度診断する</button>
+      <a class="primary-btn" href="index.html">占い・鑑定ツール トップへ戻る</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>© 2026 占い・鑑定ツール</footer>
+
+<script>
+(function(){
+
+  // ---- 質問データ（4指標 × 7問 = 28問）----
+  const QUESTIONS = [
+    {axis:'EI', text:'週末の過ごし方は？', a:{t:'友人を誘って賑やかに過ごしたい',l:'E'}, b:{t:'一人か少人数で静かに過ごしたい',l:'I'}},
+    {axis:'SN', text:'物事を捉えるとき、つい重視してしまうのは？', a:{t:'具体的な事実やデータ',l:'S'}, b:{t:'全体像や将来の可能性',l:'N'}},
+    {axis:'TF', text:'何かを判断するとき大切にしたいのは？', a:{t:'筋の通った論理や基準',l:'T'}, b:{t:'その場の気持ちや調和',l:'F'}},
+    {axis:'JP', text:'旅行に行くなら？', a:{t:'事前にしっかり計画を立てたい',l:'J'}, b:{t:'現地の気分で自由に決めたい',l:'P'}},
+    {axis:'EI', text:'初対面の人とは？', a:{t:'割とすぐに打ち解けられる',l:'E'}, b:{t:'打ち解けるまで少し時間がかかる',l:'I'}},
+    {axis:'SN', text:'説明書や手順書を読むとき？', a:{t:'順番どおりに進めたい',l:'S'}, b:{t:'大まかに理解したらすぐ試したい',l:'N'}},
+    {axis:'TF', text:'友人が落ち込んでいたら？', a:{t:'まず解決策を一緒に考える',l:'T'}, b:{t:'まず気持ちに寄り添う',l:'F'}},
+    {axis:'JP', text:'締め切りのある作業は？', a:{t:'早めに片付けて余裕を持ちたい',l:'J'}, b:{t:'ギリギリでも何とかなると思う',l:'P'}},
+    {axis:'EI', text:'大人数の集まりに参加すると？', a:{t:'むしろエネルギーが湧いてくる',l:'E'}, b:{t:'だんだん疲れてしまう',l:'I'}},
+    {axis:'SN', text:'会話していて惹かれる話題は？', a:{t:'実体験に基づいた具体的な話',l:'S'}, b:{t:'アイデアや可能性についての話',l:'N'}},
+    {axis:'TF', text:'人に意見を伝えるときは？', a:{t:'率直に、ストレートに伝える',l:'T'}, b:{t:'言葉を選びながら柔らかく伝える',l:'F'}},
+    {axis:'JP', text:'自分の部屋や机は？', a:{t:'きちんと整理整頓されている方だ',l:'J'}, b:{t:'多少散らかっていても気にならない',l:'P'}},
+    {axis:'EI', text:'考えがまとまりやすいのは？', a:{t:'誰かと話しながら考えるとき',l:'E'}, b:{t:'一人で静かに考える時間があるとき',l:'I'}},
+    {axis:'SN', text:'物事を学ぶとき、しっくりくるのは？', a:{t:'具体的な実例から学ぶこと',l:'S'}, b:{t:'背景にある概念やパターンから学ぶこと',l:'N'}},
+    {axis:'TF', text:'何かを決断するときの基準は？', a:{t:'筋が通っているかどうか',l:'T'}, b:{t:'関わる人みんなが納得できるかどうか',l:'F'}},
+    {axis:'JP', text:'急に予定が変わったら？', a:{t:'少しストレスを感じる',l:'J'}, b:{t:'むしろ面白がってしまう',l:'P'}},
+    {axis:'EI', text:'注目を浴びる場面は？', a:{t:'わりと好きな方だ',l:'E'}, b:{t:'できれば避けたい',l:'I'}},
+    {axis:'SN', text:'自分はどちらかというと？', a:{t:'現実的で堅実な方だ',l:'S'}, b:{t:'想像力豊かで独創的な方だ',l:'N'}},
+    {axis:'TF', text:'議論をしているとき大切にしたいのは？', a:{t:'結論の正しさ',l:'T'}, b:{t:'お互いの関係性',l:'F'}},
+    {axis:'JP', text:'物事を進めるときは？', a:{t:'計画どおりに進めたい',l:'J'}, b:{t:'状況に応じて臨機応変に進めたい',l:'P'}},
+    {axis:'EI', text:'新しい環境に入ったら？', a:{t:'自分から積極的に話しかける',l:'E'}, b:{t:'まず周りの様子をうかがう',l:'I'}},
+    {axis:'SN', text:'仕事や作業で得意なのは？', a:{t:'手順どおり正確にこなすこと',l:'S'}, b:{t:'新しいやり方を思いつくこと',l:'N'}},
+    {axis:'TF', text:'自分はどちらかというと？', a:{t:'公平さを大切にする方だ',l:'T'}, b:{t:'思いやりを大切にする方だ',l:'F'}},
+    {axis:'JP', text:'やりたいことを進めるときは？', a:{t:'きっちり計画してから動きたい',l:'J'}, b:{t:'まず動きながら考えたい',l:'P'}},
+    {axis:'EI', text:'イベントの前夜は？', a:{t:'わくわくして楽しみになる',l:'E'}, b:{t:'少し気持ちが構えてしまう',l:'I'}},
+    {axis:'SN', text:'興味を引かれやすいのは？', a:{t:'今ここにある現実的な物事',l:'S'}, b:{t:'未来のビジョンや抽象的なテーマ',l:'N'}},
+    {axis:'TF', text:'仕事を選ぶなら重視したいのは？', a:{t:'論理的に効率よく進められること',l:'T'}, b:{t:'人の役に立てている実感があること',l:'F'}},
+    {axis:'JP', text:'自分はどちらかというと？', a:{t:'きっちりしている方だ',l:'J'}, b:{t:'柔軟で自由な方だ',l:'P'}}
+  ];
+
+  // ---- 16タイプの説明 ----
+  const TYPES = {
+    INTJ:{title:'未来設計者', desc:'長期的なビジョンを描き、独自の視点から物事を体系立てて考えるタイプ。効率と論理を重視し、自分の内に明確な基準を持って着実に計画を実行していく。', tags:['戦略的','独立心','分析力']},
+    INTP:{title:'探究する分析者', desc:'物事の仕組みや本質を突き詰めて考えることに喜びを感じるタイプ。柔軟な発想で新しい理論やアイデアを組み立て、知的好奇心の赴くままに探究を続ける。', tags:['論理的','好奇心','独創性']},
+    ENTJ:{title:'統率する戦略家', desc:'目標に向かって人や物事を動かしていくことに長けたタイプ。大局を見据えた決断力と実行力で、周囲を巻き込みながら計画を前進させる。', tags:['統率力','決断力','向上心']},
+    ENTP:{title:'発想の挑戦者', desc:'新しい可能性を見つけては議論を楽しみ、常識にとらわれない発想で物事を捉えるタイプ。変化を恐れず、次々とアイデアを試していく行動力を持つ。', tags:['発想力','機転','社交性']},
+    INFJ:{title:'静かな理想家', desc:'人の気持ちを深く理解しながら、自分の内にある理想や価値観を大切にするタイプ。物事の奥にある意味を読み取り、静かに、しかし強い意志で目標に向かう。', tags:['洞察力','理想主義','共感力']},
+    INFP:{title:'心を紡ぐ夢想家', desc:'自分の価値観や感性を大切にし、物事を独自の視点で捉えるタイプ。表現することを通じて自分らしさを探求し、誠実さを大切に人と関わる。', tags:['感受性','誠実','想像力']},
+    ENFJ:{title:'人を導く調停者', desc:'周囲の人の成長や調和を大切にし、自然と人をまとめる役割を担うタイプ。温かい言葉で人を励まし、共通の目標に向けて場をまとめていく。', tags:['共感力','リーダーシップ','温かさ']},
+    ENFP:{title:'自由な発信者', desc:'好奇心とエネルギーにあふれ、新しい出会いやアイデアにわくわくするタイプ。自由な発想で可能性を広げながら、周囲を巻き込み楽しい雰囲気をつくる。', tags:['情熱','発想力','社交性']},
+    ISTJ:{title:'堅実な実務家', desc:'責任感を持って物事を着実にやり遂げるタイプ。経験や事実に基づいた判断を重視し、決めたことを最後までやり通す粘り強さを持つ。', tags:['誠実','計画性','責任感']},
+    ISFJ:{title:'寄り添う守護者', desc:'周囲の人をそっと支えることに喜びを感じるタイプ。細やかな気配りと丁寧な仕事ぶりで、信頼される存在になる。', tags:['思いやり','献身','丁寧さ']},
+    ESTJ:{title:'実行する統率者', desc:'物事を効率よく進めることに長けたタイプ。明確な基準とルールに基づいて組織やチームをまとめ、着実に成果を出していく。', tags:['実行力','組織力','責任感']},
+    ESFJ:{title:'場を整える世話役', desc:'周囲との調和を大切にし、人をサポートすることに喜びを感じるタイプ。気配り上手で、場の雰囲気を温かく整えていく。', tags:['協調性','気配り','社交性']},
+    ISTP:{title:'冷静な職人', desc:'状況を冷静に観察し、実践的に問題を解決していくタイプ。手を動かしながら学ぶことを好み、自分のペースで物事を仕上げていく。', tags:['冷静さ','実践力','適応力']},
+    ISFP:{title:'感性の表現者', desc:'自分の感性を大切にし、穏やかなペースで物事を楽しむタイプ。美しさや心地よさに敏感で、自分らしい表現を大切にする。', tags:['感性','柔軟性','穏やかさ']},
+    ESTP:{title:'行動派の挑戦者', desc:'今この瞬間を楽しみながら、機敏に行動していくタイプ。状況の変化にすぐ対応し、リスクを恐れず新しいことに飛び込んでいく。', tags:['行動力','適応力','大胆さ']},
+    ESFP:{title:'場を盛り上げる演者', desc:'明るいエネルギーで周囲を楽しませることが得意なタイプ。今を全力で楽しみながら、人との触れ合いの中で輝きを見せる。', tags:['社交性','明るさ','行動力']}
+  };
+
+  const AXIS_LABEL = {E:'外向',I:'内向',S:'感覚',N:'直観',T:'思考',F:'感情',J:'判断',P:'知覚'};
+  const AXIS_PAIRS = [['E','I'],['S','N'],['T','F'],['J','P']];
+
+  let current = 0;
+  const counts = {E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
+
+  const introEl = document.getElementById('intro');
+  const quizEl = document.getElementById('quiz');
+  const resultEl = document.getElementById('result');
+  const progressBar = document.getElementById('progressBar');
+  const progressLabel = document.getElementById('progressLabel');
+  const questionText = document.getElementById('questionText');
+  const optA = document.getElementById('optA');
+  const optB = document.getElementById('optB');
+
+  document.getElementById('startBtn').addEventListener('click', startQuiz);
+  document.getElementById('retryBtn').addEventListener('click', resetQuiz);
+
+  function startQuiz(){
+    introEl.hidden = true;
+    quizEl.hidden = false;
+    renderQuestion();
+  }
+
+  function renderQuestion(){
+    const q = QUESTIONS[current];
+    progressBar.style.width = (current / QUESTIONS.length * 100) + '%';
+    progressLabel.textContent = 'Q' + (current + 1) + ' / ' + QUESTIONS.length;
+    questionText.textContent = q.text;
+    optA.textContent = q.a.t;
+    optB.textContent = q.b.t;
+    optA.onclick = function(){ answer(q.a.l); };
+    optB.onclick = function(){ answer(q.b.l); };
+  }
+
+  function answer(letter){
+    counts[letter]++;
+    current++;
+    if(current < QUESTIONS.length){
+      renderQuestion();
+    } else {
+      progressBar.style.width = '100%';
+      showResult();
+    }
+  }
+
+  function showResult(){
+    quizEl.hidden = true;
+
+    let code = '';
+    AXIS_PAIRS.forEach(function(pair){
+      code += (counts[pair[0]] >= counts[pair[1]]) ? pair[0] : pair[1];
+    });
+
+    const type = TYPES[code];
+
+    document.getElementById('resultCode').textContent = code;
+    document.getElementById('resultTitle').textContent = type.title;
+    document.getElementById('resultDesc').textContent = type.desc;
+
+    const tagsEl = document.getElementById('resultTags');
+    tagsEl.innerHTML = '';
+    type.tags.forEach(function(tag){
+      const span = document.createElement('span');
+      span.textContent = tag;
+      tagsEl.appendChild(span);
+    });
+
+    const barsEl = document.getElementById('axisBars');
+    barsEl.innerHTML = '';
+    AXIS_PAIRS.forEach(function(pair){
+      const total = QUESTIONS.length / 4; // 各指標7問
+      const left = counts[pair[0]];
+      const right = counts[pair[1]];
+      const leftPct = Math.round(left / total * 100);
+      const winner = left >= right ? pair[0] : pair[1];
+
+      const row = document.createElement('div');
+      row.className = 'axis-row';
+
+      const labels = document.createElement('div');
+      labels.className = 'axis-labels';
+      labels.innerHTML =
+        '<span class="' + (winner === pair[0] ? 'strong' : '') + '">' + AXIS_LABEL[pair[0]] + ' ' + pair[0] + '</span>' +
+        '<span class="' + (winner === pair[1] ? 'strong' : '') + '">' + pair[1] + ' ' + AXIS_LABEL[pair[1]] + '</span>';
+
+      const track = document.createElement('div');
+      track.className = 'axis-track';
+      const fill = document.createElement('div');
+      fill.className = 'axis-fill';
+      fill.style.width = leftPct + '%';
+      track.appendChild(fill);
+
+      row.appendChild(labels);
+      row.appendChild(track);
+      barsEl.appendChild(row);
+    });
+
+    resultEl.hidden = false;
+  }
+
+  function resetQuiz(){
+    current = 0;
+    Object.keys(counts).forEach(function(k){ counts[k] = 0; });
+    resultEl.hidden = true;
+    introEl.hidden = false;
+  }
+
+})();
+</script>
+
+</body>
+</html>

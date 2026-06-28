@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>宿曜占星術 — 二十七宿占い</title>
+<style>
+  :root{
+    --bg-deep:#0f1830;
+    --bg-deep2:#161f3d;
+    --panel:#1b2547;
+    --panel-light:#232e57;
+    --gold:#d4af6a;
+    --gold-soft:#e8cf9a;
+    --ink:#eef0f7;
+    --ink-dim:#aab2cc;
+    --line:rgba(212,175,106,0.25);
+    --good:#8fbf8a;
+    --bad:#d98a7a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse 70% 50% at 50% -10%, rgba(212,175,106,0.10), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 100%, rgba(120,140,220,0.08), transparent 60%),
+      var(--bg-deep);
+    color:var(--ink);
+    font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+    padding:0 0 60px;
+  }
+  .stars{
+    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.5;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, #fff, transparent),
+      radial-gradient(1px 1px at 80% 10%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 60% 70%, #fff, transparent),
+      radial-gradient(1px 1px at 30% 80%, #fff, transparent),
+      radial-gradient(1px 1px at 90% 60%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 45% 35%, #fff, transparent),
+      radial-gradient(1px 1px at 15% 55%, #fff, transparent),
+      radial-gradient(1px 1px at 70% 90%, #fff, transparent);
+    background-repeat:no-repeat;
+  }
+  .wrap{position:relative; z-index:1; max-width:720px; margin:0 auto; padding:0 20px;}
+  header{
+    text-align:center;
+    padding:54px 20px 30px;
+  }
+  header .eyebrow{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    letter-spacing:0.3em; font-size:11px; color:var(--gold-soft);
+    text-transform:uppercase; margin-bottom:14px;
+  }
+  h1{
+    font-size:40px; letter-spacing:0.12em; margin:0 0 12px;
+    color:var(--ink); font-weight:500;
+    text-shadow:0 0 30px rgba(212,175,106,0.25);
+  }
+  header p{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    color:var(--ink-dim); font-size:14px; letter-spacing:0.04em;
+  }
+  .moonline{
+    width:120px; height:1px; margin:22px auto 0;
+    background:linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  nav.tabs{
+    display:flex; gap:2px; margin:10px 0 0;
+    border-bottom:1px solid var(--line);
+  }
+  nav.tabs button{
+    flex:1; padding:16px 8px; background:transparent; border:none;
+    color:var(--ink-dim); font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    font-size:15px; letter-spacing:0.08em; cursor:pointer; position:relative;
+    transition:color .25s;
+  }
+  nav.tabs button.active{ color:var(--gold-soft); }
+  nav.tabs button.active::after{
+    content:""; position:absolute; left:10%; right:10%; bottom:-1px; height:2px;
+    background:var(--gold);
+  }
+  nav.tabs button:hover{ color:var(--ink); }
+
+  .panel{
+    background:linear-gradient(180deg, var(--panel), var(--panel-light));
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:40px 30px;
+    margin-top:0;
+    box-shadow:0 30px 60px -30px rgba(0,0,0,0.6);
+  }
+  .panel h2{
+    text-align:center; font-size:26px; font-weight:500; letter-spacing:0.1em; margin:0 0 8px;
+  }
+  .panel .sub{
+    text-align:center; color:var(--ink-dim); font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    font-size:13px; margin-bottom:30px;
+  }
+
+  .date-row{ display:flex; gap:10px; justify-content:center; margin-bottom:8px; flex-wrap:wrap;}
+  .date-group{display:flex; flex-direction:column; align-items:center; gap:6px;}
+  .date-group label{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; font-size:11px; color:var(--ink-dim); letter-spacing:.08em;}
+  select{
+    background:var(--bg-deep2); color:var(--ink); border:1px solid var(--line);
+    border-radius:3px; padding:10px 14px; font-size:15px;
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    min-width:90px; text-align:center;
+  }
+  select:focus{ outline:none; border-color:var(--gold); }
+
+  .two-people{ display:flex; gap:18px; justify-content:center; flex-wrap:wrap; margin-bottom:10px;}
+  .person-block{
+    border:1px solid var(--line); border-radius:4px; padding:18px 16px 20px;
+    background:rgba(0,0,0,0.12);
+  }
+  .person-block .ptitle{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    font-size:12px; color:var(--gold-soft); letter-spacing:.1em; margin-bottom:12px; text-align:center;
+  }
+
+  .go-btn{
+    display:block; margin:30px auto 0; padding:14px 46px;
+    background:linear-gradient(180deg,#c79b54,#a9793a);
+    color:#1b1206; border:none; border-radius:3px; cursor:pointer;
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    font-size:15px; letter-spacing:.12em; font-weight:600;
+    box-shadow:0 10px 24px -10px rgba(212,175,106,0.6);
+    transition:transform .15s, box-shadow .15s;
+  }
+  .go-btn:hover{ transform:translateY(-1px); box-shadow:0 14px 28px -10px rgba(212,175,106,0.75); }
+  .go-btn:active{ transform:translateY(0); }
+
+  .result{
+    margin-top:36px; padding-top:30px; border-top:1px solid var(--line);
+    display:none;
+  }
+  .result.show{ display:block; animation:fadein .4s ease; }
+  @keyframes fadein{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .suku-badge{
+    text-align:center; margin-bottom:24px;
+  }
+  .suku-badge .nm{
+    font-size:34px; letter-spacing:.1em; color:var(--gold-soft);
+    text-shadow:0 0 24px rgba(212,175,106,0.35);
+  }
+  .suku-badge .kana{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    font-size:12px; color:var(--ink-dim); letter-spacing:.1em; margin-top:4px;
+  }
+  .tag-row{ display:flex; gap:8px; justify-content:center; margin-top:14px; flex-wrap:wrap;}
+  .tag{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    font-size:11px; letter-spacing:.05em; color:var(--ink-dim);
+    border:1px solid var(--line); border-radius:20px; padding:5px 14px;
+  }
+  .desc{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    font-size:14.5px; line-height:1.9; color:var(--ink);
+    background:rgba(0,0,0,0.18); border-radius:4px; padding:20px 22px;
+  }
+  .desc + .desc{ margin-top:14px; }
+  .field-label{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    font-size:11px; color:var(--gold-soft); letter-spacing:.12em; margin:22px 0 8px;
+  }
+
+  .compat-grid{
+    display:flex; align-items:center; justify-content:center; gap:18px; margin-bottom:18px;
+  }
+  .compat-grid .cp-name{ font-size:20px; color:var(--gold-soft); text-align:center;}
+  .compat-grid .cp-arrow{ color:var(--ink-dim); font-size:20px;}
+  .relation-pill{
+    display:block; width:fit-content; margin:0 auto 18px; padding:8px 24px;
+    border:1px solid var(--gold); border-radius:20px; color:var(--gold-soft);
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; font-size:14px; letter-spacing:.1em;
+  }
+
+  .fortune-meter{
+    display:flex; justify-content:center; gap:6px; margin:18px 0 22px;
+  }
+  .fortune-meter span{
+    width:10px; height:10px; border-radius:50%; background:rgba(212,175,106,0.18);
+  }
+  .fortune-meter span.on{ background:var(--gold); }
+
+  footer{
+    text-align:center; margin-top:50px; color:var(--ink-dim);
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; font-size:11px; letter-spacing:.05em;
+    opacity:0.7;
+  }
+
+  @media (max-width:480px){
+    h1{ font-size:30px; }
+    .panel{ padding:30px 18px; }
+    .date-group{ width:30%; }
+    select{ width:100%; min-width:0; }
+  }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">SHUKUYO ASTROLOGY · 二十七宿</div>
+    <h1>宿曜占い</h1>
+    <p>生年月日から、月が宿る星 — あなたの「宿」を読み解きます</p>
+    <div class="moonline"></div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="personality">性格占い</button>
+    <button class="tab-btn" data-tab="compat">相性占い</button>
+    <button class="tab-btn" data-tab="fortune">運勢占い</button>
+  </nav>
+
+  <!-- 性格占い -->
+  <section class="panel tab-pane" id="pane-personality">
+    <h2>性格占い</h2>
+    <div class="sub">生年月日から、本命宿と性格・特徴を占います</div>
+
+    <div class="date-row">
+      <div class="date-group">
+        <label>年</label>
+        <select id="p-year"></select>
+      </div>
+      <div class="date-group">
+        <label>月</label>
+        <select id="p-month"></select>
+      </div>
+      <div class="date-group">
+        <label>日</label>
+        <select id="p-day"></select>
+      </div>
+    </div>
+
+    <button class="go-btn" id="p-go">占う</button>
+
+    <div class="result" id="p-result">
+      <div class="suku-badge">
+        <div class="nm" id="p-name"></div>
+        <div class="kana" id="p-kana"></div>
+        <div class="tag-row" id="p-tags"></div>
+      </div>
+      <div class="field-label">性格・特徴</div>
+      <div class="desc" id="p-personality"></div>
+      <div class="field-label">恋愛・対人</div>
+      <div class="desc" id="p-love"></div>
+      <div class="field-label">ラッキーカラー</div>
+      <div class="desc" id="p-color"></div>
+      <div class="field-label" id="p-weekday-label"></div>
+      <div class="desc" id="p-weekday"></div>
+    </div>
+  </section>
+
+  <!-- 相性占い -->
+  <section class="panel tab-pane" id="pane-compat" style="display:none;">
+    <h2>相性占い</h2>
+    <div class="sub">二人の生年月日から、宿どうしの関係を占います</div>
+
+    <div class="two-people">
+      <div class="person-block">
+        <div class="ptitle">A さん</div>
+        <div class="date-row">
+          <div class="date-group"><label>年</label><select id="c1-year"></select></div>
+          <div class="date-group"><label>月</label><select id="c1-month"></select></div>
+          <div class="date-group"><label>日</label><select id="c1-day"></select></div>
+        </div>
+      </div>
+      <div class="person-block">
+        <div class="ptitle">B さん</div>
+        <div class="date-row">
+          <div class="date-group"><label>年</label><select id="c2-year"></select></div>
+          <div class="date-group"><label>月</label><select id="c2-month"></select></div>
+          <div class="date-group"><label>日</label><select id="c2-day"></select></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="go-btn" id="c-go">占う</button>
+
+    <div class="result" id="c-result">
+      <div class="compat-grid">
+        <div class="cp-name" id="c-name1"></div>
+        <div class="cp-arrow">⟷</div>
+        <div class="cp-name" id="c-name2"></div>
+      </div>
+      <div class="relation-pill" id="c-relation"></div>
+      <div class="desc" id="c-desc"></div>
+    </div>
+  </section>
+
+  <!-- 運勢占い -->
+  <section class="panel tab-pane" id="pane-fortune" style="display:none;">
+    <h2>運勢占い</h2>
+    <div class="sub">あなたの本命宿から、今日の運勢を占います</div>
+
+    <div class="date-row">
+      <div class="date-group">
+        <label>年</label>
+        <select id="f-year"></select>
+      </div>
+      <div class="date-group">
+        <label>月</label>
+        <select id="f-month"></select>
+      </div>
+      <div class="date-group">
+        <label>日</label>
+        <select id="f-day"></select>
+      </div>
+    </div>
+
+    <button class="go-btn" id="f-go">占う</button>
+
+    <div class="result" id="f-result">
+      <div class="compat-grid">
+        <div class="cp-name" id="f-name1"></div>
+        <div class="cp-arrow">⟷</div>
+        <div class="cp-name" id="f-name2"></div>
+      </div>
+      <div class="relation-pill" id="f-relation"></div>
+      <div class="fortune-meter" id="f-meter"></div>
+      <div class="desc" id="f-desc"></div>
+    </div>
+  </section>
+
+  <footer>※ 本サービスは簡易計算によるエンターテインメント占いです。厳密な旧暦換算とは多少のずれが生じる場合があります。</footer>
+</div>
+
+<script>
+/* ---------- 27宿 データ ---------- */
+// 標準的な並び順（角宿→軫宿）
+const SUKU = [
+  { name:"角宿", kana:"かくしゅく", tags:["和善宿","東"], color:"若草色・グリーン系",
+    personality:"明るく社交的で、誰からも好かれるムードメーカー。仕事への意欲が高く、人を惹きつける天性のリーダー気質を持ちます。",
+    love:"恋愛では駆け引きをせず誠実。相手をよく観察し、自然に距離を縮めるのが得意です。" },
+  { name:"亢宿", kana:"こうしゅく", tags:["軽燥宿","東"], color:"空色・スカイブルー系",
+    personality:"損得を抜きにして理想を追い求める正義派。自由な発想と独立心が強く、型にはまることを嫌います。",
+    love:"束縛を嫌い、対等な関係を求めます。価値観を共有できる相手と長続きしやすいタイプ。" },
+  { name:"氐宿", kana:"ていしゅく", tags:["剛柔宿","東"], color:"深紅・ワインレッド系",
+    personality:"豪快で勘が鋭く、現実主義者。外は柔らかく内に強さを秘めた二面性のある性質を持ちます。",
+    love:"一見クールですが情熱的。一度好きになると一途に尽くす傾向があります。" },
+  { name:"房宿", kana:"ぼうしゅく", tags:["和善宿","東"], color:"金色・ゴールド系",
+    personality:"派手で財運に恵まれた人気者。芸術的なセンスと創造力に富み、周囲を惹きつける華やかさがあります。",
+    love:"恋愛にも華やかさを求め、ロマンチックな演出を好みます。気前のよさで相手を喜ばせます。" },
+  { name:"心宿", kana:"しんしゅく", tags:["毒害宿","東"], color:"珊瑚色・コーラル系",
+    personality:"愛嬌があり人心掌握に優れた庶民派。感情表現が豊かで、人とのつながりを大切にします。",
+    love:"情にもろく、相手の気持ちに寄り添うタイプ。尽くしすぎて疲れてしまうこともあります。" },
+  { name:"尾宿", kana:"びしゅく", tags:["毒害宿","東"], color:"墨色・チャコール系",
+    personality:"自己を厳しく律する頑固一徹の武勇人。行動力があり、目標に向かって突き進む強さを持ちます。",
+    love:"恋愛でも自分の信念を曲げません。誠実さを重んじ、軽い関係を好みません。" },
+  { name:"箕宿", kana:"きしゅく", tags:["安重宿","東"], color:"紫紺・パープル系",
+    personality:"子分を集めてのし上がる、度胸ある親分肌。包容力があり、周囲から頼られる存在です。",
+    love:"頼りがいのある面倒見の良いパートナー。相手を導きたいという気持ちが強く出ます。" },
+  { name:"斗宿", kana:"としゅく", tags:["安重宿","北"], color:"群青色・インディゴ系",
+    personality:"元祖になれる知恵多き挑戦者。新しいことへの探究心が強く、独自の道を切り開きます。",
+    love:"型にはまらない恋愛観を持ち、知的な刺激を与えてくれる相手に惹かれます。" },
+  { name:"女宿", kana:"にょしゅく", tags:["軽燥宿","北"], color:"薄紅・桜色系",
+    personality:"野心と好奇心旺盛な、陰の指導者タイプ。控えめに見えて、内には強い意志を秘めています。",
+    love:"一歩引いた立場から相手を支えるのが得意。実は恋愛にも主導権を持ちたいタイプです。" },
+  { name:"虚宿", kana:"きょしゅく", tags:["軽燥宿","北"], color:"乳白色・アイボリー系",
+    personality:"先見の明がある波瀾万丈な知将。物事にとらわれない自由な気質を持ち、変化を恐れません。",
+    love:"執着が少なくさっぱりした恋愛観。お互いの自由を尊重できる関係を望みます。" },
+  { name:"危宿", kana:"きしゅく", tags:["軽燥宿","北"], color:"銀色・シルバー系",
+    personality:"危機を乗り越える強さを持つ、ロマンチストな冒険家。繊細さと大胆さを併せ持ちます。",
+    love:"感受性が豊かでドラマチックな恋愛を好む傾向。気持ちの振れ幅が大きいタイプです。" },
+  { name:"室宿", kana:"しつしゅく", tags:["猛悪宿","北"], color:"鉄紺・ネイビー系",
+    personality:"自我が強くパワフルで、生き残る力に優れます。困難な局面でこそ本領を発揮します。",
+    love:"恋愛でも主導権を握りたいタイプ。頼られることに喜びを感じます。" },
+  { name:"壁宿", kana:"へきしゅく", tags:["安重宿","北"], color:"白磁色・オフホワイト系",
+    personality:"徳があり堂々とした、名誉を重んじるタイプ。経済的にも安定した運を持ちます。",
+    love:"誠実で安定志向。長期的に信頼関係を築けるパートナーを求めます。" },
+  { name:"奎宿", kana:"けいしゅく", tags:["和善宿","西"], color:"若葉色・ミントグリーン系",
+    personality:"知的で好奇心旺盛、コミュニケーション能力に優れた人気者。柔らかな性質で人当たりが良いです。",
+    love:"会話を楽しみながら関係を深めるタイプ。知的な会話ができる相手に魅力を感じます。" },
+  { name:"婁宿", kana:"ろうしゅく", tags:["急速宿","西"], color:"橙色・アプリコット系",
+    personality:"行動が素早く、臨機応変に対応できる持続力のある人。フットワークの軽さが武器です。",
+    love:"アクティブな恋愛を好み、デートでもすぐに行動に移すタイプ。" },
+  { name:"胃宿", kana:"いしゅく", tags:["急速宿","西"], color:"琥珀色・アンバー系",
+    personality:"恵まれた環境からスタートする運の持ち主。おっとりとした性格でがつがつしません。",
+    love:"焦らずゆったりと関係を育てるタイプ。安心感を与える存在になります。" },
+  { name:"昴宿", kana:"ぼうしゅく", tags:["剛柔宿","西"], color:"白銀色・パールホワイト系",
+    personality:"外側は柔らかく内側は強い、二面性を持つタイプ。繊細さと芯の強さを併せ持ちます。",
+    love:"控えめに見えますが、恋愛では意外と一途で情熱的な面を見せます。" },
+  { name:"畢宿", kana:"ひつしゅく", tags:["安重宿","西"], color:"深緑色・フォレストグリーン系",
+    personality:"徳があり堂々とした名誉派。経済面でも困ることのない安定した運を持ちます。",
+    love:"落ち着いた大人の恋愛を好み、地に足のついた関係を築きます。" },
+  { name:"觜宿", kana:"ししゅく", tags:["和善宿","西"], color:"薄紫・ラベンダー系",
+    personality:"柔らかで穏やかな性質を持つ、知的好奇心の強いタイプ。コミュニケーション力も高いです。",
+    love:"優しさで相手を包み込むタイプ。喧嘩をせず穏やかな関係を望みます。" },
+  { name:"参宿", kana:"しんしゅく", tags:["毒害宿","西"], color:"黒紫・プラム系",
+    personality:"たいへん個性的で、いかようにも使える鋭さを持つタイプ。大成する可能性を秘めています。",
+    love:"恋愛でも独自のスタイルを持ち、ありきたりな関係を好みません。" },
+  { name:"井宿", kana:"せいしゅく", tags:["軽燥宿","南"], color:"水色・アクアブルー系",
+    personality:"自由を好み物事への執着が少ない、真面目だが軽やかな行動派。フラットな人間関係を好みます。",
+    love:"束縛のない自由な恋愛観。気の合う相手とは自然体で過ごせます。" },
+  { name:"鬼宿", kana:"きしゅく", tags:["急速宿","南"], color:"朱色・バーミリオン系",
+    personality:"行動が素早く臨機応変。マイペースに見えて実は粘り強い持続力を持つタイプです。",
+    love:"独自の世界観を持ちながらも、心を許した相手には深く尽くします。" },
+  { name:"柳宿", kana:"りゅうしゅく", tags:["毒害宿","南"], color:"柳色・若緑系",
+    personality:"個性的で柔軟性に富み、いかようにも対応できるしなやかさを持つタイプ。",
+    love:"感受性が豊かで、相手の気持ちを敏感に察知します。深い愛情を内に秘めています。" },
+  { name:"星宿", kana:"せいしゅく", tags:["猛悪宿","南"], color:"金星色・シャンパンゴールド系",
+    personality:"自我が強くパワフルで、どんな局面でも生き残る力を持つタイプ。エネルギッシュです。",
+    love:"恋愛でも積極的にアプローチするタイプ。情熱的な関係を好みます。" },
+  { name:"張宿", kana:"ちょうしゅく", tags:["猛悪宿","南"], color:"赤銅色・テラコッタ系",
+    personality:"パワフルで強い自我を持ち、困難な状況でも力強く乗り越えるタイプです。",
+    love:"主導権を握りたい一方で、内には繊細な一面も併せ持ちます。" },
+  { name:"翼宿", kana:"よくしゅく", tags:["安重宿","南"], color:"翡翠色・ジェイドグリーン系",
+    personality:"徳があり堂々とした性質を持つ、名誉を重んじるタイプ。安定した経済運を持ちます。",
+    love:"誠実で揺るがない愛情を持ち、長く付き合うほど信頼が深まる関係を築きます。" },
+  { name:"軫宿", kana:"しんしゅく", tags:["急速宿","南"], color:"瑠璃色・ラピスブルー系",
+    personality:"臨機応変に動ける素早さと、止まらない持続力を持つ多才なタイプです。",
+    love:"フットワークが軽く、出会いにも積極的。一度心を決めると粘り強く向き合います。" },
+];
+const N = SUKU.length; // 27
+
+/* 七曜（曜日）別の特徴 */
+const WEEKDAY = [
+  { name:"日曜日", desc:"明るく開放的で、人前に立つことを苦にしないタイプ。存在感があり、自然と周囲の中心になりやすいでしょう。一方でおおらかすぎて、細部への配慮が抜けることもあります。自由な発想を活かせる環境で力を発揮します。" },
+  { name:"月曜日", desc:"穏やかで包容力があり、人の話に静かに耳を傾けられるタイプ。情緒が安定しており、周囲に安心感を与える存在です。変化よりも積み重ねを好み、地道な努力で信頼を築いていきます。" },
+  { name:"火曜日", desc:"血気盛んで意志が強く、何事にも果敢にチャレンジしていきます。好戦的といってもいいほどで、反骨精神も強いことから、時には扱いづらい人というレッテルを貼られることもあるでしょう。気性の荒さを上手くコントロールして、協調性を心がけることが大切です。公務員やサラリーマンよりも、独立した方がうまくいきます。" },
+  { name:"水曜日", desc:"頭の回転が速く、機転に富んだタイプ。情報収集力に優れ、状況に応じて柔軟に立ち回ることができます。一方で気分の波が出やすく、興味の対象が次々と変わる傾向もあるでしょう。多才さを一つの分野に絞ると大きく伸びます。" },
+  { name:"木曜日", desc:"おおらかで誠実、人から信頼されやすいタイプ。物事を大きな視点で捉え、長期的な計画を立てるのが得意です。慎重なあまり決断が遅れることもありますが、地に足のついた着実な成功を手にしやすい星回りです。" },
+  { name:"金曜日", desc:"美意識が高く、社交的で華やかな雰囲気を持つタイプ。人を惹きつける魅力があり、芸術やセンスを活かす分野で力を発揮します。楽しいことを優先しすぎて計画性に欠ける面もあるので、メリハリを意識すると吉です。" },
+  { name:"土曜日", desc:"忍耐力があり、コツコツと物事を積み上げていく堅実なタイプ。責任感が強く、任された役割を最後までやり遂げる力を持ちます。慎重で控えめな分、自分から動き出すまでに時間がかかることもあるでしょう。" },
+];
+/* 命/業/胎 を除く8関係を順に配置（簡易三九の法） */
+const REL8 = ["栄","親","友","安","壊","危","成","衰"];
+function relationName(offset){
+  // offset: 0-26, base(自分)から見て相手が何個先か
+  const mod = ((offset % N) + N) % N;
+  const third = Math.floor(mod / 9);   // 0,1,2
+  const pos = mod % 9;                  // 0-8
+  if(pos === 0){ return ["命","業","胎"][third]; }
+  return REL8[pos-1];
+}
+const RELATION_DESC = {
+  "命":"とても縁の強い、運命的な結びつきを持つ相手。良くも悪くも強く影響し合う特別な関係です。",
+  "業":"刺激し合い、互いに成長を促す関係。時にぶつかりながらも切り離せない縁を持ちます。",
+  "胎":"育み育まれる関係。長い時間をかけてじっくりと信頼関係を築いていくタイプの縁です。",
+  "栄":"互いに繁栄を与え合う、明るく良好な関係。一緒にいると物事がうまく進みやすい間柄です。",
+  "親":"親しみやすく、自然体で付き合える安心感のある関係。長く穏やかな縁が続きます。",
+  "友":"友人のような対等な関係。気負わず付き合える、心地よい距離感を保てる間柄です。",
+  "安":"安らぎを与え合う関係。一緒にいるとリラックスでき、癒やしを感じられる相手です。",
+  "壊":"刺激的だが波が大きい関係。価値観の違いから摩擦も起きやすく、距離感に注意が必要です。",
+  "危":"緊張感のある関係。お互いに気を遣う場面が多く、無理をしすぎないことが大切です。",
+  "成":"物事を成就させ合う、頼りになる関係。協力するとお互いの目標が叶いやすくなります。",
+  "衰":"気疲れしやすい関係。意識的に距離を取り合うことで、良い面が見えてくる間柄です。",
+};
+
+/* ---------- 27宿の暦カレンダー計算 ----------
+   2026年6月20日 = 張宿（index 24）を基準点とし、
+   27日サイクルで近似計算します（簡易版）。
+-------------------------------------------------*/
+const ANCHOR_DATE = new Date(Date.UTC(1968,1,6)); // 1968-02-06
+const ANCHOR_INDEX = SUKU.findIndex(s=>s.name==="觜宿");
+
+function dateToUTC(y,m,d){ return new Date(Date.UTC(y, m-1, d)); }
+
+function sukuIndexForDate(y,m,d){
+  const target = dateToUTC(y,m,d);
+  const diffDays = Math.round((target - ANCHOR_DATE) / 86400000);
+  let idx = (ANCHOR_INDEX + diffDays) % N;
+  idx = ((idx % N) + N) % N;
+  return idx;
+}
+
+/* ---------- UI セットアップ ---------- */
+function fillSelect(sel, start, end, defaultVal){
+  for(let v=start; v<=end; v++){
+    const opt = document.createElement("option");
+    opt.value = v; opt.textContent = v;
+    if(v===defaultVal) opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+function daysInMonth(y,m){ return new Date(y, m, 0).getDate(); }
+function setupDateSelectors(prefix, defY, defM, defD){
+  const y = document.getElementById(prefix+"-year");
+  const m = document.getElementById(prefix+"-month");
+  const d = document.getElementById(prefix+"-day");
+  const thisYear = new Date().getFullYear();
+  fillSelect(y, 1920, thisYear, defY);
+  fillSelect(m, 1, 12, defM);
+  function rebuildDays(){
+    const yy = parseInt(y.value), mm = parseInt(m.value);
+    const max = daysInMonth(yy, mm);
+    const cur = parseInt(d.value) || defD;
+    d.innerHTML = "";
+    fillSelect(d, 1, max, Math.min(cur, max));
+  }
+  rebuildDays();
+  y.addEventListener("change", rebuildDays);
+  m.addEventListener("change", rebuildDays);
+}
+
+const today = new Date();
+setupDateSelectors("p", 1990, 1, 1);
+setupDateSelectors("c1", 1990, 1, 1);
+setupDateSelectors("c2", 1990, 1, 1);
+setupDateSelectors("f", 1990, 1, 1);
+
+function getDate(prefix){
+  return {
+    y: parseInt(document.getElementById(prefix+"-year").value),
+    m: parseInt(document.getElementById(prefix+"-month").value),
+    d: parseInt(document.getElementById(prefix+"-day").value),
+  };
+}
+
+/* ---------- タブ切り替え ---------- */
+const panes = {
+  personality: document.getElementById("pane-personality"),
+  compat: document.getElementById("pane-compat"),
+  fortune: document.getElementById("pane-fortune"),
+};
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    Object.values(panes).forEach(p=>p.style.display="none");
+    panes[btn.dataset.tab].style.display = "block";
+  });
+});
+
+/* ---------- 性格占い ---------- */
+document.getElementById("p-go").addEventListener("click", ()=>{
+  const {y,m,d} = getDate("p");
+  const idx = sukuIndexForDate(y,m,d);
+  const s = SUKU[idx];
+  document.getElementById("p-name").textContent = s.name;
+  document.getElementById("p-kana").textContent = s.kana + "　／　" + y+"年"+m+"月"+d+"日生まれ";
+  const tagRow = document.getElementById("p-tags");
+  tagRow.innerHTML = "";
+  s.tags.forEach(t=>{
+    const span = document.createElement("span");
+    span.className="tag"; span.textContent=t;
+    tagRow.appendChild(span);
+  });
+  document.getElementById("p-personality").textContent = s.personality;
+  document.getElementById("p-love").textContent = s.love;
+  document.getElementById("p-color").textContent = s.color;
+  const wd = dateToUTC(y,m,d).getUTCDay();
+  const w = WEEKDAY[wd];
+  document.getElementById("p-weekday-label").textContent = w.name + "生まれの人の特徴";
+  document.getElementById("p-weekday").textContent = w.desc;
+  document.getElementById("p-result").classList.add("show");
+});
+
+/* ---------- 相性占い ---------- */
+document.getElementById("c-go").addEventListener("click", ()=>{
+  const d1 = getDate("c1"), d2 = getDate("c2");
+  const i1 = sukuIndexForDate(d1.y,d1.m,d1.d);
+  const i2 = sukuIndexForDate(d2.y,d2.m,d2.d);
+  const s1 = SUKU[i1], s2 = SUKU[i2];
+  const rel = relationName(i2 - i1);
+  document.getElementById("c-name1").textContent = "A："+s1.name;
+  document.getElementById("c-name2").textContent = "B："+s2.name;
+  document.getElementById("c-relation").textContent = "関係：「"+rel+"」の縁";
+  document.getElementById("c-desc").textContent = RELATION_DESC[rel];
+  document.getElementById("c-result").classList.add("show");
+});
+
+/* ---------- 運勢占い ---------- */
+document.getElementById("f-go").addEventListener("click", ()=>{
+  const {y,m,d} = getDate("f");
+  const myIdx = sukuIndexForDate(y,m,d);
+  const t = new Date();
+  const todayIdx = sukuIndexForDate(t.getFullYear(), t.getMonth()+1, t.getDate());
+  const mySuku = SUKU[myIdx], todaySuku = SUKU[todayIdx];
+  const rel = relationName(todayIdx - myIdx);
+  document.getElementById("f-name1").textContent = "本命："+mySuku.name;
+  document.getElementById("f-name2").textContent = "今日："+todaySuku.name;
+  document.getElementById("f-relation").textContent = "今日の関係：「"+rel+"」";
+  document.getElementById("f-desc").textContent = RELATION_DESC[rel];
+
+  // 簡易吉凶メーター（5段階）
+  const score = {
+    "命":4,"栄":5,"親":4,"友":4,"成":5,"安":3,"業":3,"胎":3,"壊":1,"危":2,"衰":2
+  }[rel] ?? 3;
+  const meter = document.getElementById("f-meter");
+  meter.innerHTML = "";
+  for(let i=0;i<5;i++){
+    const dot = document.createElement("span");
+    if(i < score) dot.classList.add("on");
+    meter.appendChild(dot);
+  }
+  document.getElementById("f-result").classList.add("show");
+});
+</script>
+</body>
+</html>

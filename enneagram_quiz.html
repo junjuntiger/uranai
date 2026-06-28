@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>エニアグラム診断</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+
+  :root{
+    --bg: #14151c;
+    --bg-soft: #1c1d27;
+    --panel: #21222e;
+    --line: #343544;
+    --gold: #c9a24b;
+    --gold-soft: #e3c982;
+    --ink: #ece9e2;
+    --ink-dim: #9a98a6;
+    --ok: #6f9e84;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: radial-gradient(ellipse at top, #1b1c27 0%, var(--bg) 60%);
+    color: var(--ink);
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height:100vh;
+    padding: 32px 16px 80px;
+  }
+  .wrap{max-width: 640px; margin: 0 auto;}
+
+  h1, .display{
+    font-family: 'Shippori Mincho', serif;
+    letter-spacing: 0.04em;
+  }
+
+  /* ---------- INTRO ---------- */
+  #intro{
+    text-align:center;
+    padding-top: 24px;
+  }
+  .enneagon{
+    width: 220px; height: 220px;
+    margin: 0 auto 28px;
+    position: relative;
+  }
+  .enneagon svg{ width:100%; height:100%; display:block; }
+  .enneagon circle.node{
+    fill: var(--bg-soft);
+    stroke: var(--gold);
+    stroke-width: 1.4;
+    transition: fill 0.4s, r 0.4s;
+  }
+  .enneagon line{
+    stroke: var(--gold);
+    stroke-opacity: 0.35;
+    stroke-width: 1;
+  }
+  .enneagon text{
+    fill: var(--gold-soft);
+    font-family: 'Shippori Mincho', serif;
+    font-size: 13px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  h1{ font-size: 1.9rem; font-weight:700; margin: 0 0 8px; color: var(--ink); }
+  .eyebrow{
+    font-size: 0.75rem; letter-spacing: 0.22em; color: var(--gold);
+    text-transform: uppercase; margin-bottom: 14px;
+  }
+  .lede{ color: var(--ink-dim); line-height:1.9; font-size: 0.95rem; max-width: 460px; margin: 0 auto 32px;}
+  .meta-row{
+    display:flex; justify-content:center; gap: 28px;
+    color: var(--ink-dim); font-size: 0.8rem; margin-bottom: 36px;
+  }
+  .meta-row b{ color: var(--gold-soft); display:block; font-size:1.1rem; font-family:'Shippori Mincho',serif; }
+
+  button{
+    font-family:'Noto Sans JP', sans-serif;
+    cursor:pointer;
+    border:none;
+  }
+  .btn-primary{
+    background: linear-gradient(135deg, var(--gold-soft), var(--gold));
+    color: #1b1c0f;
+    font-weight:700;
+    font-size: 1rem;
+    padding: 15px 44px;
+    border-radius: 999px;
+    letter-spacing: 0.03em;
+    box-shadow: 0 8px 24px -8px rgba(201,162,75,0.5);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-primary:hover{ transform: translateY(-2px); box-shadow: 0 12px 28px -8px rgba(201,162,75,0.6); }
+  .btn-primary:focus-visible{ outline: 2px solid var(--gold-soft); outline-offset:3px; }
+
+  .btn-ghost{
+    background:transparent; color: var(--ink-dim);
+    font-size: 0.85rem; padding: 10px 18px;
+    border:1px solid var(--line); border-radius: 999px;
+  }
+  .btn-ghost:hover{ color: var(--ink); border-color: var(--gold); }
+  .btn-ghost:focus-visible{ outline: 2px solid var(--gold-soft); outline-offset:2px; }
+
+  /* ---------- QUIZ ---------- */
+  #quiz{ display:none; }
+  .progress-track{
+    height: 3px; background: var(--line); border-radius: 3px; overflow:hidden; margin-bottom: 28px;
+  }
+  .progress-fill{
+    height:100%; background: linear-gradient(90deg, var(--gold), var(--gold-soft));
+    width:0%; transition: width 0.35s ease;
+  }
+  .progress-label{
+    display:flex; justify-content:space-between; font-size:0.75rem; color: var(--ink-dim);
+    margin-bottom: 18px; letter-spacing: 0.05em;
+  }
+  .q-card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 36px 28px;
+    min-height: 200px;
+  }
+  .q-num{
+    font-family:'Shippori Mincho', serif;
+    color: var(--gold);
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+  }
+  .q-text{
+    font-size: 1.18rem;
+    line-height: 1.75;
+    margin-bottom: 30px;
+    font-weight:500;
+  }
+  .scale{
+    display:flex; justify-content:space-between; gap: 6px;
+  }
+  .scale button{
+    flex:1;
+    background: var(--bg-soft);
+    border:1px solid var(--line);
+    border-radius: 10px;
+    color: var(--ink-dim);
+    padding: 13px 4px;
+    font-size: 0.72rem;
+    line-height:1.3;
+    transition: all 0.15s;
+  }
+  .scale button:hover{ border-color: var(--gold); color: var(--ink); }
+  .scale button.selected{
+    background: var(--gold); color:#1b1c0f; border-color: var(--gold); font-weight:700;
+  }
+  .scale-cap{
+    display:flex; justify-content:space-between; font-size:0.68rem; color: var(--ink-dim); margin-top:8px; padding: 0 2px;
+  }
+  .nav-row{
+    display:flex; justify-content:space-between; margin-top: 22px;
+  }
+
+  /* ---------- RESULT ---------- */
+  #result{ display:none; }
+  .result-hero{
+    text-align:center; margin-bottom: 30px;
+  }
+  .type-badge{
+    display:inline-flex; align-items:center; justify-content:center;
+    width: 86px; height:86px; border-radius:50%;
+    border: 2px solid var(--gold);
+    font-family:'Shippori Mincho', serif;
+    font-size: 2.2rem; color: var(--gold-soft);
+    margin-bottom: 18px;
+    background: radial-gradient(circle, rgba(201,162,75,0.12), transparent 70%);
+  }
+  .type-name{ font-size: 1.7rem; margin: 0 0 6px; }
+  .type-sub{ color: var(--ink-dim); font-size: 0.9rem; }
+
+  .bar-row{ display:flex; align-items:center; gap: 12px; margin-bottom: 11px; }
+  .bar-label{ width: 108px; font-size: 0.82rem; color: var(--ink-dim); text-align:right; flex-shrink:0; }
+  .bar-track{ flex:1; height: 9px; background: var(--bg-soft); border-radius: 6px; overflow:hidden; border:1px solid var(--line);}
+  .bar-fill{ height:100%; background: linear-gradient(90deg, var(--gold), var(--gold-soft)); border-radius:6px; width:0%; transition: width 0.8s ease; }
+  .bar-fill.top{ background: linear-gradient(90deg, #d9b65c, #f0dca0); }
+  .bar-pct{ width: 38px; font-size:0.78rem; color: var(--ink-dim); }
+
+  .panel-block{
+    background: var(--panel); border:1px solid var(--line); border-radius: 16px;
+    padding: 26px 24px; margin-top: 24px;
+  }
+  .panel-block h3{
+    font-family:'Shippori Mincho', serif; font-size: 1.05rem; color: var(--gold-soft);
+    margin: 0 0 12px; display:flex; align-items:center; gap:8px;
+  }
+  .panel-block p, .panel-block li{ font-size: 0.9rem; line-height: 1.85; color: var(--ink); }
+  .panel-block ul{ margin: 0; padding-left: 1.2em; }
+  .tag-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;}
+  .tag{
+    font-size: 0.74rem; padding: 5px 12px; border-radius: 999px;
+    border:1px solid var(--line); color: var(--ink-dim);
+  }
+
+  .result-actions{ display:flex; gap:12px; justify-content:center; margin-top: 34px; flex-wrap:wrap; }
+
+  @media (max-width: 480px){
+    .q-card{ padding: 28px 18px; }
+    .scale{ flex-wrap:wrap; }
+    .scale button{ flex: 1 1 18%; }
+    .bar-label{ width: 84px; font-size:0.74rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- INTRO -->
+  <section id="intro">
+    <div class="enneagon"><svg viewBox="0 0 220 220" id="enneagonSvg"></svg></div>
+    <div class="eyebrow">Enneagram · 性格構造診断</div>
+    <h1>エニアグラム診断</h1>
+    <p class="lede">27の質問から、9つの性格タイプのうちあなたの核となる動機を見つけます。<br>「正しい行動」ではなく「なぜそう動くか」を診断します。</p>
+    <div class="meta-row">
+      <div><b>27問</b>質問数</div>
+      <div><b>約5分</b>所要時間</div>
+      <div><b>9タイプ</b>分類</div>
+    </div>
+    <button class="btn-primary" onclick="startQuiz()">診断をはじめる</button>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz">
+    <div class="progress-label"><span id="qIndexLabel">質問 1 / 27</span><span id="qPercentLabel">4%</span></div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="q-card">
+      <div class="q-num" id="qTypeLabel"></div>
+      <div class="q-text" id="qText"></div>
+      <div class="scale" id="scaleButtons"></div>
+      <div class="scale-cap"><span>まったく当てはまらない</span><span>非常に当てはまる</span></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-ghost" id="backBtn" onclick="goBack()">← 戻る</button>
+      <button class="btn-ghost" onclick="resetQuiz()">最初からやり直す</button>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result">
+    <div class="result-hero">
+      <div class="type-badge" id="resultBadge">1</div>
+      <h2 class="type-name" id="resultName">改革者</h2>
+      <div class="type-sub" id="resultSub">タイプ1</div>
+    </div>
+
+    <div id="barChart"></div>
+
+    <div class="panel-block">
+      <h3>◆ 核となる動機</h3>
+      <p id="coreMotivation"></p>
+    </div>
+    <div class="panel-block">
+      <h3>◆ 強み</h3>
+      <ul id="strengthsList"></ul>
+    </div>
+    <div class="panel-block">
+      <h3>◆ 注意したい傾向</h3>
+      <ul id="challengesList"></ul>
+    </div>
+    <div class="panel-block">
+      <h3>◆ 成長のヒント</h3>
+      <p id="growthTip"></p>
+    </div>
+    <div class="panel-block">
+      <h3>◆ キーワード</h3>
+      <div class="tag-row" id="tagRow"></div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-primary" onclick="resetQuiz()">もう一度診断する</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const TYPES = {
+  1: { name:"改革者", sub:"The Reformer", motivation:"物事を正しく行いたい、誠実でありたいという強い欲求を持つタイプ。理想と現実のギャップに敏感で、自分にも他人にも高い基準を求めます。",
+       strengths:["原則を守る誠実さと責任感","物事を改善しようとする実行力","公正さへの強いこだわり"],
+       challenges:["完璧主義になりやすく自分を許せない","批判的・潔癖になりすぎることがある","「正しさ」にこだわるあまり柔軟性を失う"],
+       growth:"「完璧」より「十分に良い」を受け入れる練習をしましょう。自分の感情、特に怒りを抑え込まずに認めることが、心の余白を生みます。",
+       tags:["誠実","理想主義","責任感","完璧主義","倫理観"]},
+  2: { name:"助ける人", sub:"The Helper", motivation:"人に愛され、必要とされたいという欲求から、他者のニーズに敏感になり世話をすることに価値を見出すタイプ。",
+       strengths:["温かさと共感力","人の気持ちを察する力","惜しみないサポート精神"],
+       challenges:["自分のニーズを後回しにしすぎる","見返りを期待して見えない疲弊を溜める","他者に過度に介入してしまう"],
+       growth:"「与える」だけでなく「受け取る」練習を。自分自身のニーズを言葉にして表現することが、健全な関係の土台になります。",
+       tags:["共感的","世話好き","親密さ重視","自己犠牲傾向","関係性志向"]},
+  3: { name:"達成者", sub:"The Achiever", motivation:"価値があると認められたい、成功したいという欲求が強く、目標達成と自己実現に強いモチベーションを持つタイプ。",
+       strengths:["高い目標設定力と実行力","状況適応力とカリスマ性","効率を重視する合理性"],
+       challenges:["評価や成果にアイデンティティを依存しすぎる","本当の感情を後回しにしてしまう","イメージ作りに気を取られすぎる"],
+       growth:"「何を成し遂げたか」ではなく「自分が何者か」に目を向ける時間を持ちましょう。立ち止まって感情を感じることも、立派な成果です。",
+       tags:["目標志向","効率的","自信家","競争心","適応力"]},
+  4: { name:"個性を求める人", sub:"The Individualist", motivation:"自分は特別であり、他者とは違う独自性を持ちたいという欲求から、深い感情体験や美的な表現を重視するタイプ。",
+       strengths:["豊かな感受性と創造性","本物の感情に深く向き合う力","独自の美意識"],
+       challenges:["「自分は足りない」という感覚に囚われやすい","感情の起伏に振られやすい","ないものに目が向きすぎる"],
+       growth:"今ここにある「ある」ものに目を向ける練習を。感情の深さは強みですが、それに支配されず観察する視点を持つとバランスが取れます。",
+       tags:["感受性豊か","独創的","本物志向","内省的","美意識"]},
+  5: { name:"調べる人", sub:"The Investigator", motivation:"知識を蓄え、有能であろうとすることで、外の世界に圧倒されずに自分を守りたいという欲求を持つタイプ。",
+       strengths:["深い分析力と洞察力","客観性と冷静な判断力","独立した思考力"],
+       challenges:["人との関わりから距離を置きすぎる","感情よりも理屈を優先しすぎる","エネルギーやリソースを過剰に節約してしまう"],
+       growth:"考える前に、まず行動し関わってみることを意識しましょう。知識は実際の経験と結びついたとき、初めて本当の力になります。",
+       tags:["分析的","独立心","観察力","知的好奇心","プライバシー重視"]},
+  6: { name:"忠実な人", sub:"The Loyalist", motivation:"安全と安心を確保したいという欲求から、信頼できるものを探し、リスクに備えようとするタイプ。",
+       strengths:["高い責任感と忠実さ","危機を予測する力","仲間を大切にする結束力"],
+       challenges:["不安や心配が思考をループしやすい","権威や信頼に対して両極端な反応をする","最悪のシナリオを想定しすぎる"],
+       growth:"自分の内なる判断力を信じる練習を。不安は情報の一つに過ぎず、すべてではないと捉えることで視野が広がります。",
+       tags:["責任感","警戒心","忠実","チームワーク","リスク管理"]},
+  7: { name:"熱中する人", sub:"The Enthusiast", motivation:"人生を楽しみ、苦痛や制限を避けたいという欲求から、常に新しい可能性や刺激を追い求めるタイプ。",
+       strengths:["楽観性と高いエネルギー","発想の柔軟さと多才さ","周囲を楽しませる力"],
+       challenges:["一つのことに集中し続けるのが苦手","つらい感情を避けて気を逸らしてしまう","計画が散漫になりやすい"],
+       growth:"不快な感情からも逃げずにとどまる練習をしましょう。すべての体験を味わい尽くすことが、本当の満足につながります。",
+       tags:["楽観的","多才","冒険心","社交的","自由を好む"]},
+  8: { name:"挑戦する人", sub:"The Challenger", motivation:"自分の力で人生を統制し、弱さを見せず強くあろうとする欲求から、自立と力を重視するタイプ。",
+       strengths:["強い決断力とリーダーシップ","正義感と弱者を守る姿勢","逆境に強い意志力"],
+       challenges:["支配的・対立的になりやすい","弱さを見せることへの抵抗が強い","他者をコントロールしようとしてしまう"],
+       growth:"弱さや柔らかさを見せることも強さの一形態だと捉えてみましょう。コントロールを手放す瞬間にこそ、深い信頼関係が生まれます。",
+       tags:["力強い","決断力","保護的","自立心","直接的"]},
+  9: { name:"平和をもたらす人", sub:"The Peacemaker", motivation:"内外の調和を保ち、対立を避けたいという欲求から、平穏さと一致を大切にするタイプ。",
+       strengths:["高い受容力と調和力","争いを和らげる仲介力","落ち着いた安定感"],
+       challenges:["自分の意見や欲求を後回しにしがち","決断や対立を避けて先延ばしにする","怒りなど不快な感情に気づきにくい"],
+       growth:"自分が本当に望むことに意識的に気づく練習を。小さな決断から始めて「自分の声」を表に出していくことが第一歩です。",
+       tags:["平和的","受容的","協調性","安定感","控えめ"]}
+};
+
+// 27 questions = 3 per type, mapped to type id
+const QUESTIONS = [
+  {t:1, q:"物事には「正しいやり方」があると感じ、それに従いたくなる。"},
+  {t:2, q:"周りの人が何を必要としているか、自然と気づいてしまう。"},
+  {t:3, q:"目標を立てたら、それを達成するまで頑張り続けたくなる。"},
+  {t:4, q:"自分は他の人とは違う、独特な感性を持っていると感じる。"},
+  {t:5, q:"行動する前に、まずじっくり考えて理解したいタイプだ。"},
+  {t:6, q:"何か新しいことを始める前に、リスクや問題点を確認したくなる。"},
+  {t:7, q:"新しい体験や可能性にワクワクすることが多い。"},
+  {t:8, q:"自分の意見ははっきり主張するし、対立も恐れない。"},
+  {t:9, q:"争いごとは避けて、できるだけ穏やかに過ごしたいと思う。"},
+  {t:1, q:"自分や他人のミスに気づくと、つい指摘したくなってしまう。"},
+  {t:2, q:"誰かの役に立てたとき、強い満足感を感じる。"},
+  {t:3, q:"人からどう評価されるかを、つい意識してしまう。"},
+  {t:4, q:"自分の気持ちを深く感じ、表現することが大切だと思う。"},
+  {t:5, q:"一人の時間でじっくり情報を整理するのが好きだ。"},
+  {t:6, q:"信頼できる人やグループに対して、強い忠誠心を感じる。"},
+  {t:7, q:"同じことの繰り返しや退屈な状況が苦手だ。"},
+  {t:8, q:"弱みを見せるより、強くあり続けたいと思う。"},
+  {t:9, q:"自分の希望より、周りとの調和を優先することが多い。"},
+  {t:1, q:"「もっと良くできるはず」という考えが頭から離れない。"},
+  {t:2, q:"頼られることに、ある種の喜びと存在価値を感じる。"},
+  {t:3, q:"成果や結果を出すことに、強いやりがいを感じる。"},
+  {t:4, q:"平凡であることに、どこか満たされない気持ちを感じる。"},
+  {t:5, q:"自分の知識や能力に自信があるが、それを誰かに見せるのは苦手だ。"},
+  {t:6, q:"何かを決める前に「もし失敗したら」と考えてしまう。"},
+  {t:7, q:"つらいことがあると、つい気分を変えて気を紛らわせたくなる。"},
+  {t:8, q:"不当な扱いを見ると、黙っていられない。"},
+  {t:9, q:"本当はどうしたいのか、自分でもよく分からなくなることがある。"}
+];
+
+const SCALE_LABELS = ["1","2","3","4","5"];
+
+/* ---------------- STATE ---------------- */
+let current = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+
+/* ---------------- INTRO DECORATION ---------------- */
+function drawEnneagon(){
+  const svg = document.getElementById('enneagonSvg');
+  const cx=110, cy=110, r=82;
+  let html = '';
+  const pts = [];
+  for(let i=0;i<9;i++){
+    const angle = (Math.PI*2/9)*i - Math.PI/2;
+    const x = cx + r*Math.cos(angle);
+    const y = cy + r*Math.sin(angle);
+    pts.push([x,y]);
+  }
+  // connecting lines (enneagram inner pattern, simplified star)
+  for(let i=0;i<9;i++){
+    const a = pts[i];
+    const b = pts[(i+3)%9];
+    html += `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" />`;
+  }
+  for(let i=0;i<9;i++){
+    const [x,y] = pts[i];
+    html += `<circle class="node" cx="${x}" cy="${y}" r="15"></circle>`;
+    html += `<text x="${x}" y="${y+1}">${i+1}</text>`;
+  }
+  svg.innerHTML = html;
+}
+drawEnneagon();
+
+/* ---------------- FLOW ---------------- */
+function startQuiz(){
+  document.getElementById('intro').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const item = QUESTIONS[current];
+  document.getElementById('qIndexLabel').textContent = `質問 ${current+1} / ${QUESTIONS.length}`;
+  document.getElementById('qPercentLabel').textContent = Math.round(((current)/QUESTIONS.length)*100)+'%';
+  document.getElementById('progressFill').style.width = ((current)/QUESTIONS.length*100)+'%';
+  document.getElementById('qTypeLabel').textContent = `Q${current+1}`;
+  document.getElementById('qText').textContent = item.q;
+
+  const scaleEl = document.getElementById('scaleButtons');
+  scaleEl.innerHTML = '';
+  SCALE_LABELS.forEach((label, idx)=>{
+    const val = idx+1;
+    const btn = document.createElement('button');
+    btn.textContent = label;
+    if(answers[current] === val) btn.classList.add('selected');
+    btn.onclick = ()=> selectAnswer(val);
+    scaleEl.appendChild(btn);
+  });
+
+  document.getElementById('backBtn').style.visibility = current===0 ? 'hidden' : 'visible';
+}
+
+function selectAnswer(val){
+  answers[current] = val;
+  if(current < QUESTIONS.length - 1){
+    current++;
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function goBack(){
+  if(current>0){ current--; renderQuestion(); }
+}
+
+function resetQuiz(){
+  current = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  document.getElementById('result').style.display='none';
+  document.getElementById('quiz').style.display='none';
+  document.getElementById('intro').style.display='block';
+}
+
+function showResult(){
+  document.getElementById('quiz').style.display='none';
+  document.getElementById('progressFill').style.width='100%';
+
+  const scores = {1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0};
+  QUESTIONS.forEach((item, i)=>{
+    scores[item.t] += (answers[i]||0);
+  });
+  // max per type = 3 questions * 5 = 15
+  const maxScore = 15;
+  const sorted = Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+  const topType = parseInt(sorted[0][0]);
+  const data = TYPES[topType];
+
+  document.getElementById('resultBadge').textContent = topType;
+  document.getElementById('resultName').textContent = data.name;
+  document.getElementById('resultSub').textContent = `タイプ${topType}・${data.sub}`;
+  document.getElementById('coreMotivation').textContent = data.motivation;
+  document.getElementById('growthTip').textContent = data.growth;
+
+  const strengthsList = document.getElementById('strengthsList');
+  strengthsList.innerHTML = data.strengths.map(s=>`<li>${s}</li>`).join('');
+  const challengesList = document.getElementById('challengesList');
+  challengesList.innerHTML = data.challenges.map(s=>`<li>${s}</li>`).join('');
+  const tagRow = document.getElementById('tagRow');
+  tagRow.innerHTML = data.tags.map(t=>`<span class="tag">${t}</span>`).join('');
+
+  const barChart = document.getElementById('barChart');
+  barChart.innerHTML = sorted.map(([typeId, score])=>{
+    const pct = Math.round((score/maxScore)*100);
+    const isTop = parseInt(typeId)===topType;
+    return `<div class="bar-row">
+      <div class="bar-label">タイプ${typeId} ${TYPES[typeId].name}</div>
+      <div class="bar-track"><div class="bar-fill ${isTop?'top':''}" style="width:${pct}%"></div></div>
+      <div class="bar-pct">${pct}%</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('result').style.display='block';
+  window.scrollTo({top:0, behavior:'smooth'});
+
+  // trigger bar animation after paint
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('.bar-fill').forEach(el=>{
+      const w = el.style.width;
+      el.style.width = '0%';
+      requestAnimationFrame(()=>{ el.style.width = w; });
+    });
+  });
+}
+</script>
+</body>
+</html>

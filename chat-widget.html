@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>反響対応アシスタント</title>
+<style>
+  :root {
+    --ink: #2B2A28;
+    --paper: #FBF8F3;
+    --clay: #B5673A;
+    --moss: #5C6B4F;
+    --line: #E3DCD0;
+    --bubble-bot: #F2ECE0;
+    --bubble-user: #2B2A28;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: transparent;
+  }
+
+  body {
+    font-family: "Hiragino Sans", "Yu Gothic UI", "Noto Sans JP", -apple-system, sans-serif;
+    color: var(--ink);
+  }
+
+  #widget-root {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-height: 640px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(43, 42, 40, 0.10);
+  }
+
+  /* ---------- Header ---------- */
+  .chat-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .chat-header .badge {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--clay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+
+  .chat-header .titles {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+  }
+
+  .chat-header .titles .t1 {
+    font-size: 14.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .chat-header .titles .t2 {
+    font-size: 11.5px;
+    color: #C9C2B4;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #7FA06B;
+    display: inline-block;
+  }
+
+  /* ---------- Messages ---------- */
+  .chat-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .chat-body::-webkit-scrollbar { width: 6px; }
+  .chat-body::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+
+  .row {
+    display: flex;
+    width: 100%;
+  }
+  .row.bot { justify-content: flex-start; }
+  .row.user { justify-content: flex-end; }
+
+  .bubble {
+    max-width: 82%;
+    padding: 10px 13px;
+    border-radius: 14px;
+    font-size: 13.7px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .bubble.bot {
+    background: var(--bubble-bot);
+    color: var(--ink);
+    border-top-left-radius: 4px;
+  }
+
+  .bubble.user {
+    background: var(--bubble-user);
+    color: var(--paper);
+    border-top-right-radius: 4px;
+  }
+
+  .bubble.fallback {
+    background: #FBEDE6;
+    border: 1px solid #E9C9B8;
+    color: #8C4A2A;
+  }
+
+  .category-tag {
+    display: inline-block;
+    font-size: 10.5px;
+    color: var(--moss);
+    background: #EBEFE4;
+    border-radius: 5px;
+    padding: 2px 7px;
+    margin-bottom: 6px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .typing {
+    display: flex;
+    gap: 4px;
+    padding: 12px 13px;
+  }
+  .typing span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #B8AF9E;
+    animation: bounce 1.2s infinite ease-in-out;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.15s; }
+  .typing span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+    40% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  /* ---------- Suggested questions ---------- */
+  .suggestions {
+    padding: 0 14px 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .chip {
+    font-size: 12px;
+    padding: 7px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .chip:hover {
+    background: var(--bubble-bot);
+    border-color: var(--clay);
+  }
+
+  /* ---------- Input ---------- */
+  .chat-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-top: 1px solid var(--line);
+    background: var(--paper);
+    flex-shrink: 0;
+  }
+
+  .chat-input input {
+    flex: 1;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 10px 15px;
+    font-size: 13.5px;
+    outline: none;
+    background: #fff;
+    color: var(--ink);
+    font-family: inherit;
+  }
+  .chat-input input:focus {
+    border-color: var(--clay);
+  }
+
+  .chat-input button {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: var(--clay);
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .chat-input button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .chat-input button:not(:disabled):active {
+    transform: scale(0.93);
+  }
+
+  .footnote {
+    text-align: center;
+    font-size: 10px;
+    color: #A39B8B;
+    padding: 0 0 8px;
+  }
+</style>
+</head>
+<body>
+
+<div id="widget-root">
+
+  <div class="chat-header">
+    <div class="badge">🏠</div>
+    <div class="titles">
+      <div class="t1">反響対応アシスタント</div>
+      <div class="t2"><span class="dot"></span>よくある質問に自動でお答えします</div>
+    </div>
+  </div>
+
+  <div class="chat-body" id="chatBody"></div>
+
+  <div class="suggestions" id="suggestions"></div>
+
+  <div class="chat-input">
+    <input type="text" id="userInput" placeholder="ご質問を入力してください" autocomplete="off">
+    <button id="sendBtn" aria-label="送信">➤</button>
+  </div>
+  <div class="footnote">自動応答です。内容によっては担当者からご連絡します。</div>
+
+</div>
+
+<script>
+/* =========================================================
+   設定: GAS APIのURLをここに設定してください。
+   スプレッドシートのApps Scriptを「ウェブアプリ」としてデプロイすると
+   発行されるURL（.../exec で終わるもの）を入れます。
+========================================================= */
+const GAS_API_URL = 'YOUR_GAS_WEB_APP_URL_HERE'; // 例: https://script.google.com/macros/s/xxxxxxxx/exec
+
+/* デモ用フォールバックデータ（GAS未接続時のローカル動作確認用） */
+const DEMO_DATA = [
+  // ---- 内見・見学 ----
+  { question: '物件の見学（内見）には何が必要ですか', answer: 'メジャー、筆記用具など持ち物は基本的に不要です。当日は身分証明書をお持ちいただくとスムーズです。', category: '内見・見学' },
+  { question: '遠方に住んでいるのですが内見は可能ですか', answer: 'はい、可能です。オンライン内見やビデオ通話での案内も対応しております。', category: '内見・見学' },
+  { question: '内見の予約は当日でも可能ですか', answer: '空き状況や鍵の手配状況によりますが、当日のご予約も可能な場合がございます。お早めにご連絡ください。', category: '内見・見学' },
+  { question: '内見にかかる時間はどのくらいですか', answer: '1件あたり15〜30分程度が目安です。複数件まとめてご案内することも可能です。', category: '内見・見学' },
+  { question: '内見は1日に何件まで案内してもらえますか', answer: '移動時間にもよりますが、1日3〜5件程度を目安にご案内しております。', category: '内見・見学' },
+  { question: '内見の際に駐車場は借りられますか', answer: '物件により異なります。お車でお越しの際は事前にご相談ください。', category: '内見・見学' },
+  { question: '内見をキャンセルしたい場合はどうすればいいですか', answer: '担当者へお電話またはチャットでご連絡ください。早めのご連絡をお願いいたします。', category: '内見・見学' },
+  { question: '夜間や休日でも内見はできますか', answer: '物件や管理会社により対応可能な時間帯が異なります。ご希望の日時をお知らせください。', category: '内見・見学' },
+
+  // ---- 費用・支払い ----
+  { question: '初期費用（敷金・礼金など）の支払い方法を教えてください', answer: '原則として銀行振込でのお支払いとなります。詳細は契約時にご案内いたします。', category: '費用・支払い' },
+  { question: '仲介手数料はいつ払いますか', answer: '物件や契約内容により異なりますが、一般的には契約時にお支払いいただきます。', category: '費用・支払い' },
+  { question: '初期費用はだいたいどのくらいかかりますか', answer: '一般的に賃料の4〜6か月分が目安です。物件により敷金・礼金・前家賃・火災保険料などが含まれます。', category: '費用・支払い' },
+  { question: '火災保険には必ず加入する必要がありますか', answer: 'はい、多くの物件で加入が必須となっております。提携の保険プランをご案内することも可能です。', category: '費用・支払い' },
+  { question: '更新料はかかりますか', answer: '物件により異なります。契約更新時に賃料の1か月分程度を更新料としていただく場合がございます。', category: '費用・支払い' },
+  { question: '初期費用をクレジットカードで支払えますか', answer: '物件や管理会社によって対応が異なります。事前にご希望をお伝えください。', category: '費用・支払い' },
+  { question: '家賃の支払い方法は何がありますか', answer: '口座振替（自動引き落とし）が一般的です。物件によっては銀行振込にも対応しています。', category: '費用・支払い' },
+
+  // ---- 契約・審査 ----
+  { question: '申し込みから入居までの流れを教えてください', answer: '入居審査や契約手続きを経て、最短でも数日〜1週間程度かかります。', category: '契約・審査' },
+  { question: '入居審査にはどのくらいの時間がかかりますか', answer: '一般的には身分証明書などの提出書類が揃ってから数日程度で結果が出ます。', category: '契約・審査' },
+  { question: 'フリーターや学生でも入居審査は通りますか', answer: 'はい、可能です。収入状況に応じて保証人や保証会社の利用をご案内する場合があります。', category: '契約・審査' },
+  { question: '審査に必要な書類は何ですか', answer: '身分証明書、収入証明書（源泉徴収票や給与明細など）、勤務先情報などが一般的に必要です。', category: '契約・審査' },
+  { question: '保証人がいない場合はどうすればいいですか', answer: '保証会社をご利用いただくことで、保証人なしでもご契約いただける場合がございます。', category: '契約・審査' },
+  { question: '審査に落ちることはありますか', answer: '収入状況や勤務形態などにより、審査が通らない場合もございます。詳細は個別にご相談ください。', category: '契約・審査' },
+  { question: '契約時に立ち会いは必要ですか', answer: '基本的にはご来店いただいての契約となりますが、郵送やオンラインでの契約に対応している場合もあります。', category: '契約・審査' },
+  { question: '法人契約は可能ですか', answer: 'はい、法人契約も可能です。必要書類が個人契約と異なりますので、別途ご案内いたします。', category: '契約・審査' },
+  { question: '外国籍の方でも契約できますか', answer: 'はい、可能です。物件によって必要書類が異なる場合がありますので、お問い合わせください。', category: '契約・審査' },
+
+  // ---- 物件・周辺環境 ----
+  { question: '掲載されている物件は今も空いていますか', answer: '物件の空き状況は日々変動します。最新の状況はお問い合わせください。', category: '物件・周辺環境' },
+  { question: 'ペット可の物件はありますか', answer: '物件ごとに「小型犬可」など条件が異なります。ご希望の条件をお知らせください。', category: '物件・周辺環境' },
+  { question: '駅から近い物件はありますか', answer: '徒歩5分以内の物件も多数ご用意しております。ご希望の路線・エリアをお伝えください。', category: '物件・周辺環境' },
+  { question: '楽器の演奏ができる物件はありますか', answer: '防音性の高い物件や楽器演奏可の物件もございます。ご希望をお知らせください。', category: '物件・周辺環境' },
+  { question: '近くにスーパーやコンビニはありますか', answer: '物件ごとに周辺環境をまとめた資料をご用意しております。エリアをお知らせいただければご案内します。', category: '物件・周辺環境' },
+  { question: '日当たりの良い物件はありますか', answer: '南向き・角部屋など日当たりの良い物件もご紹介できます。ご希望の階数や方角をお知らせください。', category: '物件・周辺環境' },
+  { question: 'インターネット完備の物件はありますか', answer: 'インターネット無料・Wi-Fi完備の物件も多数ございます。', category: '物件・周辺環境' },
+  { question: '築年数が浅い物件を希望していますが、ありますか', answer: '築5年以内の物件もご用意しております。ご希望の条件で検索いたします。', category: '物件・周辺環境' },
+
+  // ---- 退去・契約終了 ----
+  { question: '退去の連絡はいつまでにすればいいですか', answer: '一般的には退去予定日の1か月前までにご連絡いただく必要があります。物件により異なる場合があります。', category: '退去・契約終了' },
+  { question: '退去時のクリーニング費用は誰が払いますか', answer: '原則として入居者様にご負担いただきます。契約内容により金額や範囲が異なります。', category: '退去・契約終了' },
+  { question: '敷金は退去時に返ってきますか', answer: '原状回復費用などを差し引いた金額が返金されます。詳細は契約書をご確認ください。', category: '退去・契約終了' },
+  { question: '契約期間中に解約すると違約金がかかりますか', answer: '物件や契約内容により、短期解約違約金が発生する場合があります。契約書をご確認ください。', category: '退去・契約終了' },
+
+  // ---- その他 ----
+  { question: '営業時間を教えてください', answer: '平日10:00〜19:00、土日祝10:00〜18:00で営業しております。', category: 'その他' },
+  { question: '電話での相談はできますか', answer: 'はい、お電話でのご相談も承っております。営業時間内にお気軽にご連絡ください。', category: 'その他' },
+  { question: '取扱物件のエリアはどこですか', answer: '東京都内を中心に幅広いエリアの物件を取り扱っております。詳細はお問い合わせください。', category: 'その他' }
+];
+
+const SUGGESTED_QUESTIONS = [
+  '内見の予約は当日でも可能ですか',
+  '初期費用はだいたいどのくらい？',
+  'ペット可の物件はありますか',
+  '入居審査にはどのくらいかかりますか',
+  '退去の連絡はいつまで？',
+  '保証人がいない場合は？'
+];
+
+const chatBody = document.getElementById('chatBody');
+const userInput = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+const suggestionsEl = document.getElementById('suggestions');
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function addBotMessage(answer, category, matched) {
+  const row = document.createElement('div');
+  row.className = 'row bot';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble bot' + (matched === false ? ' fallback' : '');
+
+  let html = '';
+  if (matched && category) {
+    html += '<span class="category-tag">' + escapeHtml(category) + '</span><br>';
+  }
+  html += escapeHtml(answer);
+  bubble.innerHTML = html;
+
+  row.appendChild(bubble);
+  chatBody.appendChild(row);
+  scrollToBottom();
+}
+
+function addUserMessage(text) {
+  const row = document.createElement('div');
+  row.className = 'row user';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble user';
+  bubble.textContent = text;
+  row.appendChild(bubble);
+  chatBody.appendChild(row);
+  scrollToBottom();
+}
+
+function showTyping() {
+  const row = document.createElement('div');
+  row.className = 'row bot';
+  row.id = 'typingRow';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble bot typing';
+  bubble.innerHTML = '<span></span><span></span><span></span>';
+  row.appendChild(bubble);
+  chatBody.appendChild(row);
+  scrollToBottom();
+}
+
+function hideTyping() {
+  const row = document.getElementById('typingRow');
+  if (row) row.remove();
+}
+
+function scrollToBottom() {
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function renderSuggestions() {
+  suggestionsEl.innerHTML = '';
+  SUGGESTED_QUESTIONS.forEach(function (q) {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.textContent = q;
+    chip.addEventListener('click', function () {
+      userInput.value = q;
+      handleSend();
+    });
+    suggestionsEl.appendChild(chip);
+  });
+}
+
+/* ---------- あいまい検索ロジック（GAS未接続時のローカルフォールバック） ----------
+   GAS (Code.gs) 側と同じアルゴリズムを使用:
+   文字bigram（2文字組）の重なり度（Diceの係数）＋同義語展開 ----------------- */
+function normalize(text) {
+  let t = String(text).toLowerCase();
+  t = t.replace(/[！-～]/g, function (s) {
+    return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+  });
+  // カタカナ → ひらがな
+  t = t.replace(/[\u30a1-\u30f6]/g, function (s) {
+    return String.fromCharCode(s.charCodeAt(0) - 0x60);
+  });
+  t = t.replace(/[〜~]/g, 'ー');
+  t = t.replace(/[\s　、。,.!?！？「」『』()（）・/／:：;；]/g, '');
+  return t.trim();
+}
+
+const SYNONYM_GROUPS = [
+  ['ある', 'あります', 'いる', 'います', '存在', '可能', 'できる', 'できます', '大丈夫', 'ok'],
+  ['ない', 'なくても', 'いなくても', '不要', '無し', 'なし'],
+  ['いくら', 'どのくらい', 'どれくらい', 'どれぐらい', 'どのぐらい'],
+  ['いつ', 'いつまで', 'いつごろ'],
+  ['飼える', '飼う', 'ペット可', 'ペット'],
+  ['何件', '何個', '件数', '上限'],
+  ['まで', 'までに']
+];
+
+function expandSynonyms(text) {
+  let result = text;
+  SYNONYM_GROUPS.forEach(function (group) {
+    const canonical = group[0];
+    group.slice(1).forEach(function (variant) {
+      if (result.indexOf(variant) !== -1) {
+        result = result.split(variant).join(canonical);
+      }
+    });
+  });
+  return result;
+}
+
+function toBigrams(text) {
+  const grams = [];
+  if (text.length < 2) {
+    if (text.length === 1) grams.push(text);
+    return grams;
+  }
+  for (let i = 0; i < text.length - 1; i++) grams.push(text.substring(i, i + 2));
+  return grams;
+}
+
+function diceCoefficient(textA, textB) {
+  const a = toBigrams(textA);
+  const b = toBigrams(textB);
+  if (a.length === 0 || b.length === 0) {
+    return textA === textB && textA.length > 0 ? 1 : 0;
+  }
+  const counts = {};
+  a.forEach(function (g) { counts[g] = (counts[g] || 0) + 1; });
+  let common = 0;
+  const bCounts = {};
+  b.forEach(function (g) { bCounts[g] = (bCounts[g] || 0) + 1; });
+  Object.keys(bCounts).forEach(function (g) {
+    if (counts[g]) common += Math.min(counts[g], bCounts[g]);
+  });
+  return (2 * common) / (a.length + b.length);
+}
+
+function similarity(userTextRaw, sheetTextRaw) {
+  if (!userTextRaw || !sheetTextRaw) return 0;
+  const userText = expandSynonyms(userTextRaw);
+  const sheetText = expandSynonyms(sheetTextRaw);
+
+  const dice = diceCoefficient(userText, sheetText);
+
+  let containBonus = 0;
+  if (sheetText.indexOf(userText) !== -1 || userText.indexOf(sheetText) !== -1) {
+    containBonus = 0.15;
+  }
+
+  const lenRatio = Math.min(userText.length, sheetText.length) / Math.max(userText.length, sheetText.length);
+  const lengthPenalty = lenRatio < 0.2 ? 0.9 : 1;
+
+  return Math.min((dice + containBonus) * lengthPenalty, 1);
+}
+
+const LOCAL_MATCH_THRESHOLD = 0.30;
+
+function localFindAnswer(question) {
+  const normQ = normalize(question);
+  let best = null;
+  let bestScore = 0;
+
+  DEMO_DATA.forEach(function (item) {
+    const normItemQ = normalize(item.question);
+    const score = similarity(normQ, normItemQ);
+    if (score > bestScore) {
+      bestScore = score;
+      best = item;
+    }
+  });
+
+  if (best && bestScore >= LOCAL_MATCH_THRESHOLD) {
+    return { matched: true, answer: best.answer, category: best.category };
+  }
+  return {
+    matched: false,
+    answer: '申し訳ございません。ご質問内容について自動回答ができませんでした。担当者に確認しますので、少々お待ちいただくか、お問い合わせフォームよりご連絡ください。',
+    category: ''
+  };
+}
+
+/* ---------- GAS APIへの問い合わせ ---------- */
+async function fetchAnswerFromGAS(question) {
+  const url = GAS_API_URL + '?question=' + encodeURIComponent(question);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('API error: ' + res.status);
+  return await res.json();
+}
+
+async function handleSend() {
+  const text = userInput.value.trim();
+  if (!text) return;
+
+  addUserMessage(text);
+  userInput.value = '';
+  sendBtn.disabled = true;
+  showTyping();
+
+  let result;
+  try {
+    if (GAS_API_URL && GAS_API_URL.indexOf('YOUR_GAS_WEB_APP_URL_HERE') === -1) {
+      result = await fetchAnswerFromGAS(text);
+    } else {
+      // GAS未設定時はローカルのデモデータで動作確認
+      await new Promise(function (r) { setTimeout(r, 450); });
+      result = localFindAnswer(text);
+    }
+  } catch (err) {
+    result = {
+      matched: false,
+      answer: '通信エラーが発生しました。担当者に確認しますので、しばらくしてから再度お試しください。',
+      category: ''
+    };
+  }
+
+  hideTyping();
+  addBotMessage(result.answer, result.category, result.matched);
+  sendBtn.disabled = false;
+  userInput.focus();
+}
+
+sendBtn.addEventListener('click', handleSend);
+userInput.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') handleSend();
+});
+
+/* 初期表示 */
+addBotMessage('こんにちは！「反響対応アシスタント」です。物件の内見・費用・契約・審査などについて、よくあるご質問にお答えします。下の候補をタップするか、質問を入力してください。', '', true);
+renderSuggestions();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>占い・鑑定ツール</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Noto Serif JP', 'Hiragino Mincho ProN', serif;
+      background: #fdf6f0;
+      color: #2c1a3a;
+      overflow-x: hidden;
+    }
+
+    /* 水彩背景レイヤー */
+    .watercolor-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .watercolor-bg svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    header, main, footer { position: relative; z-index: 1; }
+
+    /* ヘッダー */
+    header {
+      text-align: center;
+      padding: 4rem 1rem 2.5rem;
+    }
+
+    .crystal {
+      font-size: 3.5rem;
+      display: block;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 4px 16px #c084fc66);
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: #3b1d6e;
+      text-shadow: 0 2px 12px #c084fc44;
+    }
+
+    header p {
+      margin-top: 0.6rem;
+      font-size: 0.82rem;
+      color: #8060a8;
+      letter-spacing: 0.12em;
+      font-weight: 400;
+    }
+
+    /* 仕切り */
+    .divider {
+      width: 80px;
+      height: 2px;
+      margin: 1.2rem auto 0;
+      background: linear-gradient(90deg, transparent, #c084fc, #60a5fa, transparent);
+      border-radius: 2px;
+    }
+
+    /* メイン */
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0.5rem 1.2rem 5rem;
+    }
+
+    /* カテゴリ */
+    .category { margin-bottom: 3rem; }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .cat-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 1rem;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .cat-1 .cat-badge { background: #ede9ff; color: #6d28d9; border: 1.5px solid #c4b5fd; }
+    .cat-2 .cat-badge { background: #e0f2fe; color: #0369a1; border: 1.5px solid #7dd3fc; }
+    .cat-3 .cat-badge { background: #d1fae5; color: #065f46; border: 1.5px solid #6ee7b7; }
+    .cat-4 .cat-badge { background: #fef3c7; color: #92400e; border: 1.5px solid #fcd34d; }
+
+    .category-sub {
+      font-size: 0.72rem;
+      color: #9070b8;
+      font-style: italic;
+      letter-spacing: 0.06em;
+    }
+
+    /* カードグリッド */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.85rem;
+    }
+
+    .card {
+      display: block;
+      text-decoration: none;
+      color: #2c1a3a;
+      border-radius: 16px;
+      padding: 1.1rem 1.2rem 1rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 水彩風カード背景 */
+    .cat-1 .card { background: linear-gradient(135deg, #faf5ff 60%, #ede9ff); border: 1.5px solid #ddd6fe; }
+    .cat-2 .card { background: linear-gradient(135deg, #f0f9ff 60%, #dbeafe); border: 1.5px solid #bfdbfe; }
+    .cat-3 .card { background: linear-gradient(135deg, #f0fdf4 60%, #d1fae5); border: 1.5px solid #a7f3d0; }
+    .cat-4 .card { background: linear-gradient(135deg, #fffbeb 60%, #fef3c7); border: 1.5px solid #fde68a; }
+
+    .card:hover {
+      transform: translateY(-3px);
+    }
+    .cat-1 .card:hover { box-shadow: 0 8px 28px #c4b5fd44; }
+    .cat-2 .card:hover { box-shadow: 0 8px 28px #93c5fd44; }
+    .cat-3 .card:hover { box-shadow: 0 8px 28px #6ee7b744; }
+    .cat-4 .card:hover { box-shadow: 0 8px 28px #fcd34d44; }
+
+    /* にじみ装飾 */
+    .card::after {
+      content: '';
+      position: absolute;
+      top: -20px; right: -20px;
+      width: 70px; height: 70px;
+      border-radius: 50%;
+      opacity: 0.18;
+    }
+    .cat-1 .card::after { background: #a78bfa; }
+    .cat-2 .card::after { background: #60a5fa; }
+    .cat-3 .card::after { background: #34d399; }
+    .cat-4 .card::after { background: #fbbf24; }
+
+    .card-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      letter-spacing: 0.04em;
+    }
+
+    .card-desc {
+      font-size: 0.73rem;
+      line-height: 1.6;
+      color: #6b5080;
+      font-weight: 400;
+    }
+
+    .card-action {
+      display: inline-block;
+      margin-top: 0.65rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+
+    .cat-1 .card-action { color: #7c3aed; }
+    .cat-2 .card-action { color: #2563eb; }
+    .cat-3 .card-action { color: #059669; }
+    .cat-4 .card-action { color: #d97706; }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.72rem;
+      color: #9070b8;
+      position: relative; z-index: 1;
+    }
+
+    /* 占術のルーツ コラム */
+    .trivia-section {
+      margin-top: 1rem;
+      padding: 2.5rem 0 1rem;
+      border-top: 1px solid #e9d5ff;
+    }
+
+    .trivia-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .trivia-title {
+      display: block;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #4c1d95;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.3rem;
+    }
+
+    .trivia-sub {
+      font-size: 0.75rem;
+      color: #9070b8;
+      letter-spacing: 0.1em;
+    }
+
+    .trivia-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .trivia-item {
+      background: rgba(255,255,255,0.6);
+      border: 1px solid #ede9ff;
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+    }
+
+    .trivia-top {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .trivia-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #3b1d6e;
+    }
+
+    .trivia-origin {
+      font-size: 0.65rem;
+      color: #7c3aed;
+      background: #ede9ff;
+      border-radius: 999px;
+      padding: 0.15rem 0.6rem;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .trivia-fact {
+      font-size: 0.76rem;
+      color: #4a3060;
+      line-height: 1.75;
+    }
+
+    .trivia-fact b {
+      color: #6d28d9;
+    }
+
+    @media (max-width: 480px) {
+      header h1 { font-size: 1.4rem; }
+      .cards { grid-template-columns: 1fr; }
+      .category-sub { display: none; }
+      .trivia-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 水彩背景 -->
+<div class="watercolor-bg">
+  <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="blur1"><feGaussianBlur stdDeviation="40"/></filter>
+      <filter id="blur2"><feGaussianBlur stdDeviation="60"/></filter>
+      <filter id="blur3"><feGaussianBlur stdDeviation="80"/></filter>
+    </defs>
+    <!-- 水彩にじみ -->
+    <ellipse cx="200" cy="150" rx="320" ry="240" fill="#e9d5ff" opacity="0.45" filter="url(#blur2)"/>
+    <ellipse cx="1300" cy="120" rx="280" ry="200" fill="#bfdbfe" opacity="0.4" filter="url(#blur2)"/>
+    <ellipse cx="750" cy="500" rx="400" ry="300" fill="#fce7f3" opacity="0.3" filter="url(#blur3)"/>
+    <ellipse cx="100" cy="750" rx="250" ry="200" fill="#d1fae5" opacity="0.35" filter="url(#blur2)"/>
+    <ellipse cx="1350" cy="800" rx="300" ry="220" fill="#fef3c7" opacity="0.38" filter="url(#blur2)"/>
+    <ellipse cx="900" cy="200" rx="200" ry="150" fill="#c7d2fe" opacity="0.3" filter="url(#blur1)"/>
+    <ellipse cx="400" cy="600" rx="180" ry="140" fill="#fbcfe8" opacity="0.28" filter="url(#blur1)"/>
+  </svg>
+</div>
+
+<header>
+  <span class="crystal">🔮</span>
+  <h1>占い・鑑定ツール</h1>
+  <p>名前と生年月日から導く、あなたの設計図</p>
+  <div class="divider"></div>
+</header>
+
+<main>
+
+  <!-- 宿命・使命 -->
+  <section id="shukumei" class="category cat-1">
+    <div class="category-header">
+      <span class="cat-badge">🔭 宿命・使命を知る</span>
+      <span class="category-sub">生まれ持った設計図</span>
+    </div>
+    <div class="cards">
+      <a class="card" href="https://junjuntiger.github.io/uranai/kazutama.html">
+        <div class="card-name">かずたま数秘占い</div>
+        <div class="card-desc">五十音の数霊で読み解く本質・使命・タイミング。相性鑑定にも対応。</div>
+        <span class="card-action">占う →</span>
+      </a>
+      <a class="card" href="https://junjuntiger.github.io/uranai/dragon.html">
+        <div class="card-name">天地ドラゴン星占い</div>
+        <div class="card-desc">ドラゴンエネルギーで読み解く、運命の流れ。</div>
+        <span class="card-action">占う →</span>
+      </a>
+      <a class="card" href="https://junjuntiger.github.io/uranai/maya.html">
+        <div class="card-name">マヤ暦占い</div>
+        <div class="card-desc">太陽の紋章と音で読み解く、魂の目的と才能。</div>
+        <span class="card-action">占う →</span>
+      </a>
+      <a class="card" href="https://junjuntiger.github.io/uranai/shichu-suimei.html">
+        <div class="card-name">四柱推命</div>
+        <div class="card-desc">年月日時の四つの柱から読み解く、宿命と運気の流れ。</div>
+        <span class="card-action">占う →</span>
+      </a>
+      <a class="card" href="https://junjuntiger.github.io/uranai/sanmei.html">
+        <div class="card-name">算命学</div>
+        <div class="card-desc">中国古来の命術で読み解く宿命と運命の地図。天干地支が示す生涯の流れ。</div>
+        <span class="card-action">占う →</span>
+      </a>
+      <a class="card" href="https://junjuntiger.github.io/uranai/human.html">
+        <div class="card-name">ヒューマンデザイン</div>
+        <div class="card-desc">生まれ持ったエネルギーの設計図。タイプと権威で自分らしい生き方を発見。</div>
+        <span class="card-action">占う →</span>
+      </a>
+      <a class="card" href="https://junjuntiger.github.io/uranai/animal.html">
+        <div class="card-name">動物占い</div>
+        <div class="card-desc">動物キャラクターで表現する本質と相性。</div>
+        <span class="card-action">占う →</span>
+      </a>
+      <a class="card" href="https://junjuntiger.github.io/uranai/syukyou.html">
+        <div class="card-name">宿曜占星術</div>
+        <div class="card-desc">月の宿で読み解く東洋占星術。27の宿が示す縁・才能・運命の周期。</div>
+        <span class="card-action">占う →</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- 本質・性格 -->
+  <section id="honshitsu" class="category cat-2">
+    <div class="category-header">
+      <span class="cat-badge">🪞 本質・性格を知る</span>
+      <span class="category-sub">自分らしさのトリセツ</span>
+    </div>
+    <div class="cards">
+      <a class="card" href="https://junjuntiger.github.io/uranai/mbti.html">
+        <div class="card-name">MBTI性格診断</div>
+        <div class="card-desc">16の性格タイプから読み解く、自分らしい思考と行動のパターン。</div>
+        <span class="card-action">診断する →</span>
+      </a>
+      <a class="card" href="https://junjuntiger.github.io/uranai/enneagram_quiz.html">
+        <div class="card-name">エニアグラム診断</div>
+        <div class="card-desc">9つの性格タイプから、あなたの本質的な動機と行動パターンを発見。</div>
+        <span class="card-action">診断する →</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- 運勢・タイミング -->
+  <section id="unsei" class="category cat-3">
+    <div class="category-header">
+      <span class="cat-badge">🌊 運勢・タイミングを読む</span>
+      <span class="category-sub">今の流れと波に乗る</span>
+    </div>
+    <div class="cards">
+      <a class="card" href="https://junjuntiger.github.io/uranai/kyusei_kigaku.html">
+        <div class="card-name">九星気学</div>
+        <div class="card-desc">九つの星と方位気学で読み解く運勢と吉方位。今年・今月の運気を確認。</div>
+        <span class="card-action">占う →</span>
+      </a>
+      <a class="card" href="https://junjuntiger.github.io/uranai/biorhythm.html">
+        <div class="card-name">バイオリズム</div>
+        <div class="card-desc">身体・感情・知性のリズムを波形で可視化し、好不調の波を確認。</div>
+        <span class="card-action">占う →</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- 今すぐメッセージ -->
+  <section id="message" class="category cat-4">
+    <div class="category-header">
+      <span class="cat-badge">🃏 今すぐメッセージを受け取る</span>
+      <span class="category-sub">直感でひく、今日のヒント</span>
+    </div>
+    <div class="cards">
+      <a class="card" href="https://junjuntiger.github.io/uranai/tarot.html">
+        <div class="card-name">タロット占い</div>
+        <div class="card-desc">78枚のカードが映し出す、今このときのメッセージ。直感でカードを引く。</div>
+        <span class="card-action">占う →</span>
+      </a>
+      <a class="card" href="https://junjuntiger.github.io/uranai/rune_fortune.html">
+        <div class="card-name">ルーン占い</div>
+        <div class="card-desc">古代北欧の文字に宿る神秘の力で、今知るべきメッセージを読み解く。</div>
+        <span class="card-action">占う →</span>
+      </a>
+      <a class="card" href="https://junjuntiger.github.io/uranai/tarot_astro.html">
+        <div class="card-name">星座タロット占い</div>
+        <div class="card-desc">12星座とタロットが融合した新感覚の占い。星の導きとカードのメッセージで今を読み解く。</div>
+        <span class="card-action">占う →</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- 占術のルーツ コラム -->
+  <section class="trivia-section">
+    <div class="trivia-header">
+      <h2 class="trivia-title">📖 各占術のルーツ</h2>
+      <p class="trivia-sub">読んで「へえ」となる豆知識</p>
+    </div>
+    <div class="trivia-grid">
+
+      <div class="trivia-item">
+        <div class="trivia-top"><span class="trivia-name">四柱推命</span><span class="trivia-origin">中国 / 7〜11世紀</span></div>
+        <p class="trivia-fact">唐代に李虚中が基礎を作り、宋代の徐子平が「時柱」を加えて完成。年・月・日・時の四柱と天干地支の組み合わせは約<b>518,400通り</b>にも及ぶ。</p>
+      </div>
+
+      <div class="trivia-item">
+        <div class="trivia-top"><span class="trivia-name">マヤ暦占い</span><span class="trivia-origin">メソアメリカ / 紀元前3000年〜</span></div>
+        <p class="trivia-fact">マヤの「ツォルキン暦」は<b>260日サイクル</b>の農業・儀礼暦。古代マヤは金星の会合周期を<b>584日</b>と計算し、現代値（583.92日）にきわめて近い精度で把握していた。</p>
+      </div>
+
+      <div class="trivia-item">
+        <div class="trivia-top"><span class="trivia-name">九星気学</span><span class="trivia-origin">中国→日本 / 明治〜大正</span></div>
+        <p class="trivia-fact">中国古典「洛書（らくしょ）」の<b>魔方陣</b>が起源。1〜9の数字をどの方向に足しても15になる謎の配列が、星と方位の体系へと発展した。</p>
+      </div>
+
+      <div class="trivia-item">
+        <div class="trivia-top"><span class="trivia-name">タロット占い</span><span class="trivia-origin">イタリア / 15世紀</span></div>
+        <p class="trivia-fact">もともとは貴族が楽しんだ<b>カードゲーム</b>だった。占いに使われ始めたのは18世紀フランスから。78枚の現在の形が確立したのは意外と最近、19世紀末のイギリス。</p>
+      </div>
+
+      <div class="trivia-item">
+        <div class="trivia-top"><span class="trivia-name">ルーン占い</span><span class="trivia-origin">北欧・ゲルマン / 2000年以上前</span></div>
+        <p class="trivia-fact">「rūn」は古代語で<b>「秘密・秘儀」</b>を意味する。北欧神話では、オーディン神が9日間木に逆さ吊りになって自らを犠牲にし、ルーンを手に入れたとされる。</p>
+      </div>
+
+      <div class="trivia-item">
+        <div class="trivia-top"><span class="trivia-name">宿曜占星術</span><span class="trivia-origin">インド→日本 / 9世紀</span></div>
+        <p class="trivia-fact">密教の流入とともに日本へ渡り、<b>空海らが広めた</b>とされる東洋占星術。平安貴族は「危宿（きしゅく）」には重要な決断を避け、出会いの宿を調べてから縁談を進めた。</p>
+      </div>
+
+      <div class="trivia-item">
+        <div class="trivia-top"><span class="trivia-name">ヒューマンデザイン</span><span class="trivia-origin">現代 / 1987年</span></div>
+        <p class="trivia-fact">カナダ人Ra Uru Huがイビサ島で8日間の神秘体験を経て「受け取った」とされるシステム。易経・西洋占星術・カバラ・チャクラを<b>一つに統合</b>した最新の占術。</p>
+      </div>
+
+      <div class="trivia-item">
+        <div class="trivia-top"><span class="trivia-name">エニアグラム</span><span class="trivia-origin">中東 / 起源不詳</span></div>
+        <p class="trivia-fact">グルジェフが20世紀初頭に中東から西洋へ伝えたとされる。「エニア」はギリシャ語で<b>「9」</b>。9タイプは人間の9つの本質的な欲求パターンを表すという。</p>
+      </div>
+
+      <div class="trivia-item">
+        <div class="trivia-top"><span class="trivia-name">MBTI性格診断</span><span class="trivia-origin">アメリカ / 1940年代</span></div>
+        <p class="trivia-fact">ユングの心理タイプ論をマイヤーズ母娘が実用化。もともとは<b>「戦時中の女性が自分に合う仕事を見つけるため」</b>に開発された。現在は世界で年間200万人が受検。</p>
+      </div>
+
+      <div class="trivia-item">
+        <div class="trivia-top"><span class="trivia-name">バイオリズム</span><span class="trivia-origin">ドイツ・オーストリア / 19世紀末</span></div>
+        <p class="trivia-fact">医師フリース（1890年代）と心理学者スウォボダ（1900年頃）が<b>ほぼ同時期に独立して発見</b>。身体23日・感情28日・知性33日という周期は、生まれた日をゼロ点に一生続くとされる。</p>
+      </div>
+
+      <div class="trivia-item">
+        <div class="trivia-top"><span class="trivia-name">動物占い</span><span class="trivia-origin">日本 / 1998年</span></div>
+        <p class="trivia-fact">四柱推命の難解な理論をキャラクターで親しみやすく再設計した<b>日本生まれ</b>の占術。12動物×60性格の組み合わせで約720通りの個性を表現する。</p>
+      </div>
+
+      <div class="trivia-item">
+        <div class="trivia-top"><span class="trivia-name">かずたま数秘占い</span><span class="trivia-origin">日本 / 現代</span></div>
+        <p class="trivia-fact">「言霊（ことだま）」信仰から生まれた日本独自の数秘術。五十音の各音に<b>1〜10の数霊</b>が宿るとされ、名前の読みからエネルギーを読み解く。当サイトでは入門向け<b>簡易版</b>を使用。</p>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<section style="text-align:center; padding: 40px 20px 20px; background: transparent;">
+  <p style="font-size:13px; color:#8a7a6a; margin-bottom:14px; letter-spacing:0.05em;">関連サイト</p>
+  <div style="display:flex; justify-content:center; gap:16px; flex-wrap:wrap;">
+    <a href="ikirukai.html" style="display:inline-block; padding:10px 28px; border:1px solid #c8b89a; border-radius:24px; font-size:14px; color:#5a4a3a; text-decoration:none; background:#fdf8f2; letter-spacing:0.05em;">いきる会HP</a>
+    <a href="ikirukai2.html" style="display:inline-block; padding:10px 28px; border:1px solid #c8b89a; border-radius:24px; font-size:14px; color:#5a4a3a; text-decoration:none; background:#fdf8f2; letter-spacing:0.05em;">いきる会HP（新）</a>
+  </div>
+</section>
+
+<footer>© 2026 占い・鑑定ツール</footer>
+
+<script>
+  window.addEventListener('load', () => {
+    if (location.hash) {
+      const el = document.querySelector(location.hash);
+      if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    }
+  });
+</script>
+
+</body>
+</html>

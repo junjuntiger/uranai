@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>かずたま数秘術</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&display=swap');
+
+  :root {
+    --ink: #1a1a18;
+    --ink-mid: #4a4a44;
+    --ink-light: #8a8a80;
+    --paper: #f7f4ee;
+    --paper-warm: #ede9df;
+    --paper-mid: #e0dbd0;
+    --gold: #b89a5a;
+    --gold-light: #d4b87a;
+    --red: #8b3a2a;
+    --border: rgba(26,26,24,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  header {
+    text-align: center;
+    padding: 3rem 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--paper);
+  }
+
+  .header-kana {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  header h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    color: var(--ink);
+  }
+
+  header p {
+    font-size: 12px;
+    color: var(--ink-light);
+    margin-top: 8px;
+    letter-spacing: 0.1em;
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 1rem 4rem;
+  }
+
+  /* タブ */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+    gap: 0;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    color: var(--ink-light);
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--gold);
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* フォーム */
+  .person-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .person-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .person-num {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+  }
+
+  .remove-btn {
+    background: none;
+    border: none;
+    color: var(--ink-light);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0 4px;
+    font-family: sans-serif;
+  }
+
+  .remove-btn:hover { color: var(--red); }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .form-row.full { grid-template-columns: 1fr; }
+
+  label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-light);
+    margin-bottom: 5px;
+  }
+
+  input[type="text"], input[type="date"], input[type="number"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus { border-color: var(--gold); }
+
+  .add-person-btn {
+    width: 100%;
+    padding: 10px;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    background: none;
+    color: var(--ink-light);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: border-color 0.2s, color 0.2s;
+    margin-bottom: 1.5rem;
+  }
+
+  .add-person-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  .calc-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 300;
+    transition: background 0.2s;
+  }
+
+  .calc-btn:hover { background: var(--gold); }
+
+  /* 結果エリア */
+  #results { margin-top: 2rem; }
+
+  .result-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .result-section-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    color: var(--ink);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.25rem;
+  }
+
+  .person-result {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .person-result-name {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 18px;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+
+  .person-result-birth {
+    font-size: 12px;
+    color: var(--ink-light);
+    margin-bottom: 1.25rem;
+  }
+
+  .nums-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 1.25rem;
+  }
+
+  .num-cell {
+    background: var(--paper-warm);
+    border-radius: 6px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+
+  .num-cell-label {
+    font-size: 10px;
+    color: var(--ink-light);
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .num-cell-val {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 22px;
+    font-weight: 300;
+    color: var(--ink);
+  }
+
+  .num-cell-val.master { color: var(--gold); }
+
+  .num-cell-name {
+    font-size: 10px;
+    color: var(--ink-mid);
+    margin-top: 3px;
+  }
+
+  .timing-badge {
+    display: inline-block;
+    background: var(--paper-mid);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: var(--ink-mid);
+    margin-bottom: 1rem;
+  }
+
+  .timing-badge strong {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 16px;
+    color: var(--ink);
+    margin-right: 4px;
+  }
+
+  .reading-blocks { display: grid; gap: 10px; }
+
+  .reading-block {
+    padding: 12px 14px;
+    border-left: 2px solid var(--gold-light);
+    background: var(--paper);
+    border-radius: 0 4px 4px 0;
+  }
+
+  .reading-block-title {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+
+  .reading-block-body {
+    font-size: 13px;
+    color: var(--ink-mid);
+    line-height: 1.8;
+  }
+
+  /* 相性 */
+  .compat-pair {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .compat-pair-names {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 15px;
+    font-weight: 300;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .compat-sep {
+    color: var(--gold);
+    font-size: 12px;
+  }
+
+  .compat-score {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1rem;
+  }
+
+  .score-dots {
+    display: flex;
+    gap: 4px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--paper-mid);
+  }
+
+  .dot.on { background: var(--gold); }
+
+  .score-label {
+    font-size: 12px;
+    color: var(--ink-light);
+  }
+
+  .loading-msg {
+    text-align: center;
+    padding: 2rem;
+    color: var(--ink-light);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+  }
+
+  .error-msg {
+    padding: 1rem;
+    background: #fff0ee;
+    border: 1px solid #f0c0b0;
+    border-radius: 6px;
+    color: var(--red);
+    font-size: 13px;
+    margin-bottom: 1rem;
+  }
+
+  /* 年 */
+  .year-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.25rem;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .year-input-row label {
+    margin: 0;
+    white-space: nowrap;
+    font-size: 13px;
+    color: var(--ink-mid);
+  }
+
+  .year-input-row input {
+    width: 90px;
+    margin: 0;
+  }
+
+  @media (max-width: 480px) {
+    .nums-grid { grid-template-columns: repeat(2, 1fr); }
+    .form-row { grid-template-columns: 1fr; }
+    header h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-kana"></div>
+  <h1>かずたま数秘術</h1>
+  <p>名前と誕生日から導く、人生の設計図</p>
+</header>
+
+<div class="container">
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('input')">入力</button>
+    <button class="tab" onclick="switchTab('results')" id="tab-results" style="display:none">鑑定結果</button>
+  </div>
+
+  <!-- 入力タブ -->
+  <div class="tab-content active" id="tab-input">
+
+    <div class="year-input-row">
+      <label for="year-select">鑑定する年</label>
+      <input type="text" id="year-select" value="2026" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)">
+    </div>
+
+    <div id="persons-container"></div>
+
+    <button class="add-person-btn" onclick="addPerson()">＋ 人物を追加</button>
+
+    <button class="calc-btn" onclick="calculate()">鑑 定 す る</button>
+
+  </div>
+
+  <!-- 結果タブ -->
+  <div class="tab-content" id="tab-results-content">
+    <div id="results"></div>
+  </div>
+
+</div>
+
+<script>
+// ========== データ ==========
+const GOJUON = {
+  あ:1,い:1,う:1,え:1,お:1,
+  か:2,き:2,く:2,け:2,こ:2,
+  さ:3,し:3,す:3,せ:3,そ:3,
+  た:4,ち:4,つ:4,て:4,と:4,
+  な:5,に:5,ぬ:5,ね:5,の:5,
+  は:6,ひ:6,ふ:6,へ:6,ほ:6,
+  ま:7,み:7,む:7,め:7,も:7,
+  や:8,ゆ:8,よ:8,ゃ:8,ゅ:8,ょ:8,
+  ら:9,り:9,る:9,れ:9,ろ:9,
+  わ:10,を:10,ん:10,
+  が:2,ぎ:2,ぐ:2,げ:2,ご:2,
+  ざ:3,じ:3,ず:3,ぜ:3,ぞ:3,
+  だ:4,ぢ:4,づ:4,で:4,ど:4,
+  ば:6,び:6,ぶ:6,べ:6,ぼ:6,
+  ぱ:6,ぴ:6,ぷ:6,ぺ:6,ぽ:6,
+};
+
+const NUM_MEANINGS = {
+  1:{title:"先駆者",kw:"独立・開拓・オリジナリティ"},
+  2:{title:"調和",kw:"協調・感受性・繊細さ"},
+  3:{title:"表現",kw:"創造・明るさ・言葉の才能"},
+  4:{title:"安定",kw:"誠実・勤勉・着実に形を作る"},
+  5:{title:"自由",kw:"変化・冒険・可能性を広げる"},
+  6:{title:"愛・奉仕",kw:"責任・癒し・人を守る温かさ"},
+  7:{title:"探求",kw:"分析・内省・深い洞察"},
+  8:{title:"力・繁栄",kw:"実行力・成功・社会的スケール"},
+  9:{title:"完成・博愛",kw:"包容力・手放し・人類への貢献"},
+  10:{title:"完結と再生",kw:"終わりと始まりを同時に生きる"},
+  11:{title:"啓示",kw:"霊感・ビジョン・高次の知恵"},
+  22:{title:"マスタービルダー",kw:"夢を現実化・大きな使命"},
+  33:{title:"マスターティーチャー",kw:"深い愛と癒しで人を導く"},
+};
+
+const YEAR_MEANINGS = {
+  1:"新しいサイクルの始まり。種まきの年。",
+  2:"関係性を育む年。焦らず待つことが大切。",
+  3:"表現と創造の年。発信・発表に吉。",
+  4:"基盤を固める年。地道な努力が実を結ぶ。",
+  5:"変化と転機の年。動くことで道が開く。",
+  6:"愛と責任の年。人間関係に向き合う。",
+  7:"内省と学びの年。静かに力を蓄える。",
+  8:"収穫と実現の年。努力が形になる。",
+  9:"手放しと完結の年。次のサイクルへの準備。",
+  11:"直感が冴える特別な年。ビジョンを大切に。",
+  22:"大きなビジョンを現実化する稀な年。",
+  33:"深い愛で周囲を照らす年。",
+};
+
+// ========== 計算 ==========
+function reduce(n) {
+  if (n === 11 || n === 22 || n === 33) return n;
+  while (n > 9) {
+    n = String(n).split('').reduce((a,c) => a + parseInt(c), 0);
+    if (n === 11 || n === 22 || n === 33) return n;
+  }
+  return n;
+}
+
+function calcNums(name, by, bm, bd, targetYear) {
+  const y = parseInt(by), m = parseInt(bm), day = parseInt(bd);
+
+  const life = reduce([...String(y),...String(m),...String(day)].map(Number).reduce((a,b)=>a+b,0));
+  const destiny = reduce([...String(m),...String(day)].map(Number).reduce((a,b)=>a+b,0));
+  const soul = reduce([...String(day)].map(Number).reduce((a,b)=>a+b,0));
+  const persona = reduce([...String(y)].map(Number).reduce((a,b)=>a+b,0));
+
+  let esum = 0;
+  for (const c of name) { if (GOJUON[c]) esum += GOJUON[c]; }
+  const expr = reduce(esum);
+
+  const mission = reduce(life + expr);
+
+  const pySum = [...String(targetYear),...String(m),...String(day)].map(Number).reduce((a,b)=>a+b,0);
+  const personalYear = reduce(pySum);
+
+  return { life, destiny, soul, persona, expr, mission, personalYear };
+}
+
+// ========== UI ==========
+let persons = [];
+let personCount = 0;
+
+function addPerson(name='', kana='', by='2000', bm='11', bd='22') {
+  personCount++;
+  const id = personCount;
+  persons.push({ id, name, kana, by, bm, bd });
+  renderPersons();
+}
+
+function removePerson(id) {
+  persons = persons.filter(p => p.id !== id);
+  renderPersons();
+}
+
+function renderPersons() {
+  const c = document.getElementById('persons-container');
+  c.innerHTML = persons.map((p, i) => `
+    <div class="person-card">
+      <div class="person-card-header">
+        <span class="person-num">人物 ${i+1}</span>
+        ${persons.length > 1 ? `<button class="remove-btn" onclick="removePerson(${p.id})">×</button>` : ''}
+      </div>
+      <div class="form-row">
+        <div>
+          <label>氏名（漢字）</label>
+          <input type="text" placeholder="山田太郎" value="${p.name}" onchange="updatePerson(${p.id},'name',this.value)">
+        </div>
+        <div>
+          <label>氏名（ひらがな）</label>
+          <input type="text" placeholder="やまだたろう" value="${p.kana}" onchange="updatePerson(${p.id},'kana',this.value)">
+        </div>
+      </div>
+      <div class="form-row">
+        <div style="display:flex;gap:6px;align-items:flex-end;grid-column:1/-1">
+          <div style="flex:2">
+            <label>生年（西暦）</label>
+            <input type="text" inputmode="numeric" maxlength="4" placeholder="2000" value="${p.by}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)" onchange="updatePerson(${p.id},'by',this.value)">
+          </div>
+          <div style="flex:1">
+            <label>月</label>
+            <input type="text" inputmode="numeric" maxlength="2" placeholder="11" value="${p.bm}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onchange="updatePerson(${p.id},'bm',this.value)">
+          </div>
+          <div style="flex:1">
+            <label>日</label>
+            <input type="text" inputmode="numeric" maxlength="2" placeholder="22" value="${p.bd}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)" onchange="updatePerson(${p.id},'bd',this.value)">
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updatePerson(id, field, value) {
+  const p = persons.find(p => p.id === id);
+  if (p) p[field] = value;
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  if (tab === 'input') {
+    document.querySelector('.tab:first-child').classList.add('active');
+    document.getElementById('tab-input').classList.add('active');
+  } else {
+    document.querySelectorAll('.tab')[1].classList.add('active');
+    document.getElementById('tab-results-content').classList.add('active');
+  }
+}
+
+// ========== 鑑定 ==========
+function calculate() {
+  const valid = persons.filter(p => p.kana && p.by && p.bm && p.bd);
+  if (valid.length === 0) {
+    alert('ひらがな氏名と生年（西暦）・月・日を入力してください。');
+    return;
+  }
+
+  const targetYear = parseInt(document.getElementById('year-select').value) || 2026;
+
+  // 結果タブを表示
+  document.getElementById('tab-results').style.display = '';
+  switchTab('results');
+
+  const resultsEl = document.getElementById('results');
+  resultsEl.innerHTML = '';
+
+  const data = valid.map(p => ({ ...p, nums: calcNums(p.kana, p.by, p.bm, p.bd, targetYear) }));
+
+  let html = '';
+
+  // 個人鑑定
+  html += `<div class="result-section">
+    <div class="result-section-title">個人鑑定</div>`;
+
+  for (const person of data) {
+    const n = person.nums;
+    const isMaster = (v) => [11,22,33].includes(v);
+
+    html += `
+    <div class="person-result">
+      <div class="person-result-name">${person.name || person.kana}</div>
+      <div class="person-result-birth">${person.by}年${person.bm}月${person.bd}日 &nbsp;|&nbsp; ${person.kana}</div>
+      <div class="nums-grid">
+        ${[
+          ['ソウル', n.soul, '魂の欲求'],
+          ['デスティニー', n.destiny, '宿命・使命'],
+          ['ライフパス', n.life, '人生のテーマ'],
+          ['ペルソナ', n.persona, '外に見せる顔'],
+          ['表現数', n.expr, '名前の数霊'],
+          ['ミッション', n.mission, '今世の役割'],
+        ].map(([label, val, name]) => `
+          <div class="num-cell">
+            <div class="num-cell-label">${label}</div>
+            <div class="num-cell-val ${isMaster(val)?'master':''}">${val}</div>
+            <div class="num-cell-name">${name}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="timing-badge">
+        ${targetYear}年の個人年数 <strong>${n.personalYear}</strong>${NUM_MEANINGS[n.personalYear]?.title||''}
+      </div>
+      <div class="reading-blocks" id="reading-${person.id}"></div>
+    </div>`;
+  }
+
+  html += '</div>';
+
+  // 相性（2人以上）
+  if (data.length >= 2) {
+    html += `<div class="result-section">
+      <div class="result-section-title">相性鑑定</div>
+      <div id="compat-area"></div>
+    </div>`;
+  }
+
+  resultsEl.innerHTML = html;
+
+  // 個人鑑定文を生成
+  for (const person of data) {
+    generateReading(person);
+  }
+
+  // 相性鑑定文
+  if (data.length >= 2) {
+    generateCompat(data);
+  }
+}
+
+// ========== 数値ごとの鑑定テキスト ==========
+const READINGS = {
+  life: {
+    1: {
+      honshitsu: "自分の力で道を切り拓く先駆者の資質を持っています。独自の視点と強い意志が武器で、誰かの後を追うより自ら先頭に立つことで本領を発揮します。オリジナリティを大切にすることが、最大の才能の開花につながります。",
+      yakuwari: "新しい道を最初に踏み出す開拓者としての役割を担っています。前例のないことに挑む勇気と、自分の軸を持ち続けることが使命。あなたが踏み出した一歩は、必ず誰かの道しるべになっています。",
+      kankei: "独立心が強く、自分のペースを大切にするタイプ。人に合わせすぎると消耗するため、自分の意志をしっかり持ちながら関わることが大切です。対等な関係の中でこそ、あなたの魅力が最大限に輝きます。",
+    },
+    2: {
+      honshitsu: "人の気持ちを細やかに読み取る、高い感受性と共感力が最大の才能です。場の空気を整え、対立を和らげる力を自然と持っています。一見目立たなくても、あなたがいることで場全体が調和します。",
+      yakuwari: "橋渡し役・調停者として、人と人をつなぐ役割を持っています。争いを好まず、誰もが心地よくいられる場を作ることが使命。縁の下で支える力が、実は大きな流れを動かしています。",
+      kankei: "思いやりが深く、相手に寄り添える貴重な存在です。ただ繊細ゆえに傷つきやすい面も。自分の感情も大切にしながら関わることで、長く深い関係を築くことができます。",
+    },
+    3: {
+      honshitsu: "言葉・表現・創造を通じて世界を明るくする才能を持っています。ユーモアがあり、場を和ませる力は天性のもの。自分を表現することをためらわずにいることが、最大の武器になります。",
+      yakuwari: "喜びと創造を届ける表現者としての役割があります。言葉・芸術・コミュニケーションを通じて人の心を動かすことが使命。あなたが発信するものは、人々のエネルギーを高めます。",
+      kankei: "明るく話しやすい雰囲気で、自然と人が集まってきます。飽きっぽく見られることもありますが、それは感性が豊かな証拠。深く継続的な関係を意識すると、さらに豊かな縁が育まれます。",
+    },
+    4: {
+      honshitsu: "誠実さと粘り強さで、確かなものを作り上げる才能を持っています。コツコツと積み上げる力と、物事を体系立てて整える能力が際立っています。信頼される土台を作るのが最大の強みです。",
+      yakuwari: "安定した基盤を作る建設者としての役割があります。地道な努力を惜しまず、長期的な視点で物事を形にすることが使命。あなたが作るものは、時間をかけてより大きな価値になります。",
+      kankei: "頼りになる存在として、自然と人から信頼を集めます。真面目すぎて融通が利かないと感じる場面もありますが、それがあなたの誠実さの表れ。柔軟さを少し取り入れると関係の幅が広がります。",
+    },
+    5: {
+      honshitsu: "変化と自由の中でこそエネルギーが湧く、多才な冒険者の資質を持っています。好奇心旺盛で、新しい環境や人に次々と飛び込んでいける順応力が最大の才能。多様な経験がそのまま豊かさになります。",
+      yakuwari: "変化の先頭に立ち、新しい可能性を示す役割があります。枠にとらわれず動き続けることで、周囲に「こんな生き方もある」と示すことが使命。自由に動くこと自体が、誰かへの贈り物になっています。",
+      kankei: "飽きっぽく見られることもありますが、それは感性の広さの表れ。多様な人と自然につながれる柔軟さが魅力です。ただ深く関わることを意識すると、より豊かな縁が育まれます。",
+    },
+    6: {
+      honshitsu: "人を愛し、守り、支える力が自然と溢れる資質を持っています。責任感が強く、誰かのために動くときに最もエネルギーが出るタイプ。家庭・コミュニティ・チームを温かく包む力が最大の才能です。",
+      yakuwari: "愛と癒しで身近な人を支える奉仕者としての役割があります。特定の誰かを守り、育てることが使命。大きな愛を日常の温かさとして届けることが、この方の今世のテーマです。",
+      kankei: "面倒見がよく、自然と頼られる存在です。ただ与えすぎて自分が空になりやすい面も。「自分を満たしてから人に与える」という順番を意識すると、関係性がより豊かになります。",
+    },
+    7: {
+      honshitsu: "物事の本質を深く探求する、鋭い分析力と洞察力を持っています。表面に流されず、真理を追い求める精神が才能の核心。一人の時間を大切にし、内省することでさらに力が磨かれます。",
+      yakuwari: "深い知恵を探求し、真実を伝える役割があります。学問・哲学・精神的な探求を通じて、世界の本質に触れることが使命。あなたが辿り着いた洞察は、多くの人の道を照らします。",
+      kankei: "ひとりの時間を必要とする内向的な面があります。深く関わった相手には誠実で信頼できる存在。表面的なつながりより、少数の深い縁を大切にすることで本来の力が発揮されます。",
+    },
+    8: {
+      honshitsu: "ビジョンを現実の成果に変える、強い実行力と達成力を持っています。スケールの大きな夢を描き、それを実際に形にする力が最大の才能。社会的な成功と物質的な豊かさを自ら引き寄せる資質があります。",
+      yakuwari: "夢を社会的な形として現実に落とし込む実現者としての役割があります。リソースを動かし、大きな流れを作ることが使命。影響力を持って動くことが、最も自分らしい生き方です。",
+      kankei: "存在感があり、自然とリーダーシップを発揮します。強さゆえに周囲に圧を与えることもあるため、柔らかさを意識すると関係が広がります。対等な関係の中で最も力を発揮します。",
+    },
+    9: {
+      honshitsu: "すべてを包み込む深い愛と、手放しの智慧を持っています。個人を超えた大きな視点で物事を見られる成熟した資質が才能の核心。経験の積み重ねが、そのまま深い人間性になっています。",
+      yakuwari: "人類への奉仕と無条件の愛を体現する完成者としての役割があります。自分の経験や智慧を惜しみなく分かち合うことが使命。執着を手放すほど、新しいものが入ってくる循環の中を生きています。",
+      kankei: "深い包容力で誰でも受け入れられる懐の深さがあります。境界線を引くことが苦手な面もあるため、自分を守る意識も大切に。与えながら手放すことで、縁が豊かに循環します。",
+    },
+    11: {
+      honshitsu: "高次の直感とインスピレーションを受け取る、霊的な感性を持っています。普通の人が気づかないことを感じ取り、ビジョンとして示す力が才能の核心。自分の直感を信頼することが最大の鍵です。",
+      yakuwari: "高次の知恵を地上に伝える啓示者としての役割があります。直感やビジョンを通じて人々を導くことが使命。11という数の重さを自覚したとき、本来の力が大きく開花します。",
+      kankei: "感受性が非常に高く、人のエネルギーをよく感じ取ります。そのため疲れやすい面も。エネルギーを整える時間を意識的に作り、自分を保ちながら関わることが大切です。",
+    },
+    22: {
+      honshitsu: "大きなビジョンを現実の形として築き上げる、マスタービルダーの資質を持っています。夢想家であると同時に、それを実際に動かせる稀有な力の持ち主。スケールの大きな使命のために生まれてきた方です。",
+      yakuwari: "社会に大きな構造物や仕組みを作る役割があります。個人を超えた大きなビジョンを現実化することが使命。22の重さを受け入れ、その力を意識的に使ったとき、本当の意味で力が開きます。",
+      kankei: "存在感が大きく、周囲に強い影響を与えます。無意識のうちにプレッシャーを与えることもあるため、温かさと謙虚さを意識することで、より深い縁が育まれます。",
+    },
+    33: {
+      honshitsu: "深い愛と癒しで人を導く、マスターティーチャーの資質を持っています。無条件の愛を体現し、周囲の人を自然と高める力が才能の核心。自分の使命の大きさを自覚したとき、本来の力が一気に開花します。",
+      yakuwari: "愛と癒しで多くの人を照らす教師・癒し人としての役割があります。自分の経験を通じて、人々が本来の力を取り戻す手助けをすることが使命。あなたがそこにいるだけで場が整い、人が癒されます。",
+      kankei: "深い愛と包容力で、多くの人が自然と集まってきます。重い使命を持つぶん、自分を大切にすることを忘れずに。軽やかさと楽しさを忘れないことが、33の力を持続させる秘訣です。",
+    },
+  },
+  destiny: {
+    1:"宿命は「先頭に立つこと」。誰かに従うのではなく、自分の意志で道を開く人生が与えられています。",
+    2:"宿命は「つなぐこと」。人と人、場と場を橋渡しし、調和をもたらすことがこの方の生まれ持った使命です。",
+    3:"宿命は「表現すること」。言葉・創造・発信を通じて世界を明るくすることが、この方の宿命的なテーマです。",
+    4:"宿命は「形にすること」。地道に積み上げ、確かな基盤を作ることがこの方に与えられた宿命的な役割です。",
+    5:"宿命は「変化を生きること」。安定より変化を選び続ける中に、この方の本当の豊かさがあります。",
+    6:"宿命は「愛すること」。人を守り育て、愛を日常の形で届けることがこの方の宿命的なテーマです。",
+    7:"宿命は「真理を探ること」。深く学び、探求し続ける中に、この方の使命が宿っています。",
+    8:"宿命は「実現すること」。大きなビジョンを現実の成果として示すことが、この方の宿命的な役割です。",
+    9:"宿命は「完成させること」。手放しと循環の中に、この方の宿命的なテーマが流れています。",
+    11:"宿命は「霊感を伝えること」。直感とビジョンを通じて人々を導くことがこの方の特別な使命です。",
+    22:"宿命は「大きな形を作ること」。社会に残る構造や仕組みを現実化することがこの方の宿命です。",
+    33:"宿命は「愛で導くこと」。深い愛と癒しで多くの人を照らすことがこの方の宿命的な使命です。",
+  },
+  soul: {
+    1:"魂が本当に求めているのは「自由と独立」。誰かの枠の中ではなく、自分の意志で動ける環境に、魂が喜びを感じます。",
+    2:"魂が本当に求めているのは「調和と安心」。争いのない穏やかな関係の中で、この方の魂は最も安らぎます。",
+    3:"魂が本当に求めているのは「表現と喜び」。創造し、発信し、笑いがある環境に、魂のエネルギーが満ちます。",
+    4:"魂が本当に求めているのは「安定と誠実さ」。地道に積み重ね、信頼できる関係の中に、魂の満足があります。",
+    5:"魂が本当に求めているのは「変化と刺激」。新しい経験や環境に飛び込むとき、魂が最も躍動します。",
+    6:"魂が本当に求めているのは「愛と安らぎ」。愛する人のそばで、温かく穏やかにいることに、魂の深い満足があります。",
+    7:"魂が本当に求めているのは「真理と内省」。一人静かに探求し、本質に触れる時間に、魂が満たされます。",
+    8:"魂が本当に求めているのは「達成と力」。目標を定め、それを実現していくプロセスに、魂のエネルギーが宿ります。",
+    9:"魂が本当に求めているのは「完成と解放」。執着を手放し、大きな流れに委ねるとき、魂が最も自由になります。",
+    11:"魂が本当に求めているのは「霊的なつながり」。見えない世界との交信や、深い直感の中に、魂の喜びがあります。",
+    22:"魂が本当に求めているのは「大きな創造」。スケールの大きなビジョンを形にするとき、魂が最も満たされます。",
+    33:"魂が本当に求めているのは「無条件の愛」。何かと引き換えではなく、ただ愛することの中に魂の充足があります。",
+  },
+  persona: {
+    1:"外からは「独立した強い人」と見られます。自立していて頼りになる印象を与えますが、内面はもっと繊細かもしれません。",
+    2:"外からは「穏やかで親切な人」と見られます。協調性があり、話しやすい雰囲気が自然と周囲を安心させます。",
+    3:"外からは「明るく楽しい人」と見られます。場を盛り上げる力があり、一緒にいると気持ちが軽くなると感じてもらえます。",
+    4:"外からは「真面目で誠実な人」と見られます。信頼感があり、任せて大丈夫という印象を自然と周囲に与えます。",
+    5:"外からは「自由で面白い人」と見られます。変化を恐れない姿勢が、周囲に新鮮な風を運ぶ存在として映っています。",
+    6:"外からは「温かく面倒見のいい人」と見られます。自然と人が集まり、頼られる存在として周囲に映っています。",
+    7:"外からは「知的で落ち着いた人」と見られます。深みのある雰囲気が、周囲に安心感と敬意を与えます。",
+    8:"外からは「頼もしく力強い人」と見られます。存在感があり、リーダーシップを自然と発揮する人として映っています。",
+    9:"外からは「包容力のある大人な人」と見られます。懐が深く、誰でも受け入れる温かさが周囲に伝わっています。",
+    11:"外からは「不思議な雰囲気を持つ人」と見られます。何か特別なものを感じさせる存在感が、人を引き寄せます。",
+    22:"外からは「大きなことをする人」と見られます。スケール感のある言動が、周囲に強い印象を残します。",
+    33:"外からは「愛に満ちた人」と見られます。深い温かさと包容力が、自然と人を引き寄せる磁場を作っています。",
+  },
+  expr: {
+    1:"名前の数霊は1。名前自体が「先頭に立つ力」を宿しており、この名前で呼ばれるたびに独立・開拓のエネルギーが強化されます。",
+    2:"名前の数霊は2。名前が「調和と協調」のエネルギーを帯びており、この名前で呼ばれることで橋渡しの力が引き出されます。",
+    3:"名前の数霊は3。名前が「表現と創造」のエネルギーを宿しており、この名前が発せられるたびに表現力が高まります。",
+    4:"名前の数霊は4。名前が「安定と誠実」のエネルギーを帯びており、着実に積み上げる力を名前が支えています。",
+    5:"名前の数霊は5。名前が「変化と自由」のエネルギーを宿しており、この名前が新たな風を呼び込む力を持ちます。",
+    6:"名前の数霊は6。名前が「愛と奉仕」のエネルギーを帯びており、呼ばれるたびに温かく守る力が引き出されます。",
+    7:"名前の数霊は7。名前が「探求と内省」のエネルギーを宿しており、真理を追い求める力を名前が後押しします。",
+    8:"名前の数霊は8。名前が「力と実現」のエネルギーを帯びており、目標を達成する力を名前が強化しています。",
+    9:"名前の数霊は9。名前が「完成と博愛」のエネルギーを宿し、手放しと循環の力を名前が体現しています。",
+    10:"名前の数霊は10。終わりと始まりを同時に宿す数で、名前が次の循環を引き寄せるエネルギーを帯びています。",
+    11:"名前の数霊は11。名前がマスターナンバーの霊的なエネルギーを宿しており、直感と啓示の力を強化します。",
+    22:"名前の数霊は22。マスタービルダーのエネルギーを名前が帯びており、大きな使命を現実化する力を後押しします。",
+    33:"名前の数霊は33。マスターティーチャーのエネルギーを名前が宿し、深い愛と癒しを届ける力を体現しています。",
+  },
+  mission: {
+    1:"今世の役割は「先駆者」。誰もやっていない道を切り拓き、その歩みを示すことがこの方の今世のミッションです。",
+    2:"今世の役割は「橋渡し」。人と人をつなぎ、調和を生み出すことがこの方の今世のミッションです。",
+    3:"今世の役割は「表現者」。創造と発信を通じて人の心を動かすことがこの方の今世のミッションです。",
+    4:"今世の役割は「建設者」。地道に形を作り、確かな基盤を残すことがこの方の今世のミッションです。",
+    5:"今世の役割は「変化の使者」。自由に動き変化し続けることで、可能性を示すことがこの方のミッションです。",
+    6:"今世の役割は「愛の体現者」。身近な人を愛し、守り、育てることがこの方の今世のミッションです。",
+    7:"今世の役割は「探求者」。深く学び、真理を伝えることがこの方の今世のミッションです。",
+    8:"今世の役割は「実現者」。大きなビジョンを現実の形として示すことがこの方の今世のミッションです。",
+    9:"今世の役割は「完成と伝承」。積み上げた智慧を次の世代に伝え、大きな循環を完結させることがミッションです。",
+    11:"今世の役割は「霊的な橋渡し」。見えない世界と現実をつなぎ、人々に光を届けることがミッションです。",
+    22:"今世の役割は「大きな形を作ること」。社会に残る仕組みや構造を現実化することがこの方のミッションです。",
+    33:"今世の役割は「愛で導くこと」。深い愛と癒しで多くの人を照らし続けることがこの方のミッションです。",
+  },
+  year: {
+    1:"今年は9年サイクルの出発点。新しいことを始めるのに最も適した年です。「やってみたい」という気持ちを最優先に。躊躇せず動いたことが、これからの9年の土台になります。",
+    2:"今年は関係性を育む年。結果を急がず、信頼を丁寧に積み重ねる時期です。直感を大切にしながら、協力関係を育てることに集中すると、来年以降に大きく花開きます。",
+    3:"今年は表現と発信の年。感じていること、作りたいものを外に出すことに意味がある時期。SNS・発表・創作など、自分の世界を広げる行動が実を結びやすい年です。",
+    4:"今年は基盤を固める年。派手な変化より、地道な積み重ねが大切な時期。毎日の習慣・体の管理・仕事の整理に集中することで、来年以降の飛躍の土台が生まれます。",
+    5:"今年は変化と転機の年。動きたい衝動を信じて、新しい環境や出会いに踏み出す時期。変化を恐れず、むしろ積極的に選んでいくことで扉が開きます。",
+    6:"今年は愛と責任の年。家族・パートナー・コミュニティとの関係を見直し、深める時期。人のために動くことが自分の喜びにもつながる、温かい一年になります。",
+    7:"今年は内省と学びの年。焦って外に動くより、じっくり自分と向き合い、知識を深める時期。来年の収穫のために静かにエネルギーを蓄えることが最善です。",
+    8:"今年は収穫と実現の年。これまでの努力が形になる時期。積極的に動き、目標を高く設定することで、大きな成果を得られる可能性があります。",
+    9:"今年は手放しと完結の年。終わらせることに意味がある時期。執着を手放すほど、新しいものが入ってきます。来年からの新しい9年サイクルに向けた、大切な準備期間です。",
+    11:"直感が鋭く冴える特別な年。頭で考えるより、感じることを優先する時期。スピリチュアルな気づきやサインを大切にすると、人生の大きな転換点になります。",
+    22:"大きなビジョンを現実化できる稀な年。今年動いたことが長期的な基盤になります。チャンスを感じたら迷わず動くことが、この年の最善策です。",
+    33:"深い愛と癒しで周囲を照らす一年。自分が喜びを感じることを優先しながら、自然と人を支える流れの中を生きると、この年の力が最大限に発揮されます。",
+  }
+};
+
+function generateReading(person) {
+  const n = person.nums;
+  const name = person.name || person.kana;
+  const targetYear = document.getElementById('year-select').value;
+
+  const lifeR = READINGS.life[n.life] || READINGS.life[1];
+  const destR = READINGS.destiny[n.destiny] || '';
+  const soulR = READINGS.soul[n.soul] || '';
+  const personaR = READINGS.persona[n.persona] || '';
+  const exprR = READINGS.expr[n.expr] || '';
+  const missionR = READINGS.mission[n.mission] || '';
+  const yearR = READINGS.year[n.personalYear] || '';
+
+  const el = document.getElementById(`reading-${person.id}`);
+  if (el) {
+    el.innerHTML = [
+      ['✦ 本質と才能', lifeR.honshitsu],
+      ['✦ 宿命と魂の欲求', `${destR}<br><br>${soulR}`],
+      ['✦ 外に見せる顔と名前の力', `${personaR}<br><br>${exprR}`],
+      ['✦ 今世のミッション', missionR],
+      [`✦ ${targetYear}年のタイミング`, yearR],
+    ].map(([title, body]) => `
+      <div class="reading-block">
+        <div class="reading-block-title">${title}</div>
+        <div class="reading-block-body">${body}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function generateCompat(data) {
+  const pairs = [];
+  for (let i = 0; i < data.length; i++) {
+    for (let j = i+1; j < data.length; j++) {
+      pairs.push([data[i], data[j]]);
+    }
+  }
+
+  const compatArea = document.getElementById('compat-area');
+  let compatHtml = '';
+
+  for (const [a, b] of pairs) {
+    const na = a.nums, nb = b.nums;
+    const sharedSoul = na.soul === nb.soul;
+    const sharedMission = na.mission === nb.mission;
+    const score = (sharedSoul ? 2 : 0) + (sharedMission ? 2 : 0) +
+      (Math.abs(na.life - nb.life) <= 2 ? 1 : 0);
+    const dots = Math.min(5, Math.max(1, score));
+
+    compatHtml += `
+    <div class="compat-pair">
+      <div class="compat-pair-names">
+        ${a.name||a.kana}
+        <span class="compat-sep">×</span>
+        ${b.name||b.kana}
+      </div>
+      <div class="compat-score">
+        <div class="score-dots">
+          ${[1,2,3,4,5].map(i=>`<div class="dot ${i<=dots?'on':''}"></div>`).join('')}
+        </div>
+        <span class="score-label">数霊共鳴度</span>
+      </div>
+      <div id="compat-${a.id}-${b.id}">
+        <div class="loading-msg" style="padding:0.5rem">相性を読み解いています…</div>
+      </div>
+    </div>`;
+  }
+
+  compatArea.innerHTML = compatHtml;
+
+  for (const [a, b] of pairs) {
+    generateCompatReading(a, b);
+  }
+}
+
+function generateCompatReading(a, b) {
+  const na = a.nums, nb = b.nums;
+
+  // 共鳴スコア分析
+  const sharedSoul = na.soul === nb.soul;
+  const sharedMission = na.mission === nb.mission;
+  const sharedLife = na.life === nb.life;
+  const lifeDiff = Math.abs(na.life - nb.life);
+
+  const mn = (v) => NUM_MEANINGS[v] || {title:'数', kw:''};
+
+  // 共鳴ポイント
+  let kyomei = '';
+  if (sharedSoul) {
+    kyomei += `ソウル数が両者とも${na.soul}（${mn(na.soul).title}）で一致。魂の深いところで「${mn(na.soul).kw}」という価値観が共鳴しており、言葉にしなくても通じ合える感覚があります。`;
+  } else if (sharedMission) {
+    kyomei += `ミッション数が両者とも${na.mission}（${mn(na.mission).title}）で一致。人生の方向性が根本的に同じで、共に動くと大きなエネルギーが生まれます。`;
+  } else if (lifeDiff <= 1) {
+    kyomei += `ライフパス数が${na.life}と${nb.life}で近く、人生のリズムが似ています。同じテンポで動ける、歩調の合いやすいペアです。`;
+  } else {
+    kyomei += `数霊的に異なる個性を持つ二人ですが、異質なエネルギーが互いを補い合う関係です。お互いに持っていないものを学び合える、成長の組み合わせです。`;
+  }
+
+  // 課題
+  let kadai = '';
+  if (na.life === 1 || nb.life === 1) {
+    const other = na.life === 1 ? nb : na;
+    kadai += `ライフパス1は「自分の道を行く」意志が強い数。相手のペースに合わせることへの抵抗感が出やすい場面があります。お互いの独立性を尊重しながら関わることが大切です。`;
+  } else if ((na.life === 5 || nb.life === 5) && (na.life === 8 || nb.life === 8)) {
+    kadai += `5の「自由・変化」と8の「結果・スケール」はテンポが噛み合わないことがあります。5が軽やかに動きたいとき、8はもっとしっかりやろうと感じるかもしれません。`;
+  } else if (lifeDiff >= 4) {
+    kadai += `ライフパス数の差が大きく、人生への向き合い方が異なります。どちらが正しいではなく、違いを面白がれる関係性を意識すると、より豊かな関係になります。`;
+  } else {
+    kadai += `似たエネルギーを持つ二人は、同じ弱点が重なりやすい面があります。お互いの盲点を指摘し合える、率直なコミュニケーションを大切にすることがポイントです。`;
+  }
+
+  // 総合
+  const totalScore = (sharedSoul?2:0) + (sharedMission?2:0) + (lifeDiff<=1?1:0);
+  let sougo = '';
+  if (totalScore >= 3) {
+    sougo = `数霊的に深く共鳴する二人です。時間をかけるほど絆が深まり、お互いが本来の力を引き出し合える関係。長く付き合うほど価値が増すペアです。`;
+  } else if (totalScore >= 1) {
+    sougo = `異なる個性を持ちながら、どこかで響き合える二人です。違いを補い合いながら、共に動くことで互いの力が引き出されます。`;
+  } else {
+    sougo = `異なるエネルギーを持つ二人ですが、それが最大の強みにもなります。お互いの違いを面白がり、学び合う姿勢を持てると、互いにとって大きな成長の縁になります。`;
+  }
+
+  const el = document.getElementById(`compat-${a.id}-${b.id}`);
+  if (el) {
+    el.innerHTML = [
+      ['共鳴ポイント', kyomei],
+      ['課題と注意点', kadai],
+      ['総合', sougo],
+    ].map(([title, body]) => `
+      <div class="reading-block" style="margin-bottom:8px">
+        <div class="reading-block-title">${title}</div>
+        <div class="reading-block-body">${body}</div>
+      </div>
+    `).join('');
+  }
+}
+
+// 初期化
+addPerson();
+</script>
+
+<!-- ===== バランスボックス ===== -->
+<style>
+  .bb-section { border-top: 2px solid var(--border); padding-top: 2.5rem; padding-bottom: 4rem; }
+  .bb-title { font-family:'Noto Serif JP',serif; font-size:18px; font-weight:400; letter-spacing:0.15em; margin-bottom:0.5rem; }
+  .bb-desc { font-size:12px; color:var(--ink-light); letter-spacing:0.05em; margin-bottom:1.5rem; text-align:center; }
+
+  .bb-person-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .bb-person-lbl { font-size:14px; font-weight:700; min-width:44px; }
+  .bb-inputs { display:flex; align-items:center; gap:4px; }
+  .bb-inputs input {
+    padding:7px 8px; border:1px solid var(--border); border-radius:4px;
+    font-size:13px; font-family:'Noto Sans JP',sans-serif;
+    background:var(--paper); color:var(--ink); outline:none; transition:border-color 0.2s;
+  }
+  .bb-inputs input:focus { border-color:var(--gold); }
+  .bb-iny { width:64px; } .bb-inmd { width:40px; }
+  .bb-unit { font-size:12px; color:var(--ink-light); }
+
+  .bb-add-btn {
+    width:100%; padding:9px; border:1px dashed var(--border); border-radius:6px;
+    background:none; color:var(--ink-light); font-size:13px; cursor:pointer;
+    font-family:'Noto Sans JP',sans-serif; margin-top:6px; margin-bottom:1rem;
+    transition:border-color 0.2s, color 0.2s;
+  }
+  .bb-add-btn:hover { border-color:var(--gold); color:var(--gold); }
+
+  .bb-arrow-div { text-align:center; font-size:32px; color:var(--ink-mid); margin:1.5rem 0; }
+  .bb-layout { display:flex; gap:2rem; align-items:flex-start; flex-wrap:wrap; margin-top:0.5rem; }
+
+  /* 左テーブル */
+  .bb-table { min-width:220px; }
+  .bb-thead { display:grid; grid-template-columns:52px repeat(4,1fr); gap:4px; margin-bottom:6px; }
+  .bb-th { font-size:9px; color:var(--ink-light); text-align:center; letter-spacing:0.03em; }
+  .bb-prow { display:grid; grid-template-columns:52px repeat(4,1fr); gap:4px; margin-bottom:8px; align-items:center; }
+  .bb-plbl { font-size:13px; font-weight:700; }
+  .bb-circle {
+    width:36px; height:36px; border-radius:50%; border:2px solid;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Noto Serif JP',serif; font-size:13px; margin:auto;
+  }
+  .bb-circle.destiny { font-weight:700; }
+
+  /* 右グリッド */
+  .bb-grid-wrap { display:flex; flex-direction:column; }
+  .bb-grid-inner { display:flex; gap:6px; }
+  .bb-grid-table { border-collapse:collapse; }
+  .bb-grid-table th, .bb-grid-table td { border:1px solid var(--border); }
+  .bb-col-hd { font-size:10px; color:var(--ink-light); text-align:center; padding:4px 10px; vertical-align:bottom; letter-spacing:0.05em; }
+  .bb-col-arrow { display:block; font-size:9px; }
+  .bb-row-hd { font-size:10px; color:var(--ink-light); padding:4px 8px; text-align:right; white-space:nowrap; letter-spacing:0.05em; }
+  .bb-cell { width:80px; height:64px; vertical-align:top; text-align:center; background:white; padding:6px 4px 4px; }
+  .bb-cell-num { font-family:'Noto Serif JP',serif; font-size:13px; font-style:italic; color:var(--ink-mid); margin-bottom:4px; }
+  .bb-cell-persons { font-size:13px; font-weight:700; letter-spacing:0.05em; line-height:1.4; }
+  .bb-side-lbl { font-size:10px; color:var(--ink-light); writing-mode:vertical-rl; text-orientation:mixed; padding-left:6px; letter-spacing:0.1em; align-self:center; }
+  .bb-bottom-lbl { font-size:10px; color:var(--ink-light); text-align:center; margin-top:5px; letter-spacing:0.05em; }
+
+  /* 総評 */
+  .bb-summary { margin-top:2rem; }
+  .bb-summary-title { font-family:'Noto Serif JP',serif; font-size:15px; font-weight:400; letter-spacing:0.15em; padding-bottom:8px; border-bottom:1px solid var(--border); margin-bottom:1rem; }
+  .bb-summary-card { background:white; border:1px solid var(--border); border-radius:8px; padding:1rem 1.2rem; margin-bottom:0.8rem; }
+  .bb-summary-name { font-size:13px; font-weight:700; margin-bottom:6px; }
+  .bb-summary-text { font-size:12px; color:var(--ink-mid); line-height:1.85; }
+
+  @media (max-width:480px) { .bb-layout { flex-direction:column; } .bb-cell { width:60px; height:50px; } }
+</style>
+
+<div class="container bb-section">
+  <h2 class="bb-title">バランスボックス</h2>
+  <p class="bb-desc">生年月日を入力してください（※最大10名まで）</p>
+
+  <div id="bb-form">
+    <div id="bb-rows"></div>
+    <button class="bb-add-btn" id="bb-add-btn" onclick="bbAddPerson()">＋ 人物を追加</button>
+    <button class="calc-btn" onclick="calcBB()">バランスボックスにセットする</button>
+  </div>
+
+  <div id="bb-arrow-div" class="bb-arrow-div" style="display:none">▼</div>
+
+  <div id="bb-results" style="display:none">
+    <div class="bb-layout">
+      <div id="bb-left"></div>
+      <div id="bb-right"></div>
+    </div>
+    <div id="bb-summary"></div>
+  </div>
+</div>
+
+<script>
+const BB_ALL_LABELS = ['A','B','C','D','E','F','G','H','I','J'];
+const BB_ALL_COLORS = ['#c0392b','#2980b9','#27ae60','#e67e22','#8e44ad','#16a085','#d35400','#2c3e50','#7f8c8d','#e91e63'];
+const BB_NUM_TYPES  = ['才能数','本質数','探究数','天命'];
+const BB_ROWS       = ['創造派','発展派','完結派'];
+const BB_COLS       = ['行動派','統括派','慎重派'];
+const BB_CELL_LABELS = [['3','1','2,11'],['5','6,33','4,22'],['8','9','7']];
+const BB_MAP = {
+  1:[0,1], 2:[0,2], 3:[0,0],
+  4:[1,2], 5:[1,0], 6:[1,1],
+  7:[2,2], 8:[2,0], 9:[2,1],
+  11:[0,2], 22:[1,2], 33:[1,1]
+};
+
+let bbCount = 3;
+
+function bbRenderRows() {
+  const c = document.getElementById('bb-rows');
+  c.innerHTML = '';
+  for (let i = 0; i < bbCount; i++) {
+    const lbl = BB_ALL_LABELS[i], color = BB_ALL_COLORS[i];
+    c.innerHTML += `<div class="bb-person-row">
+      <span class="bb-person-lbl" style="color:${color}">${lbl} さん</span>
+      <div class="bb-inputs">
+        <input class="bb-iny" type="text" inputmode="numeric" maxlength="4" placeholder="1990" id="bby-${lbl}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)">
+        <span class="bb-unit">年</span>
+        <input class="bb-inmd" type="text" inputmode="numeric" maxlength="2" placeholder="11" id="bbm-${lbl}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)">
+        <span class="bb-unit">月</span>
+        <input class="bb-inmd" type="text" inputmode="numeric" maxlength="2" placeholder="22" id="bbd-${lbl}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)">
+        <span class="bb-unit">日</span>
+      </div>
+    </div>`;
+  }
+  document.getElementById('bb-add-btn').style.display = bbCount >= 10 ? 'none' : '';
+}
+
+function bbAddPerson() {
+  if (bbCount >= 10) return;
+  const i = bbCount;
+  bbCount++;
+  const lbl = BB_ALL_LABELS[i], color = BB_ALL_COLORS[i];
+  const c = document.getElementById('bb-rows');
+  const div = document.createElement('div');
+  div.className = 'bb-person-row';
+  div.innerHTML = `<span class="bb-person-lbl" style="color:${color}">${lbl} さん</span><div class="bb-inputs"><input class="bb-iny" type="text" inputmode="numeric" maxlength="4" placeholder="1990" id="bby-${lbl}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)"><span class="bb-unit">年</span><input class="bb-inmd" type="text" inputmode="numeric" maxlength="2" placeholder="11" id="bbm-${lbl}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)"><span class="bb-unit">月</span><input class="bb-inmd" type="text" inputmode="numeric" maxlength="2" placeholder="22" id="bbd-${lbl}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)"><span class="bb-unit">日</span></div>`;
+  c.appendChild(div);
+  if (bbCount >= 10) document.getElementById('bb-add-btn').style.display = 'none';
+}
+
+function bbDigitSum(n) {
+  return [...String(Math.abs(parseInt(n) || 0))].reduce((a,c) => a + parseInt(c), 0);
+}
+
+function calcBBNums(y, m, d) {
+  const talent  = reduce(bbDigitSum(d));
+  const essence = reduce(bbDigitSum(y) + bbDigitSum(m) + bbDigitSum(d));
+  const explore = reduce(bbDigitSum(m) + bbDigitSum(d));
+  const destiny = reduce(talent + essence + explore);
+  return [talent, essence, explore, destiny];
+}
+
+function calcBB() {
+  const people = [];
+  for (let i = 0; i < bbCount; i++) {
+    const lbl = BB_ALL_LABELS[i];
+    const y = document.getElementById(`bby-${lbl}`)?.value;
+    const m = document.getElementById(`bbm-${lbl}`)?.value;
+    const d = document.getElementById(`bbd-${lbl}`)?.value;
+    if (y && m && d) people.push({ lbl, color: BB_ALL_COLORS[i], nums: calcBBNums(y, m, d) });
+  }
+  if (!people.length) { alert('生年月日を1名以上入力してください'); return; }
+
+  // グリッド構築
+  const grid = Array.from({length:3}, () => Array.from({length:3}, () => []));
+  people.forEach(p => {
+    p.nums.forEach((n, ni) => {
+      const cell = BB_MAP[n];
+      if (cell) grid[cell[0]][cell[1]].push({ lbl:p.lbl, color:p.color, type:BB_NUM_TYPES[ni] });
+    });
+  });
+
+  // 左テーブル
+  let leftHtml = '<div class="bb-table"><div class="bb-thead"><div></div>' + BB_NUM_TYPES.map(t=>'<div class="bb-th">'+t+'</div>').join('') + '</div>';
+  people.forEach(p => {
+    const circles = p.nums.map((n, ni) => {
+      const destStyle = ni === 3 ? 'background:' + p.color + '18' : '';
+      const destClass = ni === 3 ? ' destiny' : '';
+      return '<div class="bb-circle' + destClass + '" style="border-color:' + p.color + ';color:' + p.color + ';' + destStyle + '">' + n + '</div>';
+    }).join('');
+    leftHtml += '<div class="bb-prow"><div class="bb-plbl" style="color:' + p.color + '">' + p.lbl + 'さん</div>' + circles + '</div>';
+  });
+  leftHtml += '</div>';
+
+  // 右グリッド
+  let rightHtml = `<div class="bb-grid-wrap"><div class="bb-grid-inner"><table class="bb-grid-table"><thead><tr><th></th>${BB_COLS.map(c=>`<th class="bb-col-hd">${c}<span class="bb-col-arrow">↓</span></th>`).join('')}</tr></thead><tbody>`;
+  BB_ROWS.forEach((row, ri) => {
+    rightHtml += `<tr><td class="bb-row-hd">${row}→</td>`;
+    for (let ci = 0; ci < 3; ci++) {
+      const persons = grid[ri][ci].map(e=>`<span style="color:${e.color}">${e.lbl}</span>`).join('');
+      rightHtml += `<td class="bb-cell"><div class="bb-cell-num">${BB_CELL_LABELS[ri][ci]}</div><div class="bb-cell-persons">${persons}</div></td>`;
+    }
+    rightHtml += '</tr>';
+  });
+  rightHtml += `</tbody></table><div class="bb-side-lbl">縦列→集団行動パターン</div></div><div class="bb-bottom-lbl">横列→思考パターン</div></div>`;
+
+  // 総評
+  const ROW_KW = ['新しいことを生み出す創造力','物事を育て発展させる推進力','物事を完結・結果につなげる力'];
+  const COL_KW = ['自ら動き実行する行動力','全体を見渡し調整するまとめ力','丁寧に関わる慎重さと気配り'];
+  let summaryHtml = `<div class="bb-summary"><div class="bb-summary-title">それぞれの総評</div>`;
+  people.forEach(p => {
+    const rowCnt = [0,0,0], colCnt = [0,0,0];
+    for (let ri=0;ri<3;ri++) for (let ci=0;ci<3;ci++) {
+      const n = grid[ri][ci].filter(e=>e.lbl===p.lbl).length;
+      rowCnt[ri]+=n; colCnt[ci]+=n;
+    }
+    const dr = rowCnt.indexOf(Math.max(...rowCnt));
+    const dc = colCnt.indexOf(Math.max(...colCnt));
+    const spread = rowCnt.filter(v=>v>0).length + colCnt.filter(v=>v>0).length;
+    let text = `${BB_ROWS[dr]}の傾向が強く、${ROW_KW[dr]}があります。集団の中では${BB_COLS[dc]}として${COL_KW[dc]}を発揮するタイプです。`;
+    if (spread >= 5) text += '　数字がグリッド全体に広がっており、バランスよく多面的な才能を持っています。';
+    else if (spread <= 2) text += '　特定のエリアに集中しており、その分野で際立った個性と集中力を持ちます。';
+    summaryHtml += `<div class="bb-summary-card"><div class="bb-summary-name" style="color:${p.color}">${p.lbl}さん</div><div class="bb-summary-text">${text}</div></div>`;
+  });
+  summaryHtml += '</div>';
+
+  document.getElementById('bb-left').innerHTML   = leftHtml;
+  document.getElementById('bb-right').innerHTML  = rightHtml;
+  document.getElementById('bb-summary').innerHTML= summaryHtml;
+  document.getElementById('bb-arrow-div').style.display = '';
+  document.getElementById('bb-results').style.display   = '';
+  document.getElementById('bb-results').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// 初期3行表示
+bbRenderRows();
+</script>
+
+<!-- ===== 数字の特徴 1〜33 ===== -->
+<style>
+  .num-guide-section { border-top:2px solid var(--border); padding-top:2.5rem; padding-bottom:4rem; }
+  .num-guide-title { font-family:'Noto Serif JP',serif; font-size:18px; font-weight:400; letter-spacing:0.15em; margin-bottom:1.5rem; }
+  .num-guide-grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap:12px;
+  }
+  .num-guide-card {
+    background:white; border:1px solid var(--border); border-radius:8px;
+    padding:12px 14px; display:flex; flex-direction:column; gap:4px;
+  }
+  .num-guide-card.master-card { border-color:var(--gold); background:#fffdf5; }
+  .num-guide-num {
+    font-family:'Noto Serif JP',serif; font-size:20px;
+    color:var(--ink); line-height:1;
+  }
+  .num-guide-card.master-card .num-guide-num { color:var(--gold); }
+  .num-guide-kw { font-size:12px; font-weight:700; color:var(--ink); letter-spacing:0.05em; }
+  .num-guide-desc { font-size:11px; color:var(--ink-light); line-height:1.7; }
+  .num-guide-master-badge {
+    font-size:9px; color:var(--gold); border:1px solid var(--gold);
+    border-radius:3px; padding:1px 4px; display:inline-block; margin-bottom:2px; letter-spacing:0.05em;
+  }
+</style>
+
+<div class="container num-guide-section">
+  <h2 class="num-guide-title">数字の特徴 1〜33</h2>
+  <div class="num-guide-grid">
+    <div class="num-guide-card">
+      <div class="num-guide-num">1</div>
+      <div class="num-guide-kw">独立・開拓・リーダー</div>
+      <div class="num-guide-desc">自分の意志で道を切り開く先駆者。強い個性と自立心を持ち、新しいことへの挑戦を恐れない。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">2</div>
+      <div class="num-guide-kw">協調・感受性・調和</div>
+      <div class="num-guide-desc">人と人をつなぐ橋渡し役。細やかな気遣いと共感力で周囲を支え、穏やかな関係を築く。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">3</div>
+      <div class="num-guide-kw">表現・創造・明るさ</div>
+      <div class="num-guide-desc">言葉・芸術・ユーモアで場を明るくする。豊かな感性と表現力で人を惹きつける才能がある。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">4</div>
+      <div class="num-guide-kw">安定・勤勉・実直</div>
+      <div class="num-guide-desc">コツコツと積み上げる堅実さが強み。ルールと秩序を重んじ、信頼される土台を築く。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">5</div>
+      <div class="num-guide-kw">自由・変化・冒険</div>
+      <div class="num-guide-desc">変化を愛し、多様な経験を糧にする。好奇心旺盛で、自由な発想と行動力が魅力。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">6</div>
+      <div class="num-guide-kw">愛・責任・美意識</div>
+      <div class="num-guide-desc">家族や仲間を大切にする愛情深い数。美や調和を求め、周囲の人を守り育てる力がある。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">7</div>
+      <div class="num-guide-kw">探究・分析・精神性</div>
+      <div class="num-guide-desc">物事の本質を深く追求する哲学者気質。内省的で独自の世界観と鋭い洞察力を持つ。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">8</div>
+      <div class="num-guide-kw">力・達成・豊かさ</div>
+      <div class="num-guide-desc">目標に向かって力強く進む実行者。物質的な成功と精神的な豊かさの両立を目指す。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">9</div>
+      <div class="num-guide-kw">完成・博愛・奉仕</div>
+      <div class="num-guide-desc">広い視野で人類全体を想う大きな数。奉仕と慈愛の精神を持ち、集大成を体現する。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">10</div>
+      <div class="num-guide-kw">完結と再生</div>
+      <div class="num-guide-desc">ひとつのサイクルが終わり新たな始まりへ。過去の経験を活かしながら次のステージへ踏み出す。</div>
+    </div>
+    <div class="num-guide-card master-card">
+      <div class="num-guide-master-badge">マスターナンバー</div>
+      <div class="num-guide-num">11</div>
+      <div class="num-guide-kw">直感・インスピレーション・使命</div>
+      <div class="num-guide-desc">高い感受性と霊的な直感力を持つ。人々に光を与える啓発者として大きな使命を担う。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">12</div>
+      <div class="num-guide-kw">犠牲と成長</div>
+      <div class="num-guide-desc">自分を顧みず人のために動くことで魂が磨かれる数。試練の中に大きな学びが宿る。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">13</div>
+      <div class="num-guide-kw">変革・死と再生</div>
+      <div class="num-guide-desc">古いものを壊して新しいものを生み出す変革の数。変化を恐れず乗り越えることで真の力が開花する。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">14</div>
+      <div class="num-guide-kw">自由の試練</div>
+      <div class="num-guide-desc">自由を求めながらも節制が求められる数。衝動と規律のバランスを取ることで才能が活きる。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">15</div>
+      <div class="num-guide-kw">魅力・調和・愛</div>
+      <div class="num-guide-desc">人を惹きつけるカリスマ性と愛情深さを持つ。家族や仲間を大切にしながら自分も輝く。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">16</div>
+      <div class="num-guide-kw">内なる崩壊と再構築</div>
+      <div class="num-guide-desc">プライドや執着が壊されることで真の知恵が開く。試練を通じて深い精神性を獲得する。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">17</div>
+      <div class="num-guide-kw">不屈の意志・星の力</div>
+      <div class="num-guide-desc">どんな逆境にも屈しない強さを持つ数。精神的な強さと実行力で大きな目標を達成する。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">18</div>
+      <div class="num-guide-kw">浄化・試練と博愛</div>
+      <div class="num-guide-desc">光と影の両面を経験しながら成長する数。内なる矛盾を超えることで深い博愛へと昇華する。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">19</div>
+      <div class="num-guide-kw">自立・孤独の克服</div>
+      <div class="num-guide-desc">孤独を乗り越えて真の自立を果たす数。他者への依存を手放すことで本当の力が目覚める。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">20</div>
+      <div class="num-guide-kw">調和・目覚め・選択</div>
+      <div class="num-guide-desc">感受性が高く使命への目覚めを促される数。内なる声に従い大切な選択をすることが人生の鍵。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">21</div>
+      <div class="num-guide-kw">成功・表現の開花</div>
+      <div class="num-guide-desc">個性と社交性が花開く明るい数。自己表現を通じて人と世界をつなぎ豊かな成果を生む。</div>
+    </div>
+    <div class="num-guide-card master-card">
+      <div class="num-guide-master-badge">マスターナンバー</div>
+      <div class="num-guide-num">22</div>
+      <div class="num-guide-kw">建設・夢の実現・大きな力</div>
+      <div class="num-guide-desc">夢を現実に変えるマスタービルダー。大規模なビジョンを実現する実行力と責任感を持つ。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">23</div>
+      <div class="num-guide-kw">自由な才能・社交性</div>
+      <div class="num-guide-desc">コミュニケーション力と創造性に恵まれた数。人との縁を活かし自由に才能を開花させる。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">24</div>
+      <div class="num-guide-kw">愛の責任・奉仕</div>
+      <div class="num-guide-desc">家族や仲間のために尽くすことで生きがいを感じる数。愛情と責任感が人生の柱となる。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">25</div>
+      <div class="num-guide-kw">知恵と直感・探求</div>
+      <div class="num-guide-desc">鋭い直感と深い洞察力で物事の本質を見抜く数。孤独を愛しながら精神的な知恵を深める。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">26</div>
+      <div class="num-guide-kw">物質的な力・実行</div>
+      <div class="num-guide-desc">組織や物質面で力を発揮する実行力の数。野心と協調のバランスで大きな目標を実現する。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">27</div>
+      <div class="num-guide-kw">博愛の完成・理想</div>
+      <div class="num-guide-desc">人道的な理想と豊かな知性を持つ数。広い視野で社会に貢献し他者を導くヒーラー的な存在。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">28</div>
+      <div class="num-guide-kw">リーダーと協調</div>
+      <div class="num-guide-desc">独立心と協調性を兼ね備えた数。自らが先頭に立ちながら仲間と共に大きなものを築く。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">29</div>
+      <div class="num-guide-kw">感受性と夢・試練</div>
+      <div class="num-guide-desc">繊細な感受性と強いビジョンを持つ数。感情の波を乗り越えることで霊的な才能が花開く。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">30</div>
+      <div class="num-guide-kw">創造の喜び・表現</div>
+      <div class="num-guide-desc">喜びと遊び心にあふれた創造的な数。ユーモアと芸術性で人々を楽しませ場を豊かにする。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">31</div>
+      <div class="num-guide-kw">安定した創造性</div>
+      <div class="num-guide-desc">地道な努力と創造力を融合させた数。着実に形を作りながら独自のアイデアを現実に変える。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">32</div>
+      <div class="num-guide-kw">コミュニケーション・縁</div>
+      <div class="num-guide-desc">人との縁と言葉の力を持つ数。豊かな表現力と社交性で多くの人と深いつながりを結ぶ。</div>
+    </div>
+    <div class="num-guide-card master-card">
+      <div class="num-guide-master-badge">マスターナンバー</div>
+      <div class="num-guide-num">33</div>
+      <div class="num-guide-kw">奉仕・慈愛・癒し</div>
+      <div class="num-guide-desc">無条件の愛で世界に貢献するマスターティーチャー。深い思いやりで人を癒し導く存在。</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

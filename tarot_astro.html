@@ -1,0 +1,204 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  .app{padding:1.5rem 1rem;font-family:var(--font-sans);max-width:680px;margin:0 auto;}
+  .title{font-family:'Cinzel',serif;font-size:22px;font-weight:500;text-align:center;color:var(--color-text-primary);letter-spacing:2px;margin-bottom:4px;}
+  .sub{text-align:center;font-size:13px;color:var(--color-text-secondary);margin-bottom:1.5rem;}
+  .step{display:none;flex-direction:column;align-items:center;width:100%;}
+  .step.active{display:flex;}
+  .hint{font-size:14px;color:var(--color-text-secondary);margin-bottom:1rem;text-align:center;}
+  .sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;margin-bottom:1.5rem;}
+  .sbtn{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:10px;padding:10px 6px;font-size:12px;color:var(--color-text-primary);cursor:pointer;transition:all 0.15s;text-align:center;font-family:inherit;line-height:1.4;}
+  .sbtn:hover{border-color:#7F77DD;background:#EEEDFE;color:#3C3489;}
+  .sbtn.sel{border:1.5px solid #7F77DD;background:#EEEDFE;color:#3C3489;}
+  .sicon{font-size:18px;display:block;margin-bottom:3px;}
+  .btn{background:#7F77DD;color:#fff;border:none;border-radius:10px;padding:12px 32px;font-size:15px;font-family:'Cinzel',serif;cursor:pointer;letter-spacing:1px;margin-top:0.5rem;transition:background 0.15s;}
+  .btn:hover{background:#534AB7;}
+  .btn:disabled{opacity:0.35;cursor:default;}
+  .cards{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;width:100%;margin:1rem 0;}
+  .cslot{width:110px;text-align:center;}
+  .clabel{font-size:11px;color:var(--color-text-secondary);margin-bottom:6px;letter-spacing:1px;}
+  .card{width:110px;height:185px;border-radius:12px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.25s,border-color 0.2s;overflow:hidden;}
+  .card:hover{transform:translateY(-5px);}
+  .card.open{border-color:#7F77DD;background:#EEEDFE;}
+  .cback{font-size:36px;opacity:0.18;}
+  .cfront{display:none;flex-direction:column;align-items:center;justify-content:center;padding:8px;height:100%;}
+  .card.open .cfront{display:flex;}
+  .card.open .cback{display:none;}
+  .csym{font-size:28px;margin-bottom:5px;}
+  .cname{font-size:10px;color:#3C3489;font-weight:500;text-align:center;line-height:1.4;}
+  .cnum{font-size:10px;color:var(--color-text-secondary);margin-bottom:3px;}
+  .revtag{font-size:9px;color:#993C1D;background:#FAECE7;border-radius:4px;padding:2px 5px;margin-top:3px;}
+  .prog{font-size:12px;color:var(--color-text-secondary);margin-top:0.5rem;}
+  .result{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:14px;padding:1.25rem;width:100%;margin-top:0.75rem;}
+  .rsign{font-size:13px;color:#7F77DD;font-weight:500;margin-bottom:10px;}
+  .intro{font-size:13px;color:var(--color-text-primary) !important;line-height:1.9;margin-bottom:14px;padding-bottom:14px;border-bottom:0.5px solid var(--color-border-tertiary);}
+  .rblock{margin-bottom:14px;padding-bottom:14px;border-bottom:0.5px solid var(--color-border-tertiary);}
+  .rlabel{font-size:11px;color:var(--color-text-secondary);letter-spacing:1px;margin-bottom:4px;}
+  .rcard{font-size:13px;color:var(--color-text-primary);font-weight:500;margin-bottom:5px;}
+  .rmsg{font-size:13px;color:var(--color-text-primary) !important;line-height:1.9;text-decoration:none !important;}
+  .overall{margin-top:14px;padding-top:14px;border-top:0.5px solid var(--color-border-tertiary);}
+  .otitle{font-size:11px;color:#7F77DD;margin-bottom:6px;letter-spacing:1px;}
+  .omsg{font-size:13px;color:var(--color-text-primary) !important;line-height:1.9;}
+  .reset{font-size:12px;color:var(--color-text-secondary);cursor:pointer;text-decoration:underline;margin-top:1rem;}
+</style>
+
+<div class="app">
+  <p class="title">✦ 星座タロット占い ✦</p>
+  <p class="sub">宇宙のメッセージを受け取る</p>
+
+  <div class="step active" id="s1">
+    <p class="hint">あなたの星座を選んでください</p>
+    <div class="sgrid" id="sgrid"></div>
+    <button class="btn" id="btn1" disabled>カードを引く →</button>
+  </div>
+
+  <div class="step" id="s2">
+    <p class="hint">3枚のカードをタップして開いてください</p>
+    <div class="cards" id="cardsArea"></div>
+    <p class="prog" id="prog">0 / 3 枚開きました</p>
+    <button class="btn" id="btn2" disabled style="margin-top:1rem;">鑑定結果を見る →</button>
+  </div>
+
+  <div class="step" id="s3">
+    <div class="result" id="resultBox"></div>
+    <span class="reset" id="resetBtn">もう一度占う</span>
+  </div>
+</div>
+
+<script>
+const signs=[
+  {n:'牡羊座',s:'♈',el:'火',trait:'情熱と先駆けのエネルギー'},
+  {n:'牡牛座',s:'♉',el:'土',trait:'堅実と豊かさのエネルギー'},
+  {n:'双子座',s:'♊',el:'風',trait:'知性と変化のエネルギー'},
+  {n:'蟹座',s:'♋',el:'水',trait:'感受性と守護のエネルギー'},
+  {n:'獅子座',s:'♌',el:'火',trait:'誇りと創造のエネルギー'},
+  {n:'乙女座',s:'♍',el:'土',trait:'分析と奉仕のエネルギー'},
+  {n:'天秤座',s:'♎',el:'風',trait:'調和と美のエネルギー'},
+  {n:'蠍座',s:'♏',el:'水',trait:'変容と探求のエネルギー'},
+  {n:'射手座',s:'♐',el:'火',trait:'自由と冒険のエネルギー'},
+  {n:'山羊座',s:'♑',el:'土',trait:'責任と野心のエネルギー'},
+  {n:'水瓶座',s:'♒',el:'風',trait:'革新と独立のエネルギー'},
+  {n:'魚座',s:'♓',el:'水',trait:'共感と霊性のエネルギー'}
+];
+
+const arcana=[
+  {num:'0',n:'愚者',s:'🌟',up:'新たな旅立ちと無限の可能性を示しています。純粋な魂が宇宙へと踏み出す瞬間が訪れています',dw:'無謀さや準備不足を示しています。星の導きをまだ十分に受け取れていない状態です'},
+  {num:'I',n:'魔術師',s:'✨',up:'意志と行動の力が宿っています。四元素を操る者として、内なる光が目覚めています',dw:'力が空回りしています。才能という星が曇りの中に隠れており、自信を取り戻す時です'},
+  {num:'II',n:'女教皇',s:'🌙',up:'深い直感と神秘の智慧が宿っています。月の女神が語りかける真実に耳を澄ませてください',dw:'真実が隠されています。内なる声を遮る雑音があり、月が雲に隠れている時期です'},
+  {num:'III',n:'女帝',s:'🌺',up:'豊饒と創造の力が満ちています。大地と星が祝福する実りの季節が訪れています',dw:'停滞と依存の傾向があります。創造の泉を取り戻すには、執着を手放すことが必要です'},
+  {num:'IV',n:'皇帝',s:'👑',up:'秩序と揺るぎない意志が力となっています。北極星のような確かな基盤が築かれています',dw:'硬直と支配欲が障壁となっています。星の光を遮る壁を取り除き、柔軟さを取り戻す時です'},
+  {num:'V',n:'教皇',s:'🕊️',up:'精神的な導きと伝統の智慧が降り注いでいます。古くからの星の知恵があなたを照らしています',dw:'因習からの解放が求められています。既成概念を超えた自由な星の道を探す時が来ています'},
+  {num:'VI',n:'恋人たち',s:'💫',up:'心の選択と魂の結合を示しています。ふたつの星が引き合う純粋な引力を信じてください',dw:'迷いと不一致が生じています。行き交う流星のように定まらぬ心を静める時です'},
+  {num:'VII',n:'戦車',s:'🌠',up:'意志の勝利が近づいています。流れ星のごとく目標へと突き進む力と方向性が整っています',dw:'方向を失ったエネルギーが四散しています。立ち止まって進路を確認してください'},
+  {num:'VIII',n:'力',s:'🔥',up:'内なる強さが輝いています。炎のように燃える魂が困難を優しく包み込む力を持っています',dw:'自信が揺らいでいます。心の炎が小さくなっていますが、必ず再び燃え上がります'},
+  {num:'IX',n:'隠者',s:'🕯️',up:'内省と深い智慧の時です。一人の灯火が暗闇に真実の道を照らし出しています',dw:'孤立と閉鎖に陥っています。星明かりを遮断し内に籠もりすぎている状態から抜け出す時です'},
+  {num:'X',n:'運命の輪',s:'♾️',up:'転換点が訪れています。銀河の輪が回り、新たなサイクルが始まる吉兆の時です',dw:'変化に抵抗しています。輪の回転に逆らい、変化の波に乗り遅れている状態です'},
+  {num:'XI',n:'正義',s:'⚖️',up:'真実と均衡が示されています。星の天秤が正しい道を明確に指し示しています',dw:'不公平と歪みが生じています。天秤が傾き真実が霞んでいる状態を見つめ直す時です'},
+  {num:'XII',n:'吊られた男',s:'🌊',up:'受容と視点の転換が訪れています。逆さまに映る星空に、新たな宇宙の真理が隠されています',dw:'無駄な犠牲が続いています。執着を手放せず、星の流れに抗っている状態です'},
+  {num:'XIII',n:'死神',s:'🌑',up:'変容と再生の時です。新月のように古いものが滅し、新たな光が生まれようとしています',dw:'変化への抵抗が続いています。古い星座の光に縛られ、前に進めない状態です'},
+  {num:'XIV',n:'節制',s:'🌈',up:'調和とバランスが整っています。二つの器の間を流れる光のように、全てが統合されています',dw:'過剰と不均衡が生じています。星のエネルギーが偏り、調和を取り戻す必要があります'},
+  {num:'XV',n:'悪魔',s:'💎',up:'執着と物質の誘惑への気づきが訪れています。暗黒星雲の引力に囚われていることを認識する時です',dw:'解放が始まっています。星の鎖が緩み、本来の自由が戻りつつある兆しです'},
+  {num:'XVI',n:'塔',s:'⚡',up:'突然の変革が訪れています。雷光のように古い構造が崩れ、新たな天地が開けようとしています',dw:'変化の回避が続いています。先延ばしにするほど、後の衝撃が大きくなります'},
+  {num:'XVII',n:'星',s:'⭐',up:'希望と癒しの光が降り注いでいます。夜空の星が、傷ついた魂に清らかな祝福を注いでいます',dw:'希望が薄れています。星の光が届きにくい霧の中を歩いていますが、必ず晴れる時が来ます'},
+  {num:'XVIII',n:'月',s:'🌕',up:'幻想と無意識の世界を映しています。月光が照らす影の中に潜む真実を探る旅が続きます',dw:'幻想からの覚醒が訪れています。月の霧が晴れ、現実の輪郭が明確になってきています'},
+  {num:'XIX',n:'太陽',s:'☀️',up:'喜びと成功の光が満ちています。宇宙最大の光が全てを照らし、祝福の時が来ています',dw:'輝きが一時的に陰っています。太陽が雲に隠れる時期ですが、必ず再び輝きを取り戻します'},
+  {num:'XX',n:'審判',s:'🎺',up:'覚醒と再生の時が来ています。天空から降り注ぐ光があなたの魂を呼び覚ましています',dw:'自己批判に囚われています。審判の声を恐れ、変容のチャンスを逃している状態です'},
+  {num:'XXI',n:'世界',s:'🌍',up:'完成と統合の時です。全ての星が祝福する円環が完成し、宇宙との合一が訪れています',dw:'未完と焦りがあります。もう少しで全ての星が揃います。焦らず歩み続けてください'}
+];
+
+const elMsg={
+  '火':'あなたの魂には太陽のような情熱の炎が宿っています。',
+  '土':'あなたの魂には大地のように確かな重力が宿っています。',
+  '風':'あなたの魂には星間を駆ける風のような知性が宿っています。',
+  '水':'あなたの魂には宇宙の深淵のような感受性が宿っています。'
+};
+
+const labels=['過去・根源','現在・状況','未来・可能性'];
+const labelPre=['過去の星座が示すのは、','現在あなたを取り巻く星の配置は、','未来への可能性として宇宙が示すのは、'];
+let sign=null, cards=[], opened=0;
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+
+const sg=document.getElementById('sgrid');
+signs.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='sbtn';
+  b.innerHTML='<span class="sicon">'+s.s+'</span>'+s.n+'<br><span style="font-size:10px;color:var(--color-text-secondary)">'+s.el+'</span>';
+  b.onclick=()=>{
+    document.querySelectorAll('.sbtn').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel'); sign=signs[i];
+    document.getElementById('btn1').disabled=false;
+  };
+  sg.appendChild(b);
+});
+
+document.getElementById('btn1').onclick=()=>{
+  cards=shuffle(arcana).slice(0,3).map(c=>({...c,isRev:Math.random()<0.3}));
+  opened=0;
+  const area=document.getElementById('cardsArea');
+  area.innerHTML='';
+  cards.forEach((c,i)=>{
+    const sl=document.createElement('div');sl.className='cslot';
+    sl.innerHTML='<div class="clabel">'+labels[i]+'</div>'+
+      '<div class="card" id="c'+i+'"><span class="cback">✦</span>'+
+      '<div class="cfront"><div class="csym">'+c.s+'</div><div class="cnum">'+c.num+'</div>'+
+      '<div class="cname">'+c.n+'</div>'+(c.isRev?'<span class="revtag">逆位置</span>':'')+
+      '</div></div>';
+    area.appendChild(sl);
+    document.getElementById('c'+i).onclick=()=>{
+      const el=document.getElementById('c'+i);
+      if(el.classList.contains('open'))return;
+      el.classList.add('open');opened++;
+      document.getElementById('prog').textContent=opened+' / 3 枚開きました';
+      if(opened===3)document.getElementById('btn2').disabled=false;
+    };
+  });
+  document.getElementById('prog').textContent='0 / 3 枚開きました';
+  document.getElementById('btn2').disabled=true;
+  show('s2');
+};
+
+document.getElementById('btn2').onclick=()=>{
+  const box=document.getElementById('resultBox');
+  const parts=[];
+  parts.push('<div class="rsign">'+sign.s+' '+sign.n+' ── '+sign.trait+'</div>');
+  parts.push('<div class="intro">'+elMsg[sign.el]+'宇宙はあなたに三枚の星のカードを授けました。</div>');
+  cards.forEach((c,i)=>{
+    const msg=c.isRev?c.dw:c.up;
+    parts.push(
+      '<div class="rblock">'+
+      '<div class="rlabel">'+labels[i]+'</div>'+
+      '<div class="rcard">'+c.s+' '+c.n+' ／ '+(c.isRev?'逆位置':'正位置')+'</div>'+
+      '<div class="rmsg">'+labelPre[i]+msg+'。</div>'+
+      '</div>'
+    );
+  });
+  const hasRev=cards.some(c=>c.isRev);
+  const allUp=cards.every(c=>!c.isRev);
+  let overall='';
+  if(allUp){
+    overall='三枚の星カードはすべて正位置で輝いています。宇宙は力強い祝福を送っています。過去から学び、現在を信じ、未来へと歩みを進めてください。星の流れはあなたの味方です。';
+  }else if(hasRev){
+    overall='逆位置のカードは妨害ではなく、立ち止まって内側を見つめるよう宇宙が促しているサインです。光が強ければ影もできる──その影の中にこそ、次の成長の種が眠っています。';
+  }else{
+    overall='星たちはあなたの歩む道を照らしています。迷う時は夜空を見上げてください。内なる光が、必ず正しい方向を指し示すでしょう。';
+  }
+  parts.push('<div class="overall"><div class="otitle">✦ 総合メッセージ</div><div class="omsg">'+overall+'</div></div>');
+  box.innerHTML=parts.join('');
+  show('s3');
+};
+
+document.getElementById('resetBtn').onclick=()=>{
+  sign=null;
+  document.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('btn1').disabled=true;
+  show('s1');
+};
+
+function show(id){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+</script>

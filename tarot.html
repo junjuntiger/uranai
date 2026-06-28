@@ -1,0 +1,201 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+#app { font-family: var(--font-sans); color: var(--color-text-primary); padding: 1.5rem 1rem; }
+.header { text-align: center; margin-bottom: 1.5rem; }
+.header h1 { font-family: 'Cinzel', serif; font-size: 22px; font-weight: 600; letter-spacing: 0.06em; }
+.header p { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; }
+.spreads { display: flex; gap: 8px; justify-content: center; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.sbtn { font-size: 13px; padding: 5px 14px; border: 0.5px solid var(--color-border-secondary); border-radius: 20px; background: transparent; color: var(--color-text-secondary); cursor: pointer; font-family: var(--font-sans); transition: all 0.15s; }
+.sbtn.on { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-primary); font-weight: 500; }
+.qrow { display: flex; gap: 8px; max-width: 460px; margin: 0 auto 1.5rem; }
+.qrow input { flex: 1; font-size: 14px; padding: 8px 12px; border: 0.5px solid var(--color-border-tertiary); border-radius: 8px; background: var(--color-background-primary); color: var(--color-text-primary); font-family: var(--font-sans); }
+.qrow input:focus { outline: none; border-color: var(--color-border-primary); }
+.dbtn { padding: 8px 18px; border: 0.5px solid var(--color-border-secondary); border-radius: 8px; background: var(--color-background-primary); color: var(--color-text-primary); cursor: pointer; font-size: 14px; font-weight: 500; font-family: var(--font-sans); white-space: nowrap; }
+.dbtn:hover { background: var(--color-background-secondary); }
+.cards { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.slot { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.clabel { font-size: 11px; color: var(--color-text-secondary); letter-spacing: 0.07em; text-transform: uppercase; }
+.card { width: 100px; height: 170px; border-radius: 8px; cursor: pointer; perspective: 800px; }
+.inner { width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.55s ease; border-radius: 8px; position: relative; }
+.flipped .inner { transform: rotateY(180deg); }
+.front, .back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+.back { background: #1a0a2e; border: 0.5px solid #6a3a9e; }
+.front { transform: rotateY(180deg); background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); padding: 8px; text-align: center; gap: 6px; }
+.front.rev { transform: rotateY(180deg) rotate(180deg); }
+.csymbol { font-size: 34px; line-height: 1; }
+.cname { font-family: 'Cinzel', serif; font-size: 9px; font-weight: 600; letter-spacing: 0.07em; color: var(--color-text-primary); line-height: 1.3; }
+.revlabel { font-size: 9px; color: var(--color-text-tertiary); }
+.reading { max-width: 520px; margin: 0 auto; background: var(--color-background-secondary); border-radius: 12px; padding: 1.25rem 1.5rem; }
+.rtitle { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.06em; color: var(--color-text-secondary); margin-bottom: 0.75rem; }
+.rtext { font-size: 14px; line-height: 1.8; }
+.dots { display: flex; gap: 5px; justify-content: center; margin-top: 0.75rem; }
+.dot { width: 5px; height: 5px; border-radius: 50%; background: var(--color-text-secondary); animation: blink 1.2s ease-in-out infinite; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,80%,100%{opacity:0.3;transform:scale(0.8)} 40%{opacity:1;transform:scale(1)} }
+.resetbtn { margin-top: 1rem; display: block; font-size: 12px; color: var(--color-text-secondary); background: none; border: none; cursor: pointer; text-decoration: underline; font-family: var(--font-sans); }
+</style>
+
+<div id="app">
+  <div class="header">
+    <h1>✦ Tarot Oracle ✦</h1>
+    <p>カードに問いかけ、宇宙の声を聴く</p>
+  </div>
+  <div class="spreads">
+    <button class="sbtn on" onclick="setSpr(1,this)">一枚引き</button>
+    <button class="sbtn" onclick="setSpr(3,this)">過去・現在・未来</button>
+    <button class="sbtn" onclick="setSpr(5,this)">ケルト十字（簡易）</button>
+  </div>
+  <div class="qrow">
+    <input id="q" type="text" placeholder="質問や悩みを入力（任意）" />
+    <button class="dbtn" onclick="draw()">カードを引く</button>
+  </div>
+  <div class="cards" id="cards"></div>
+  <div id="reading" style="display:none"></div>
+</div>
+
+<script>
+const CARDS = [
+  {jp:"愚者",sym:"🌟",m:"新しい始まり・冒険・無限の可能性",r:"無謀・優柔不断"},
+  {jp:"魔術師",sym:"🔮",m:"意志力・創造性・マニフェスト",r:"操作・欺瞞"},
+  {jp:"女教皇",sym:"🌙",m:"直感・神秘・内なる知恵",r:"抑圧・秘密"},
+  {jp:"女帝",sym:"🌸",m:"豊かさ・母性・美・創造性",r:"依存・停滞"},
+  {jp:"皇帝",sym:"⚡",m:"権威・構造・安定・リーダーシップ",r:"支配・硬直"},
+  {jp:"教皇",sym:"🕊️",m:"伝統・精神的指導・知恵",r:"反体制・型破り"},
+  {jp:"恋人",sym:"💫",m:"愛・調和・選択・価値観の一致",r:"不一致・衝突"},
+  {jp:"戦車",sym:"🏆",m:"勝利・意志・コントロール",r:"制御不能・攻撃性"},
+  {jp:"力",sym:"🦁",m:"勇気・忍耐・内なる力",r:"自己不信・弱さ"},
+  {jp:"隠者",sym:"🕯️",m:"内省・孤独・魂の探求",r:"孤立・後退"},
+  {jp:"運命の輪",sym:"🎡",m:"変化・サイクル・運命",r:"悪運・抵抗"},
+  {jp:"正義",sym:"⚖️",m:"公正・真実・因果応報",r:"不公平・不誠実"},
+  {jp:"吊られた男",sym:"🔄",m:"一時停止・新しい視点・手放し",r:"停滞・抵抗"},
+  {jp:"死神",sym:"🌑",m:"変容・終わりと始まり・解放",r:"変化への抵抗"},
+  {jp:"節制",sym:"🌈",m:"バランス・節度・目的",r:"失衡・過剰"},
+  {jp:"悪魔",sym:"🔥",m:"束縛・欲望・影",r:"解放・制限からの脱出"},
+  {jp:"塔",sym:"⛈️",m:"突然の変化・崩壊・啓示",r:"変化への恐れ"},
+  {jp:"星",sym:"⭐",m:"希望・信念・精神的な平和",r:"絶望・信念の喪失"},
+  {jp:"月",sym:"🌕",m:"幻想・恐れ・潜在意識",r:"混乱の解消・真実"},
+  {jp:"太陽",sym:"☀️",m:"喜び・成功・活力・明瞭さ",r:"悲観主義・曇り"},
+  {jp:"審判",sym:"📯",m:"更生・内なる呼び声・変革",r:"自己懐疑・過去への固執"},
+  {jp:"世界",sym:"🌍",m:"完結・達成・旅の完了",r:"未完成・遅延"},
+];
+
+const LABELS = {1:["メッセージ"],3:["過去","現在","未来"],5:["現状","課題","潜在意識","過去","可能性"]};
+let spr = 1, drawn = [];
+
+function setSpr(n, el) {
+  spr = n;
+  document.querySelectorAll('.sbtn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function draw() {
+  drawn = [...CARDS].sort(() => Math.random() - 0.5).slice(0, spr).map(c => ({...c, rev: Math.random() < 0.3}));
+  document.getElementById('reading').style.display = 'none';
+  renderCards();
+  drawn.forEach((_, i) => {
+    setTimeout(() => {
+      const el = document.getElementById('c'+i);
+      if (el) el.classList.add('flipped');
+      if (i === drawn.length - 1) setTimeout(getReading, 700);
+    }, 400 + i * 350);
+  });
+}
+
+function renderCards() {
+  const labels = LABELS[spr];
+  document.getElementById('cards').innerHTML = drawn.map((c, i) => `
+    <div class="slot">
+      <div class="clabel">${labels[i]}</div>
+      <div class="card" id="c${i}" onclick="this.classList.add('flipped')">
+        <div class="inner">
+          <div class="back">
+            <svg width="54" height="54" viewBox="0 0 54 54">
+              <circle cx="27" cy="27" r="25" fill="none" stroke="#8855cc" stroke-width="0.6"/>
+              <circle cx="27" cy="27" r="17" fill="none" stroke="#8855cc" stroke-width="0.6"/>
+              <line x1="27" y1="2" x2="27" y2="52" stroke="#8855cc" stroke-width="0.5"/>
+              <line x1="2" y1="27" x2="52" y2="27" stroke="#8855cc" stroke-width="0.5"/>
+              <circle cx="27" cy="27" r="3.5" fill="#8855cc" opacity="0.7"/>
+            </svg>
+          </div>
+          <div class="front${c.rev?' rev':''}">
+            <div class="csymbol">${c.sym}</div>
+            <div class="cname">${c.jp}</div>
+            ${c.rev ? '<div class="revlabel">逆位置</div>' : ''}
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function getReading() {
+  const rdiv = document.getElementById('reading');
+  rdiv.style.display = 'block';
+  rdiv.innerHTML = `<div class="reading"><div class="rtitle">✦ リーディング</div><div style="text-align:center;padding:0.5rem 0;font-size:13px;color:var(--color-text-secondary);">読み解いています<div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div></div>`;
+
+  const q = (document.getElementById('q').value || '').trim() || '今の状況';
+  const sname = {1:'一枚引き',3:'過去・現在・未来',5:'ケルト十字（簡易）'}[spr];
+  const labels = LABELS[spr];
+  const cardDesc = drawn.map((c,i) => `【${labels[i]}】${c.jp}（${c.rev?'逆位置：'+c.r:'正位置：'+c.m}）`).join('\n');
+  const prompt = `あなたはプロのタロット占い師です。\n\n質問：${q}\nスプレッド：${sname}\n\n${cardDesc}\n\n各カードの位置と意味を踏まえ、温かく洞察力のある総合リーディングを200〜280字でお伝えください。`;
+
+  // Build the reading from card meanings locally (no API needed as fallback)
+  const localReading = buildLocalReading(q, drawn, labels, sname);
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 600,
+        messages: [{role:'user', content: prompt}]
+      })
+    });
+
+    if (!res.ok) {
+      showReading(rdiv, localReading);
+      return;
+    }
+
+    const data = await res.json();
+    if (data.error) {
+      showReading(rdiv, localReading);
+      return;
+    }
+
+    const text = (data.content||[]).map(b => b.text||'').join('').trim();
+    showReading(rdiv, text || localReading);
+  } catch(e) {
+    showReading(rdiv, localReading);
+  }
+}
+
+function buildLocalReading(q, cards, labels, sname) {
+  const parts = cards.map((c, i) => {
+    const pos = labels[i];
+    const meaning = c.rev ? c.r : c.m;
+    return `【${pos}】に「${c.jp}」${c.rev?'（逆位置）':''}が現れました。これは${meaning}を示しています。`;
+  });
+  const endings = [
+    'カードはあなたに寄り添い、一歩一歩を照らしています。自分の直感を信じて進んでください。',
+    'この配置はあなたの内なる力を映し出しています。焦らず、自分のペースで歩んでいきましょう。',
+    '宇宙はあなたを見守っています。今感じていることを大切に、前に進む勇気を持ってください。',
+  ];
+  return parts.join('\n') + '\n\n' + endings[Math.floor(Math.random() * endings.length)];
+}
+
+function showReading(rdiv, text) {
+  rdiv.innerHTML = `<div class="reading"><div class="rtitle">✦ リーディング</div><div class="rtext">${text.replace(/\n/g,'<br>')}</div><button class="resetbtn" onclick="reset()">もう一度占う</button></div>`;
+}
+
+function reset() {
+  drawn = [];
+  document.getElementById('cards').innerHTML = '';
+  document.getElementById('reading').style.display = 'none';
+  document.getElementById('q').value = '';
+}
+</script>

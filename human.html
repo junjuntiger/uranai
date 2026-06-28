@@ -1,0 +1,370 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.app{max-width:680px;padding:1.5rem 0}
+.header{margin-bottom:1.5rem}
+.header h1{font-size:22px;font-weight:500;color:var(--color-text-primary)}
+.header p{font-size:14px;color:var(--color-text-secondary);margin-top:4px}
+.form-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1rem}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:13px;color:var(--color-text-secondary)}
+.form-group input,.form-group select{font-size:14px;padding:8px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);color:var(--color-text-primary);width:100%}
+.btn-main{display:block;width:100%;padding:10px;font-size:15px;font-weight:500;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);cursor:pointer;margin-top:12px}
+.btn-main:hover{opacity:0.85}
+.result{display:none}
+.type-badge{display:inline-block;padding:4px 14px;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;margin-bottom:12px}
+.section-title{font-size:16px;font-weight:500;color:var(--color-text-primary);margin-bottom:12px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem}
+.info-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px}
+.info-card .lbl{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
+.info-card .val{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.info-card .sub{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+.chart-area{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1.25rem}
+.centers-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem}
+.center-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;cursor:pointer;transition:border-color 0.15s}
+.center-card:hover{border-color:var(--color-border-primary)}
+.center-card .c-name{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.center-card .c-status{font-size:11px;margin-top:3px}
+.center-card.defined .c-status{color:#1D9E75}
+.center-card.undefined .c-status{color:#888780}
+.center-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
+.defined .center-dot{background:#1D9E75}
+.undefined .center-dot{background:#B4B2A9}
+.center-detail{display:none;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:14px;margin-bottom:1.25rem;font-size:14px;color:var(--color-text-secondary);line-height:1.6}
+.center-detail strong{color:var(--color-text-primary);font-weight:500}
+.strategy-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1rem}
+.strategy-row{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
+.strategy-row:last-child{margin-bottom:0}
+.s-icon{font-size:20px;color:var(--color-text-secondary);margin-top:2px;width:24px;flex-shrink:0}
+.s-label{font-size:12px;color:var(--color-text-secondary)}
+.s-val{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.s-desc{font-size:13px;color:var(--color-text-secondary);line-height:1.5;margin-top:2px}
+.reset-btn{font-size:13px;color:var(--color-text-secondary);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline}
+</style>
+
+<div class="app">
+  <div class="header">
+    <h1>ヒューマンデザイン診断</h1>
+    <p>生年月日・時刻・出生地を入力してチャートを生成します</p>
+  </div>
+
+  <div id="formSection">
+    <div class="form-card">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>生年月日</label>
+          <input type="date" id="birthDate" value="1990-04-15">
+        </div>
+        <div class="form-group">
+          <label>出生時刻</label>
+          <input type="time" id="birthTime" value="14:30">
+        </div>
+        <div class="form-group full">
+          <label>出生地（都市名）</label>
+          <input type="text" id="birthPlace" placeholder="例：東京、大阪、ニューヨーク" value="東京">
+        </div>
+        <div class="form-group full">
+          <label>お名前（任意）</label>
+          <input type="text" id="userName" placeholder="例：山田 太郎">
+        </div>
+      </div>
+      <button class="btn-main" onclick="calculate()"><i class="ti ti-sparkles" aria-hidden="true"></i> チャートを生成する</button>
+    </div>
+  </div>
+
+  <div class="result" id="resultSection">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <div>
+        <div id="typeBadge" class="type-badge"></div>
+        <div style="font-size:20px;font-weight:500;color:var(--color-text-primary)" id="resultName"></div>
+        <div style="font-size:13px;color:var(--color-text-secondary);margin-top:2px" id="resultDate"></div>
+      </div>
+      <button class="reset-btn" onclick="reset()"><i class="ti ti-refresh" aria-hidden="true"></i> やり直す</button>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="lbl">タイプ</div>
+        <div class="val" id="typeVal"></div>
+        <div class="sub" id="typeEn"></div>
+      </div>
+      <div class="info-card">
+        <div class="lbl">プロファイル</div>
+        <div class="val" id="profileVal"></div>
+        <div class="sub" id="profileDesc"></div>
+      </div>
+      <div class="info-card">
+        <div class="lbl">権威（Authority）</div>
+        <div class="val" id="authorityVal"></div>
+      </div>
+      <div class="info-card">
+        <div class="lbl">インカネーションクロス</div>
+        <div class="val" id="crossVal" style="font-size:13px"></div>
+      </div>
+    </div>
+
+    <div class="chart-area">
+      <div class="section-title">ボディグラフ</div>
+      <svg id="bodygraph" viewBox="0 0 320 420" style="width:100%;max-width:320px;display:block;margin:0 auto"></svg>
+    </div>
+
+    <div class="strategy-card">
+      <div class="section-title">戦略と権威</div>
+      <div class="strategy-row">
+        <div class="s-icon"><i class="ti ti-route" aria-hidden="true"></i></div>
+        <div>
+          <div class="s-label">戦略（Strategy）</div>
+          <div class="s-val" id="strategyVal"></div>
+          <div class="s-desc" id="strategyDesc"></div>
+        </div>
+      </div>
+      <div class="strategy-row">
+        <div class="s-icon"><i class="ti ti-antenna" aria-hidden="true"></i></div>
+        <div>
+          <div class="s-label">サイン（Not-Self Theme）</div>
+          <div class="s-val" id="notSelfVal"></div>
+          <div class="s-desc" id="notSelfDesc"></div>
+        </div>
+      </div>
+      <div class="strategy-row">
+        <div class="s-icon"><i class="ti ti-heart" aria-hidden="true"></i></div>
+        <div>
+          <div class="s-label">シグネチャー（Signature）</div>
+          <div class="s-val" id="signatureVal"></div>
+          <div class="s-desc" id="signatureDesc"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:1rem">
+      <div class="section-title">9センター（クリックで詳細）</div>
+      <div class="centers-grid" id="centersGrid"></div>
+      <div class="center-detail" id="centerDetail"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const TYPES = [
+  {
+    name:"マニフェスター",en:"Manifestor",color:"background:#AFA9EC;color:#3C3489",
+    strategy:"告知する（Inform）",strategyDesc:"行動する前に周囲に知らせることで摩擦を減らし、スムーズに物事を動かせます。",
+    notSelf:"怒り",signature:"平和",
+    notSelfDesc:"告知せずに動くと周囲から反発を受け、怒りが生じやすくなります。",
+    signatureDesc:"正しく告知して動いているとき、内側に深い平和を感じます。",
+    authority:"感情的権威 または 本能的権威",
+    profiles:["1/3","1/4","2/4","3/5","4/6","5/1"],
+    cross:["権威のクロス","変容のクロス","意志のクロス"],
+    centers:[true,false,true,false,true,true,false,true,false]
+  },
+  {
+    name:"ジェネレーター",en:"Generator",color:"background:#5DCAA5;color:#085041",
+    strategy:"応答する（Respond）",strategyDesc:"自分から先に動くのではなく、外からの刺激や質問に『腸からの応答』で反応することが大切です。",
+    notSelf:"欲求不満",signature:"満足",
+    notSelfDesc:"応答を待たず先に動くと欲求不満がたまり、エネルギーを消耗します。",
+    signatureDesc:"正しく応答しているとき、仕事や活動への深い満足感を感じます。",
+    authority:"仙骨権威 または 感情的権威",
+    profiles:["2/4","3/5","4/6","1/3","5/2","6/2"],
+    cross:["サービスのクロス","衝動のクロス","計画のクロス"],
+    centers:[true,false,true,true,false,true,true,false,true]
+  },
+  {
+    name:"マニフェスティング・ジェネレーター",en:"Manifesting Generator",color:"background:#97C459;color:#27500A",
+    strategy:"応答してから告知する",strategyDesc:"まず腸で応答し、行動前に周囲へ告知することで最大のエネルギーを発揮できます。",
+    notSelf:"欲求不満と怒り",signature:"満足と平和",
+    notSelfDesc:"プロセスを飛ばしたり告知を怠ると、欲求不満や怒りが生じます。",
+    signatureDesc:"応答と告知が揃ったとき、満足と平和の両方を感じられます。",
+    authority:"仙骨権威 または 感情的権威",
+    profiles:["1/3","2/4","3/5","4/6","5/1","6/3"],
+    cross:["サービスのクロス","変容のクロス","意志のクロス"],
+    centers:[true,true,true,true,false,true,true,false,true]
+  },
+  {
+    name:"プロジェクター",en:"Projector",color:"background:#85B7EB;color:#0C447C",
+    strategy:"招待を待つ（Wait for Invitation）",strategyDesc:"大きな決断や行動は招待されてから。招待なしに動くとエネルギーを消耗します。",
+    notSelf:"苦さ（ビタネス）",signature:"成功",
+    notSelfDesc:"招待なしに案内や指導をしようとすると、無視され苦さが生じます。",
+    signatureDesc:"正しい招待に応じて動いているとき、自然な成功の流れに乗れます。",
+    authority:"感情的権威・脾臓権威・自己投影権威 など",
+    profiles:["1/3","2/4","3/5","4/6","5/1","6/2"],
+    cross:["知識のクロス","奉仕のクロス","認識のクロス"],
+    centers:[false,false,true,false,true,false,true,true,false]
+  },
+  {
+    name:"リフレクター",en:"Reflector",color:"background:#FAC775;color:#633806",
+    strategy:"月のサイクルを待つ（Wait a Lunar Cycle）",strategyDesc:"重要な決断は約28日間待ち、月のサイクルを通じてさまざまな視点を体験してから決めます。",
+    notSelf:"失望",signature:"驚き",
+    notSelfDesc:"十分に待たずに決断すると失望につながりやすくなります。",
+    signatureDesc:"正しいタイミングで決断したとき、人生への驚きと喜びを感じます。",
+    authority:"月の権威（Lunar Authority）",
+    profiles:["1/4","2/4","3/6","4/6","5/2","6/3"],
+    cross:["変化のクロス","驚きのクロス","サービスのクロス"],
+    centers:[false,false,false,false,false,false,false,false,false]
+  }
+];
+
+const CENTERS = [
+  {name:"ヘッド",desc:"<strong>ヘッドセンター</strong>は思考と霊感の源。<br>定義：インスピレーションが絶え間なく流れる。未定義：外部の考えや問いに影響されやすい。"},
+  {name:"アジナ",desc:"<strong>アジナセンター</strong>はマインド・概念化の場所。<br>定義：一定の思考パターンと信念を持つ。未定義：さまざまな視点を柔軟に取り込める。"},
+  {name:"ソート（喉）",desc:"<strong>ソートセンター</strong>はコミュニケーションと表現の中心。<br>定義：自分のやり方で一貫して表現できる。未定義：環境によって話し方や表現が変わる。"},
+  {name:"自己（G）",desc:"<strong>自己（G）センター</strong>はアイデンティティと方向性の核心。<br>定義：自分軸がしっかりあり、一貫した方向へ進む。未定義：周囲の人や環境によってアイデンティティが変化する。"},
+  {name:"ハート（意志）",desc:"<strong>ハートセンター</strong>は意志力とエゴの場所。<br>定義：強い意志と自己主張の力を持つ。未定義：意志力は安定せず、自分を証明しようとしがち。"},
+  {name:"仙骨",desc:"<strong>仙骨センター</strong>は生命エネルギーと持続力の源。<br>定義（ジェネレーター/MG）：強くて持続するエネルギーを持つ。未定義：エネルギーは不安定で、休息が必要。"},
+  {name:"感情（太陽神経叢）",desc:"<strong>感情センター</strong>は感情と情熱の場所。<br>定義：感情の波があり、明確さは時間をかけて生まれる。未定義：周囲の感情を吸収し増幅させる傾向がある。"},
+  {name:"脾臓",desc:"<strong>脾臓センター</strong>は直感・生存本能・健康の場所。<br>定義：強い直感を持ち、今この瞬間に何が安全かを感じ取る。未定義：健康や安全へのこだわりが強くなりがち。"},
+  {name:"ルート",desc:"<strong>ルートセンター</strong>はプレッシャーとアドレナリンの源。<br>定義：一定のストレス耐性と推進力を持つ。未定義：外からのプレッシャーを強く感じ、急いで解消しようとしがち。"},
+];
+
+const PROFILES = [
+  {p:"1/3",name:"研究者/殉教者",desc:"探求と実験を繰り返すことで知識を深める"},
+  {p:"1/4",name:"研究者/日和見主義者",desc:"確かな基盤と影響力のある人脈で道を開く"},
+  {p:"2/4",name:"隠者/日和見主義者",desc:"自然な才能を持ち、信頼できるネットワークで輝く"},
+  {p:"2/5",name:"隠者/異端者",desc:"才能を活かし、実践的な解決策を提供する"},
+  {p:"3/5",name:"殉教者/異端者",desc:"試行錯誤で学び、実践的な知恵を伝える"},
+  {p:"3/6",name:"殉教者/ロールモデル",desc:"経験を積み、人生後半に模範となる"},
+  {p:"4/6",name:"日和見主義者/ロールモデル",desc:"人脈と信頼でコミュニティに影響を与える"},
+  {p:"5/1",name:"異端者/研究者",desc:"実践的な知識で多くの人の期待に応える"},
+  {p:"5/2",name:"異端者/隠者",desc:"才能で人々を救うが、一人の時間も必要"},
+  {p:"6/2",name:"ロールモデル/隠者",desc:"人生3段階で完成する知恵の体現者"},
+];
+
+let selectedCenter = null;
+
+function hashCode(str){
+  let h=0;
+  for(let i=0;i<str.length;i++){h=Math.imul(31,h)+str.charCodeAt(i)|0}
+  return Math.abs(h);
+}
+
+function calculate(){
+  const d=document.getElementById('birthDate').value;
+  const t=document.getElementById('birthTime').value;
+  const p=document.getElementById('birthPlace').value;
+  const n=document.getElementById('userName').value;
+  if(!d||!t||!p){alert('生年月日・時刻・出生地を入力してください');return}
+
+  const seed=hashCode(d+t+p);
+  const typeIdx=seed%5;
+  const type=TYPES[typeIdx];
+  const profileIdx=seed%PROFILES.length;
+  const profile=PROFILES[profileIdx];
+  const crossIdx=seed%type.cross.length;
+
+  document.getElementById('formSection').style.display='none';
+  const res=document.getElementById('resultSection');
+  res.style.display='block';
+
+  const badge=document.getElementById('typeBadge');
+  badge.style.cssText=type.color+';padding:4px 14px;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;display:inline-block;margin-bottom:8px';
+  badge.textContent=type.name;
+
+  document.getElementById('resultName').textContent=n||'あなた';
+  const dateStr=new Date(d).toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'})+' '+t+' 生まれ、'+p;
+  document.getElementById('resultDate').textContent=dateStr;
+  document.getElementById('typeVal').textContent=type.name;
+  document.getElementById('typeEn').textContent=type.en;
+  document.getElementById('profileVal').textContent=profile.p;
+  document.getElementById('profileDesc').textContent=profile.name+'：'+profile.desc;
+  document.getElementById('authorityVal').textContent=type.authority;
+  document.getElementById('crossVal').textContent=type.cross[crossIdx];
+  document.getElementById('strategyVal').textContent=type.strategy;
+  document.getElementById('strategyDesc').textContent=type.strategyDesc;
+  document.getElementById('notSelfVal').textContent=type.notSelf;
+  document.getElementById('notSelfDesc').textContent=type.notSelfDesc;
+  document.getElementById('signatureVal').textContent=type.signature;
+  document.getElementById('signatureDesc').textContent=type.signatureDesc;
+
+  drawBodygraph(type,seed);
+  drawCenters(type,seed);
+}
+
+function drawBodygraph(type,seed){
+  const svg=document.getElementById('bodygraph');
+  const defined=type.centers;
+
+  const defColor='#1D9E75';
+  const undefColor='#D3D1C7';
+  const defStroke='#085041';
+  const undefStroke='#B4B2A9';
+  const textColor='var(--color-text-secondary)';
+
+  const shapes=[
+    {x:145,y:18,w:30,h:30,r:15,label:"HEAD",i:0},
+    {x:135,y:65,w:50,h:32,r:8,label:"AJNA",i:1},
+    {x:128,y:115,w:64,h:36,r:8,label:"THROAT",i:2},
+    {x:130,y:175,w:60,h:40,r:20,label:"G",i:3},
+    {x:90,y:178,w:30,h:30,r:8,label:"HEART",i:4},
+    {x:130,y:235,w:60,h:40,r:8,label:"SACRAL",i:5},
+    {x:195,y:178,w:30,h:60,r:8,label:"SOLAR",i:6},
+    {x:82,y:230,w:34,h:50,r:8,label:"SPLEEN",i:7},
+    {x:130,y:295,w:60,h:36,r:8,label:"ROOT",i:8},
+  ];
+
+  const channels=[
+    [160,48,160,65],[160,97,160,115],[160,151,160,175],
+    [160,215,160,235],[160,275,160,295],
+    [160,195,130,195],[160,195,195,195],
+    [107,195,120,235],[209,208,209,238],
+    [99,260,130,270],[213,258,190,270],
+  ];
+
+  let html='<defs><filter id="none"></filter></defs>';
+
+  channels.forEach(c=>{
+    const active=Math.random()>0.5;
+    html+=`<line x1="${c[0]}" y1="${c[1]}" x2="${c[2]}" y2="${c[3]}" stroke="${active?defColor:undefColor}" stroke-width="${active?2.5:1.5}" opacity="0.7"/>`;
+  });
+
+  shapes.forEach(s=>{
+    const d=defined[s.i];
+    const fill=d?defColor:undefColor;
+    const stroke=d?defStroke:undefStroke;
+    if(s.label==="HEAD"){
+      html+=`<circle cx="${s.x}" cy="${s.y+s.r}" r="${s.r}" fill="${fill}" stroke="${stroke}" stroke-width="1"/>`;
+    } else {
+      html+=`<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" rx="${s.r}" fill="${fill}" stroke="${stroke}" stroke-width="1"/>`;
+    }
+    const lx=s.x+(s.label==="HEAD"?0:s.w/2);
+    const ly=s.label==="HEAD"?s.y+s.r+5:s.y+s.h/2+5;
+    const fontSize=s.label==="G"||s.label==="HEAD"?11:9;
+    html+=`<text x="${lx}" y="${ly}" text-anchor="middle" font-size="${fontSize}" font-family="var(--font-sans)" fill="${d?'#085041':'#888780'}" font-weight="500">${s.label}</text>`;
+  });
+
+  html+=`<text x="160" y="380" text-anchor="middle" font-size="11" font-family="var(--font-sans)" fill="var(--color-text-secondary)" opacity="0.7">● 定義済み（Defined）　○ 未定義（Undefined）</text>`;
+
+  svg.innerHTML=html;
+}
+
+function drawCenters(type,seed){
+  const grid=document.getElementById('centersGrid');
+  grid.innerHTML='';
+  type.centers.forEach((defined,i)=>{
+    const c=CENTERS[i];
+    const div=document.createElement('div');
+    div.className='center-card '+(defined?'defined':'undefined');
+    div.innerHTML=`<div class="c-name"><span class="center-dot"></span>${c.name}</div><div class="c-status">${defined?'定義済み（Defined）':'未定義（Undefined）'}</div>`;
+    div.onclick=()=>showCenterDetail(i,defined,c);
+    grid.appendChild(div);
+  });
+}
+
+function showCenterDetail(i,defined,c){
+  const det=document.getElementById('centerDetail');
+  if(selectedCenter===i&&det.style.display==='block'){
+    det.style.display='none';selectedCenter=null;return;
+  }
+  selectedCenter=i;
+  det.innerHTML=`<p style="margin-bottom:8px">${c.desc}</p><p><strong style="color:var(--color-text-primary)">あなたの${c.name}：</strong>${defined?'<span style="color:#1D9E75">定義済み</span>　安定したエネルギーが常に流れています。':'<span style="color:#888780">未定義</span>　周囲のエネルギーを受け取り増幅させる、開かれた状態です。'}</p>`;
+  det.style.display='block';
+}
+
+function reset(){
+  document.getElementById('formSection').style.display='block';
+  document.getElementById('resultSection').style.display='none';
+  selectedCenter=null;
+}
+</script>

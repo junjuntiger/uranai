@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ルーン占い</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Noto+Serif+JP:wght@400;500;700&display=swap');
+
+:root{
+  --bg-deep:#15171c;
+  --bg-panel:#1d2026;
+  --stone:#2a2e36;
+  --bone:#e8e1d3;
+  --bone-dim:#a8a08e;
+  --rust:#a85c3a;
+  --rust-bright:#c97a4f;
+  --indigo:#3c4a66;
+  --line:#3a3e47;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+  background:var(--bg-deep);
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(168,92,58,0.06), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(60,74,102,0.10), transparent 45%);
+  color:var(--bone);
+  font-family:'Noto Serif JP', serif;
+  min-height:100vh;
+  padding:48px 20px 80px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.wrap{max-width:680px;width:100%;}
+
+header{
+  text-align:center;
+  margin-bottom:40px;
+}
+
+.eyebrow{
+  font-family:'Cinzel',serif;
+  letter-spacing:0.25em;
+  font-size:11px;
+  color:var(--rust-bright);
+  text-transform:uppercase;
+  margin-bottom:14px;
+}
+
+h1{
+  font-size:32px;
+  font-weight:500;
+  letter-spacing:0.05em;
+  color:var(--bone);
+}
+
+.futhark-strip{
+  font-family:'Cinzel',serif;
+  font-size:18px;
+  letter-spacing:0.4em;
+  color:var(--bone-dim);
+  opacity:0.5;
+  margin-top:16px;
+}
+
+.panel{
+  background:var(--bg-panel);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:28px 26px;
+  margin-bottom:28px;
+}
+
+.panel-label{
+  font-family:'Cinzel',serif;
+  font-size:11px;
+  letter-spacing:0.18em;
+  color:var(--bone-dim);
+  text-transform:uppercase;
+  margin-bottom:12px;
+}
+
+textarea{
+  width:100%;
+  background:var(--stone);
+  border:1px solid var(--line);
+  border-radius:4px;
+  color:var(--bone);
+  font-family:'Noto Serif JP', serif;
+  font-size:15px;
+  padding:14px;
+  resize:vertical;
+  min-height:60px;
+  line-height:1.6;
+}
+textarea:focus{outline:1px solid var(--rust);border-color:var(--rust);}
+textarea::placeholder{color:var(--bone-dim);opacity:0.6;}
+
+.spread-options{
+  display:flex;
+  gap:10px;
+  margin-top:18px;
+}
+
+.spread-btn{
+  flex:1;
+  background:var(--stone);
+  border:1px solid var(--line);
+  color:var(--bone-dim);
+  font-family:'Noto Serif JP', serif;
+  font-size:13px;
+  padding:12px 8px;
+  border-radius:4px;
+  cursor:pointer;
+  transition:border-color 0.2s, color 0.2s;
+  text-align:center;
+  line-height:1.4;
+}
+.spread-btn .num{
+  font-family:'Cinzel',serif;
+  display:block;
+  font-size:15px;
+  color:var(--bone);
+  margin-bottom:2px;
+}
+.spread-btn.active{
+  border-color:var(--rust);
+  color:var(--bone);
+  background:rgba(168,92,58,0.10);
+}
+.spread-btn:hover{border-color:var(--bone-dim);}
+
+.draw-btn{
+  width:100%;
+  margin-top:22px;
+  background:var(--rust);
+  border:none;
+  color:#1a1410;
+  font-family:'Cinzel',serif;
+  letter-spacing:0.12em;
+  font-size:14px;
+  text-transform:uppercase;
+  padding:16px;
+  border-radius:4px;
+  cursor:pointer;
+  transition:background 0.2s, transform 0.1s;
+}
+.draw-btn:hover{background:var(--rust-bright);}
+.draw-btn:active{transform:scale(0.99);}
+.draw-btn:disabled{opacity:0.4;cursor:default;}
+
+.pouch-note{
+  text-align:center;
+  font-size:12px;
+  color:var(--bone-dim);
+  margin-top:14px;
+  letter-spacing:0.02em;
+}
+
+#results{display:none;}
+
+.positions-row{
+  display:flex;
+  gap:14px;
+  margin-bottom:30px;
+  flex-wrap:wrap;
+}
+
+.rune-card{
+  flex:1;
+  min-width:150px;
+  background:var(--bg-panel);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:22px 16px;
+  text-align:center;
+  cursor:pointer;
+  transition:border-color 0.2s, transform 0.2s;
+  opacity:0;
+}
+.rune-card.revealed{opacity:1;}
+.rune-card:hover{border-color:var(--rust);}
+
+.position-tag{
+  font-family:'Noto Serif JP',serif;
+  font-size:15px;
+  font-weight:500;
+  letter-spacing:0.1em;
+  color:var(--rust-bright);
+  text-transform:uppercase;
+  margin-bottom:14px;
+}
+
+.rune-glyph{
+  font-family:'Cinzel',serif;
+  font-size:52px;
+  color:var(--bone);
+  line-height:1;
+  margin-bottom:10px;
+  display:inline-block;
+}
+.rune-glyph.reversed{transform:scaleY(-1);}
+
+.rune-name{
+  font-size:14px;
+  font-weight:500;
+  color:var(--bone);
+  margin-bottom:3px;
+}
+.rune-orient{
+  font-size:11px;
+  color:var(--bone-dim);
+  letter-spacing:0.05em;
+}
+
+.detail-panel{display:none;}
+.detail-panel.open{display:block;}
+
+.detail-head{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  margin-bottom:18px;
+  padding-bottom:18px;
+  border-bottom:1px solid var(--line);
+}
+.detail-glyph{
+  font-family:'Cinzel',serif;
+  font-size:48px;
+  color:var(--rust-bright);
+  width:70px;
+  text-align:center;
+}
+.detail-glyph.reversed{transform:scaleY(-1);}
+.detail-titles .dt-pos{
+  font-family:'Noto Serif JP',serif;
+  font-size:15px;
+  font-weight:500;
+  letter-spacing:0.08em;
+  color:var(--rust-bright);
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+.detail-titles .dt-name{
+  font-size:20px;
+  font-weight:500;
+  color:var(--bone);
+}
+.detail-titles .dt-romaji{
+  font-size:13px;
+  color:var(--bone-dim);
+}
+
+.detail-section{margin-bottom:16px;}
+.detail-section .ds-label{
+  font-family:'Cinzel',serif;
+  font-size:10px;
+  letter-spacing:0.15em;
+  color:var(--bone-dim);
+  text-transform:uppercase;
+  margin-bottom:6px;
+}
+.detail-section .ds-body{
+  font-size:14.5px;
+  line-height:1.85;
+  color:var(--bone);
+}
+
+.keywords{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:18px;
+}
+.keyword{
+  font-size:12px;
+  color:var(--bone-dim);
+  border:1px solid var(--line);
+  padding:5px 12px;
+  border-radius:20px;
+}
+
+.reset-link{
+  display:block;
+  text-align:center;
+  margin-top:36px;
+  font-size:13px;
+  color:var(--bone-dim);
+  cursor:pointer;
+  letter-spacing:0.04em;
+}
+.reset-link:hover{color:var(--rust-bright);}
+
+footer{
+  text-align:center;
+  margin-top:50px;
+  font-size:11px;
+  color:var(--bone-dim);
+  opacity:0.5;
+  letter-spacing:0.05em;
+}
+
+@media (max-width:600px){
+  .positions-row{flex-direction:column;}
+  h1{font-size:26px;}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Elder Futhark Oracle</div>
+  <h1>ルーン占い</h1>
+  <div class="futhark-strip">ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛟᛞ</div>
+</header>
+
+<div class="panel" id="setup-panel">
+  <div class="panel-label">質問・悩み</div>
+  <textarea id="question" placeholder="今、心に浮かんでいることを書いてください（任意）"></textarea>
+
+  <div class="panel-label" style="margin-top:24px;">展開方法</div>
+  <div class="spread-options" id="spread-options">
+    <div class="spread-btn active" data-n="1">
+      <span class="num">1</span>一枚引き
+    </div>
+    <div class="spread-btn" data-n="3">
+      <span class="num">3</span>過去・現在・未来
+    </div>
+  </div>
+
+  <button class="draw-btn" id="draw-btn">石を引く</button>
+  <div class="pouch-note">袋の中から、手が触れた石を引き上げてください</div>
+</div>
+
+<div id="results">
+  <div class="positions-row" id="positions-row"></div>
+  <div class="panel detail-panel" id="detail-panel"></div>
+  <div class="reset-link" id="reset-link">もう一度、問いを立てる</div>
+</div>
+
+<footer>北欧の古代文字に宿る、24の象徴 — 直感を信じて読み解く</footer>
+
+</div>
+
+<script>
+const RUNES = [
+  {name:"Fehu", jp:"フェフ", glyph:"ᚠ", up:"豊かさ・始まりの財", upText:"新しい資源やチャンスが手元にある暗示。今は得たものを大切に育てる時期です。物質的・精神的な豊かさが流れ込んできていますが、それをどう使うかが鍵になります。", rev:"停滞・失うことへの不安", revText:"資源の枯渇や、執着による行き詰まりを示します。何かを手放す必要があるのかもしれません。物への依存を見直すタイミングです。", kw:["豊かさ","所有","始まり"]},
+  {name:"Uruz", jp:"ウルズ", glyph:"ᚢ", up:"原始の力・健康", upText:"野生の牛のような強さと生命力を象徴します。困難を乗り越える体力と意志が今のあなたにはあります。本能を信じて前進してよい時です。", rev:"消耗・弱さの露呈", revText:"力を出し切れていない、あるいは無理をして消耗している状態。休息と回復を優先する必要があります。", kw:["生命力","強さ","本能"]},
+  {name:"Thurisaz", jp:"スリサズ", glyph:"ᚦ", up:"防御・試練との対峙", upText:"棘のような防御力。困難な状況に対して、しっかりと自分を守る境界線が必要です。試練は成長のための装置でもあります。", rev:"無防備・自己破壊", revText:"防御を怠ったことで傷つきやすくなっている状態。あるいは自分自身を傷つけるような選択をしていないか見直してください。", kw:["防御","試練","境界線"]},
+  {name:"Ansuz", jp:"アンスズ", glyph:"ᚨ", up:"メッセージ・叡智の言葉", upText:"重要な知らせや助言が届く暗示。誰かの言葉、または直感の声に耳を傾けてください。コミュニケーションが鍵を握ります。", rev:"誤解・伝わらない思い", revText:"言葉が届かない、あるいは誤って解釈される危険。伝える前に一度言葉を選び直すとよいでしょう。", kw:["伝達","知恵","言葉"]},
+  {name:"Raidho", jp:"ライド", glyph:"ᚱ", up:"旅・正しい道筋", upText:"物事が正しい方向に進んでいる暗示。人生という旅路において、今のペースとルートは間違っていません。", rev:"停滞・道に迷う", revText:"進むべき方向を見失っている、あるいは無理な急ぎ方をしている状態。立ち止まって地図を見直す時です。", kw:["旅","方向","進展"]},
+  {name:"Kenaz", jp:"ケナズ", glyph:"ᚲ", up:"灯火・創造の火", upText:"内なる創造性や知識の炎が灯っています。技術や才能を活かして、何かを形にするチャンスです。", rev:"消えた灯・創造性の枯渇", revText:"やる気やインスピレーションが失われている状態。火を絶やさないよう、小さな刺激や休息を求めましょう。", kw:["創造","知識","情熱"]},
+  {name:"Gebo", jp:"ゲボ", glyph:"ᚷ", up:"贈り物・互恵の関係", upText:"与えることと受け取ることのバランスが取れている状態。良い関係性が築かれ、寛大さが報われます。", rev:"不均衡・見返りへの執着", revText:"一方的な関係や、見返りを期待しすぎる態度に注意。本来の贈り物の精神に戻ることが大切です。", kw:["贈与","関係性","バランス"]},
+  {name:"Wunjo", jp:"ウンジョ", glyph:"ᚹ", up:"喜び・調和の成就", upText:"望んでいたことが実を結び、喜びや満足感が訪れる暗示。仲間との絆も深まる時期です。", rev:"失望・不調和", revText:"期待していた喜びが先延ばしになる、あるいは関係に不調和が生じている状態。", kw:["喜び","調和","成就"]},
+  {name:"Hagalaz", jp:"ハガラズ", glyph:"ᚺ", up:"突発的な変化・自然の力", upText:"自分の力では止められない、突然の出来事や変化が起こる暗示。コントロールを手放し、流れに身を委ねる必要があります。", rev:"――（この文字に逆位置は伝統的に用いられません）", revText:"嵐の影響が長引いている、あるいは混乱の中で前に進めない状態を示すこともあります。", kw:["変化","破壊と再生","不可抗力"]},
+  {name:"Nauthiz", jp:"ナウシズ", glyph:"ᚾ", up:"必要・忍耐の試練", upText:"困難な状況の中で、本当に必要なものが見えてくる時期。制約こそが成長の種になります。", rev:"欠乏・自己制限", revText:"自らに課した不必要な制限や、欠乏感に囚われている状態。何が本当に必要かを問い直してください。", kw:["欠乏","忍耐","必要性"]},
+  {name:"Isa", jp:"イサ", glyph:"ᛁ", up:"静止・内省の時", upText:"物事が凍りつくように停止する時期。今は動くより、内側を見つめ、力を蓄える時です。", rev:"凝り固まり・感情の麻痺", revText:"停滞が長引き、感情が凍りついている状態。少しずつでも溶かしていく working が必要です。", kw:["静止","内省","忍耐"]},
+  {name:"Jera", jp:"イェラ", glyph:"ᛃ", up:"収穫・自然な巡り", upText:"これまでの努力が実を結ぶ収穫の時。物事は自然な周期の中で正しく巡っています。", rev:"――（この文字に逆位置は伝統的に用いられません）", revText:"収穫が遅れている、あるいは周期の中の困難な季節にいることを示す場合があります。", kw:["収穫","周期","成果"]},
+  {name:"Eihwaz", jp:"エイワズ", glyph:"ᛇ", up:"忍耐の樹・転換点", upText:"イチイの木のように、しなやかでありながら揺るがない強さ。困難な転換点を乗り越える力があります。", rev:"――（この文字に逆位置は伝統的に用いられません）", revText:"変化への抵抗や、転換点を避けようとする態度が示されることがあります。", kw:["転換","忍耐","防御"]},
+  {name:"Perthro", jp:"ペルスロ", glyph:"ᛈ", up:"運命・隠された知識", upText:"運命の骰子が投げられる時。先のことは見えなくても、隠された秘密や運命の手が働いています。", rev:"不運・秘密の露見", revText:"思い通りにならない巡り合わせ、あるいは隠していたことが明らかになる暗示。", kw:["運命","秘密","巡り合わせ"]},
+  {name:"Algiz", jp:"アルギズ", glyph:"ᛉ", up:"保護・守護のしるし", upText:"見えない力による保護を受けている暗示。危険から守られ、直感が正しい道を示しています。", rev:"守りの綻び・警戒の欠如", revText:"無防備な状態、あるいは警告を無視している危険性。直感の声を軽視しないでください。", kw:["保護","直感","警告"]},
+  {name:"Sowilo", jp:"ソウィロ", glyph:"ᛊ", up:"太陽・成功と活力", upText:"勝利と成功、生命力に満ちた強い力。目標に向かって輝かしい前進ができる時期です。", rev:"――（この文字に逆位置は伝統的に用いられません）", revText:"光が一時的に遮られている、達成への道のりが見えづらい状態を示すことがあります。", kw:["成功","活力","目標達成"]},
+  {name:"Tiwaz", jp:"ティワズ", glyph:"ᛏ", up:"正義・勝利への意志", upText:"正しいことのために戦う勇気と、公正な判断力。困難な選択でも正義の側に立つ強さがあります。", rev:"不正・闘争心の空回り", revText:"不公正な状況、あるいは戦う相手や方向を誤っている状態。判断を一度落ち着かせましょう。", kw:["正義","勇気","勝利"]},
+  {name:"Berkano", jp:"ベルカナ", glyph:"ᛒ", up:"成長・新たな始まり", upText:"白樺の若葉のような、新しい命や物事の芽生え。育てることへの注力が良い結果を生みます。", rev:"成長の停滞・過保護", revText:"成長が思うように進まない、あるいは過度な世話が自立を妨げている状態。", kw:["成長","誕生","育成"]},
+  {name:"Ehwaz", jp:"エワズ", glyph:"ᛖ", up:"信頼・協力関係", upText:"馬と乗り手のような、深い信頼に基づくパートナーシップ。協力によって物事が前進します。", rev:"不信・連携の乱れ", revText:"信頼関係に綻びが生じている、あるいはパートナーとの連携がうまくいっていない状態。", kw:["信頼","協力","パートナーシップ"]},
+  {name:"Mannaz", jp:"マンナズ", glyph:"ᛗ", up:"自己・人間関係の調和", upText:"自分自身や他者との健全な関係性。共同体の中での自分の役割が明確になる時です。", rev:"孤立・自己への過信", revText:"人とのつながりを断ってしまっている、あるいは自分の見方に固執しすぎている状態。", kw:["自己","共同体","関係性"]},
+  {name:"Laguz", jp:"ラグズ", glyph:"ᛚ", up:"流れ・直感と感情", upText:"水のように流れる感情や直感に従うべき時。無意識からのメッセージに耳を傾けてください。", rev:"混乱・感情の渦", revText:"感情に飲み込まれている、あるいは直感と現実の判断が混乱している状態。", kw:["直感","感情","流れ"]},
+  {name:"Inguz", jp:"インガズ", glyph:"ᛜ", up:"完結・内なる豊穣", upText:"ひとつの物事が満ち、新しい段階へ移る準備が整った状態。種が育ち、実を結ぶ時です。", rev:"――（この文字に逆位置は伝統的に用いられません）", revText:"物事の完結が遅れている、あるいは次の段階への移行に時間がかかっている状態を示すことがあります。", kw:["完結","豊穣","変容"]},
+  {name:"Dagaz", jp:"ダガズ", glyph:"ᛞ", up:"夜明け・気づきの光", upText:"新しい一日が始まるような、明確な気づきや希望の訪れ。視界が開け、物事がはっきり見えてきます。", rev:"――（この文字に逆位置は伝統的に用いられません）", revText:"気づきが訪れる前の薄暗さ、あるいは見通しがまだ立たない状態を示すことがあります。", kw:["気づき","希望","転機"]},
+  {name:"Othala", jp:"オダラ", glyph:"ᛟ", up:"祖先の地・受け継ぐもの", upText:"家族や故郷、これまで積み上げてきた財産や価値観。ルーツに立ち返ることで安定を得られます。", rev:"執着・ルーツの欠落", revText:"過去への過度な執着、あるいは自分の基盤を見失っている状態。何を受け継ぎ、何を手放すか見極める時です。", kw:["継承","故郷","基盤"]}
+];
+const NO_REVERSE = new Set(["Hagalaz","Jera","Eihwaz","Sowilo","Inguz","Dagaz"]);
+
+let selectedSpread = 1;
+let currentDraw = [];
+
+document.querySelectorAll('.spread-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.spread-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedSpread = parseInt(btn.dataset.n);
+  });
+});
+
+function drawRunes(n){
+  const pool = [...RUNES];
+  const picked = [];
+  for(let i=0;i<n;i++){
+    const idx = Math.floor(Math.random()*pool.length);
+    const rune = pool.splice(idx,1)[0];
+    const reversed = !NO_REVERSE.has(rune.name) && Math.random() < 0.4;
+    picked.push({...rune, reversed});
+  }
+  return picked;
+}
+
+const POSITION_LABELS_1 = ["今日のルーン"];
+const POSITION_LABELS_3 = ["過去", "現在", "未来"];
+
+document.getElementById('draw-btn').addEventListener('click', ()=>{
+  currentDraw = drawRunes(selectedSpread);
+  const labels = selectedSpread === 1 ? POSITION_LABELS_1 : POSITION_LABELS_3;
+
+  const row = document.getElementById('positions-row');
+  row.innerHTML = '';
+  currentDraw.forEach((r, i)=>{
+    const card = document.createElement('div');
+    card.className = 'rune-card';
+    card.innerHTML = `
+      <div class="position-tag">${labels[i]}</div>
+      <div class="rune-glyph ${r.reversed?'reversed':''}">${r.glyph}</div>
+      <div class="rune-name">${r.name}（${r.jp}）</div>
+      <div class="rune-orient">${r.reversed?'逆位置':'正位置'}</div>
+    `;
+    card.addEventListener('click', ()=>showDetail(i, labels[i]));
+    row.appendChild(card);
+    setTimeout(()=>card.classList.add('revealed'), 120*i + 60);
+  });
+
+  document.getElementById('setup-panel').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('detail-panel').classList.remove('open');
+  showDetail(0, labels[0]);
+});
+
+function showDetail(i, label){
+  const r = currentDraw[i];
+  const orientLabel = r.reversed ? '逆位置' : '正位置';
+  const meaning = r.reversed ? r.rev : r.up;
+  const meaningText = r.reversed ? r.revText : r.upText;
+  const panel = document.getElementById('detail-panel');
+  panel.innerHTML = `
+    <div class="detail-head">
+      <div class="detail-glyph ${r.reversed?'reversed':''}">${r.glyph}</div>
+      <div class="detail-titles">
+        <div class="dt-pos">${label} ・ ${orientLabel}</div>
+        <div class="dt-name">${r.name}（${r.jp}）</div>
+      </div>
+    </div>
+    <div class="keywords">${r.kw.map(k=>`<span class="keyword">${k}</span>`).join('')}</div>
+    <div class="detail-section">
+      <div class="ds-label">象徴</div>
+      <div class="ds-body">${meaning}</div>
+    </div>
+    <div class="detail-section">
+      <div class="ds-label">解釈</div>
+      <div class="ds-body">${meaningText}</div>
+    </div>
+  `;
+  panel.classList.add('open');
+}
+
+document.getElementById('reset-link').addEventListener('click', ()=>{
+  document.getElementById('setup-panel').style.display = 'block';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('question').value = '';
+});
+</script>
+
+</body>
+</html>

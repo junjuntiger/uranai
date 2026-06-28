@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>マヤ暦占い</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Mincho ProN','Yu Mincho',Georgia,serif;background:#f7f3ed;color:#2c2416;min-height:100vh}
+.wrap{max-width:660px;margin:0 auto;padding:1.5rem 1.25rem 4rem}
+.header{text-align:center;padding:2.5rem 1rem 2rem;border-bottom:1px solid #d8cfc4;margin-bottom:1.5rem}
+.header h1{font-size:26px;font-weight:400;letter-spacing:0.18em;margin-bottom:10px}
+.header p{font-size:13px;color:#8a7a68;line-height:1.8}
+.tabs-row{display:flex;gap:6px;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center}
+.tab-btn{padding:7px 16px;border:1px solid #c8bfb4;border-radius:2px;font-size:13px;cursor:pointer;background:#f7f3ed;color:#8a7a68;font-family:inherit}
+.tab-btn.active{background:#2c2416;color:#f7f3ed;border-color:#2c2416}
+.tab-add{border-style:dashed}
+.person-block{display:none}
+.person-block.active{display:block}
+.input-card{background:#fff;border:1px solid #d8cfc4;padding:1.5rem;margin-bottom:1rem}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field label{font-size:11px;color:#8a7a68;letter-spacing:0.1em}
+.field input[type=text]{padding:9px 12px;border:1px solid #d8cfc4;font-size:15px;background:#f7f3ed;color:#2c2416;width:100%;font-family:inherit;outline:none}
+.dob-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:6px}
+.dob-row select{padding:9px 8px;border:1px solid #d8cfc4;font-size:14px;background:#f7f3ed;color:#2c2416;font-family:inherit;outline:none;width:100%;cursor:pointer}
+.kantei-btn{width:100%;padding:13px;background:#2c2416;color:#f7f3ed;border:none;font-size:14px;cursor:pointer;letter-spacing:0.12em;font-family:inherit;margin-top:4px}
+.kantei-btn:hover{opacity:0.82}
+.kin-hero{text-align:center;padding:2.5rem 1rem 2rem;background:#fff;border:1px solid #d8cfc4;margin-bottom:1rem}
+.kin-lbl{font-size:10px;color:#b0a090;letter-spacing:0.2em;margin-bottom:10px}
+.kin-n{font-size:72px;font-weight:300;line-height:1}
+.sign-name{font-size:20px;font-weight:400;margin-top:16px;letter-spacing:0.1em}
+.sign-en{font-size:11px;color:#b0a090;margin-top:5px;letter-spacing:0.15em}
+.tone-pill{margin-top:16px;display:inline-flex;align-items:center;gap:8px;padding:6px 18px;border:1px solid #d8cfc4;font-size:13px;color:#8a7a68}
+.three-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1rem}
+.tcard{background:#fff;border:1px solid #d8cfc4;padding:1rem}
+.tcard-lbl{font-size:10px;color:#b0a090;letter-spacing:0.1em;margin-bottom:6px}
+.tcard-main{font-size:13px;color:#2c2416;margin-bottom:3px;line-height:1.4}
+.tcard-sub{font-size:10px;color:#b0a090}
+.tcard-desc{font-size:12px;color:#8a7a68;margin-top:8px;line-height:1.7}
+.sec-title{font-size:10px;color:#b0a090;letter-spacing:0.18em;margin:1.5rem 0 10px;display:flex;align-items:center;gap:10px}
+.sec-title::before,.sec-title::after{content:'';flex:1;height:1px;background:#d8cfc4}
+.kbun{background:#fff;border:1px solid #d8cfc4;padding:1.25rem;margin-bottom:8px}
+.kbun-lbl{font-size:10px;color:#b0a090;letter-spacing:0.1em;margin-bottom:8px}
+.kbun p{font-size:14px;color:#4a3f32;line-height:1.9}
+.related-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}
+.rkin-card{background:#fff;border:1px solid #d8cfc4;padding:1rem}
+.rkin-role{font-size:10px;color:#b0a090;letter-spacing:0.1em;margin-bottom:5px}
+.rkin-sign{font-size:14px;color:#2c2416;margin-bottom:2px}
+.rkin-num{font-size:11px;color:#b0a090;margin-bottom:7px}
+.rkin-desc{font-size:12px;color:#8a7a68;line-height:1.65}
+.compat-wrap{margin-top:2rem;padding-top:2rem;border-top:1px solid #d8cfc4;display:none}
+.compat-title{font-size:14px;color:#2c2416;margin-bottom:1rem;letter-spacing:0.1em}
+.cpicks{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin-bottom:12px}
+.cpicks select{padding:9px 12px;border:1px solid #d8cfc4;font-size:14px;background:#f7f3ed;color:#2c2416;width:100%;font-family:inherit;outline:none;cursor:pointer}
+.vs{font-size:16px;color:#c8bfb4;text-align:center}
+.score-box{background:#fff;border:1px solid #d8cfc4;padding:1.5rem;margin-top:1rem}
+.score-big{font-size:48px;font-weight:300;line-height:1}
+.score-sub{font-size:10px;color:#b0a090;margin-top:3px;margin-bottom:16px;letter-spacing:0.12em}
+.bar-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px}
+.blr{display:flex;justify-content:space-between;font-size:12px;color:#8a7a68;margin-bottom:5px}
+.bar{height:2px;background:#ede8e0}
+.barf{height:100%;background:#2c2416}
+.bar-note{font-size:11px;color:#b0a090;margin-top:5px}
+.ctext{margin-top:14px;padding-top:14px;border-top:1px solid #ede8e0;font-size:13px;color:#8a7a68;line-height:1.85}
+@media(max-width:500px){.three-grid{grid-template-columns:1fr}.related-grid{grid-template-columns:1fr}.kin-n{font-size:54px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>マヤ暦占い</h1>
+    <p>生年月日から Kin 番号・太陽の紋章・ウェイブスペル・銀河の音を導き出します</p>
+  </div>
+
+  <!-- タブ -->
+  <div class="tabs-row" id="tabsRow">
+    <button class="tab-btn active" data-target="block-0">人物1</button>
+    <button class="tab-btn tab-add" id="addBtn">+ 追加</button>
+  </div>
+
+  <!-- 人物ブロック（最初の1人は静的に配置） -->
+  <div id="persons-wrap">
+    <div class="person-block active" id="block-0">
+      <div class="input-card">
+        <div class="field">
+          <label>名前（任意）</label>
+          <input type="text" class="f-name" placeholder="例：超人">
+        </div>
+        <div class="field">
+          <label>生年月日</label>
+          <div class="dob-row">
+            <select class="f-y"></select>
+            <select class="f-m"></select>
+            <select class="f-d"></select>
+          </div>
+        </div>
+        <button class="kantei-btn">鑑　定　す　る</button>
+      </div>
+      <div class="result-area"></div>
+    </div>
+  </div>
+
+  <!-- 相性 -->
+  <div class="compat-wrap" id="compatWrap">
+    <div class="compat-title">相性を診断する</div>
+    <div class="cpicks">
+      <select id="compatA"></select>
+      <div class="vs">×</div>
+      <select id="compatB"></select>
+    </div>
+    <button class="kantei-btn" id="compatBtn">相性を鑑定する</button>
+    <div id="compatResult"></div>
+  </div>
+</div>
+
+<script>
+// ===== 占いデータ =====
+var SIGNS=[
+  {name:"赤い龍",en:"IMIX",kw:"愛・誕生・母性",color:"赤",nature:"ポジティブエネルギーに満ちた生命力溢れるタイプ。感性で物事を判断する直感型で天真爛漫。強い母性と保護本能を持ち、人を育てることが得意です。",talent:"新しい物事をゼロから生み出す創造力と起動力。面倒見の良さとチームをまとめる統率力。",wave:"生命誕生のウェイブ。新しいプロジェクトや関係の始まりに強い力を発揮します。",r:["あなたは宇宙の始まりのエネルギーを宿した人。新しいものを生み出す力が強く、周囲に命の息吹をもたらします。どんな状況でも「ゼロから始める」勇気があり、その行動力が道を切り開きます。人を守り育てる母性的な強さも持ち合わせており、あなたの周りに自然と人が集まってきます。","あなたの魂のテーマは「守ること」と「手放すこと」の間でバランスを取ること。深い愛情で人を包み込む力がありますが、それが時に執着となることも。","生命力あふれるあなたは奉仕することで本来の力を発揮します。","あなたは形あるものを作り出す才能を持っています。アイデアを現実に落とし込む力が強く、構造や基盤を整えることが得意です。","あなたは強烈な生命エネルギーの中心となる人。","生みの親としての才能を持つあなたは物事を整理・組織化する力に優れています。","あなたは直感と創造性のチャンネルを開いた人。インスピレーションを受け取り、それを形にする才能があります。","あなたは生命エネルギーを調和させる使命を持っています。","あなたの誕生のエネルギーは意図を現実に変換する力を持っています。","あなたは生命の可能性を現実化する人。夢を形にする力と実行力を兼ね備えアイデアを具体的な成果へと変えます。","あなたは古いものを溶かし新しいものを生み出す変革のエネルギーを持っています。","あなたは生命の知恵を広く分かち合う人。","宇宙の始まりのエネルギーを超越した存在。スピリチュアルな次元での役割が大きい人です。"]},
+  {name:"白い風",en:"IK",kw:"精神・疎通・呼吸",color:"白",nature:"言葉と表現力に優れた精神性の高いタイプ。自由を愛し、風のように人々をつなぐ役割を担います。",talent:"言語能力・文章力・表現力。インスピレーションを受け取り言語化する力。",wave:"精神と言葉のウェイブ。コミュニケーションのエネルギーが流れています。",r:["あなたは言葉と精神の力を宿した人。神聖なインスピレーションを受け取り、それを周囲に伝える使命があります。人々の心にすっと届くメッセージを伝えられます。","あなたのコミュニケーションには深い課題があります。言いたいことと伝わることの乖離を学ぶことが今世のテーマ。","あなたの言葉は人を動かす力を持っています。","あなたは精神的な真実を形として定義する人。","あなたは精神のエネルギーの中心となる存在。","あなたは精神とコミュニティをつなぐ橋渡し役。","あなたは霊的なメッセージを受け取るアンテナのような存在。","あなたは精神と物質を調和させる使命を持っています。","あなたの言葉には意図を現実化する力があります。","あなたは精神的なビジョンを現実に落とし込む人。","あなたは既存の概念を解放し新しい表現を生み出す人。","あなたは知識と智恵を広く分かち合う使命を持っています。","あなたは宇宙の声を地上に届ける存在。"]},
+  {name:"青い夜",en:"AKBAL",kw:"夢・豊かさ・直感",color:"青",nature:"深い内面世界を持ち、夢と現実の境界を行き来するタイプ。豊かな創造力と直感力を持ちます。",talent:"創造力・芸術的センス・深い洞察力。夢やビジョンを形にする力。",wave:"夢と豊かさのウェイブ。内面の探求から豊かさが生まれます。",r:["あなたは夢と無意識の世界に深くつながった人。眠りの中でインスピレーションを受け取る才能があります。内なる世界の豊かさを信頼することで、現実にも豊かさが流れ込んできます。","あなたの夢は深く、内なる世界と外の世界のバランスを取ることが今世のテーマ。","あなたは夢見るだけでなく現実にする行動力を持っています。","あなたは夢を形にする建築家。","あなたは夢と現実の交差点に立つ人。","あなたは夢の豊かさをコミュニティにもたらす人。","あなたは夢と現実の橋渡しをする神秘的な存在。","あなたは内なる豊かさと外の世界を統合する使命を持っています。","あなたの夢は必ず実現します。","あなたは夢を現実の成果として完成させる力を持っています。","あなたは夢の古い概念を解放し新しい豊かさを切り開く人。","あなたは夢の豊かさを皆と分かち合う人。","あなたは夢と宇宙の叡智に直接アクセスできる存在。"]},
+  {name:"黄色い種",en:"KAN",kw:"開花・目覚め・可能性",color:"黄",nature:"無限の可能性を持ち、適切なタイミングで花開くタイプ。直感的にベストな時期を見極め大きく成長します。",talent:"タイミング力・成長させる力・人の可能性を見抜く眼力。",wave:"開花と目覚めのウェイブ。可能性を引き出すエネルギーが流れています。",r:["あなたは無限の可能性を秘めた種。適切なタイミングを見極める直感があり行動すべき時に迷いなく動ける人です。","あなたの種は深く根を張ろうとしています。焦らずじっくりと土台を作ることが大切です。","あなたは種を撒き育てる人。","あなたは種の成長に必要な構造を作る人。","あなたの種は太陽のように輝く可能性を秘めています。","あなたは種が育つ環境を整える人。","あなたは種のどこに水を与えるべきか直感でわかる人。","あなたは種の成長と調和を司る人。","あなたの種は強い意志で開花します。","あなたは種を完全に開花させる力を持っています。","あなたは古い種の概念を解放し進化した形で開花する人。","あなたは種の豊かさをコミュニティ全体で分かち合う人。","あなたの種は宇宙的な使命を持っています。"]},
+  {name:"赤い蛇",en:"CHICCHAN",kw:"情熱・本能・生命力",color:"赤",nature:"強烈な生命エネルギーと直感力を持つタイプ。情熱的で変容を繰り返しながら成長します。",talent:"直感力・変容力・強いカリスマ性と感染力。",wave:"生命力と情熱のウェイブ。強いエネルギーで周囲を動かします。",r:["あなたは生命エネルギーの化身。強烈な本能と情熱で自分の道を切り開く力があります。脱皮するように変容を繰り返し、より高みへと昇っていく人です。","あなたの情熱は深く、そのエネルギーをコントロールすることが今世のテーマです。","あなたの情熱は奉仕の形で輝きます。","あなたは本能を構造化する力を持っています。","あなたは情熱の中心となる人。","あなたは情熱をリズムよく使いこなす人。","あなたの本能は宇宙のメッセージと深くつながっています。","あなたは情熱と調和を統合する人。","あなたの情熱には強い意志が宿っています。","あなたは情熱を現実の成果に変える人。","あなたは古い恐れや制限を解放するエネルギーを持っています。","あなたは情熱をコミュニティと分かち合う人。","あなたは生命エネルギーの究極の体現者。"]},
+  {name:"白い世界の橋渡し",en:"CIMI",kw:"変容・解放・手放し",color:"白",nature:"変化と手放しを得意とするタイプ。古いものを終わらせ新しいものを始める変容の力があります。",talent:"手放す力・橋渡し力・変容をサポートする才能。",wave:"変容と解放のウェイブ。変化のエネルギーが常に流れています。",r:["あなたは変容と橋渡しの使命を持って生まれた人。古いものを手放し新しい始まりへの道を切り開く力があります。","あなたは変容と安定の間で揺れています。","あなたは橋渡しの才能を奉仕に活かす人。","あなたは変容を段階的に進める力を持っています。","あなたは変容エネルギーの中心となる人。","あなたは変容のプロセスを整理整頓する人。","あなたはあの世とこの世の橋渡しができる存在。","あなたは変容と調和を同時に実現する人。","あなたの変容には強い意図が宿っています。","あなたは変容を完成させる力を持っています。","あなたは変容の概念そのものを解放する存在。","あなたは変容の智恵をコミュニティと分かち合う人。","あなたは変容の最高峰にある存在。"]},
+  {name:"青い手",en:"MANIK",kw:"癒し・達成・奉仕",color:"青",nature:"癒しの才能を持ち手仕事や直接的な奉仕を得意とするタイプ。達成感を大切にし完成させる力があります。",talent:"癒し力・手仕事の才能・達成する力。",wave:"癒しと達成のウェイブ。回復と完成のエネルギーが流れています。",r:["あなたは癒しの手を持つ人。触れるもの関わるもの全てに温もりと回復をもたらす力があります。その奉仕の精神が多くの人の心と体を癒します。","あなたは自分が消耗するまで人に与え続けてしまいます。まず自分を癒すことが鍵です。","あなたは癒しを行動で示す人。","あなたは癒しのシステムを作る人。","あなたは癒しエネルギーの中心。","あなたは癒しの場を整える人。","あなたは直感的な癒し手。","あなたは癒しと達成を統合する人。","あなたの癒しには強い意図の力が宿っています。","あなたは癒しを完成させる力を持っています。","あなたは古い癒しのパターンを解放し新しいアプローチを開拓する人。","あなたは癒しをコミュニティ全体に広げる人。","あなたは宇宙的な癒しのエネルギーを持つ存在。"]},
+  {name:"黄色い星",en:"LAMAT",kw:"美・調和・芸術",color:"黄",nature:"美的センスと芸術的才能に溢れるタイプ。調和を愛し、周囲を美しく整える力があります。",talent:"芸術的センス・デザイン力・調和を作り出す力。",wave:"美と調和のウェイブ。美のエネルギーが常に流れています。",r:["あなたは美と調和のエネルギーを宿した人。芸術的な感性で周囲を彩り存在するだけで場を豊かにします。","あなたの美への感性は深く現実とのギャップに悩むことも。","あなたは美を奉仕の形で表現する人。","あなたは美に構造を与える人。","あなたは美のエネルギーの中心。","あなたは美のバランスを整える人。","あなたは美の神秘的な側面を感じ取れる人。","あなたは美と調和を体現する人。","あなたの美への意図は強く現実を美しく変えていきます。","あなたは美を完成させる力を持っています。","あなたは美の固定概念を解放する人。","あなたは美をコミュニティと分かち合う人。","あなたは宇宙的な美のエネルギーを地上に降ろす存在。"]},
+  {name:"赤い月",en:"MULUC",kw:"流れ・感情・純化",color:"赤",nature:"豊かな感受性と直感を持ち感情の流れに敏感なタイプ。月のように満ち引きするリズムを持ちます。",talent:"感受性・共感力・流れを読む力。周囲の空気を変える力。",wave:"流れと感情のウェイブ。感情が波のように周囲に広がります。",r:["あなたは宇宙のリズムと深く共鳴する人。月のように満ち引きする感情の波を持ち、その流れに逆らわず自然に乗ることで、人生が豊かに動いていきます。感受性の豊かさはあなたの最大の才能であり、それを恐れずに解放してください。","あなたは感情の深みを探求する旅の途中。その共感力が、あなたを真の癒し手へと育てます。","あなたは感情を行動に変える力を持っています。心で感じたことをすぐに動きに変える素直さが、周囲に大きな変化をもたらします。","あなたは感情に安定した基盤を与える人。波がある感情の中でも、しっかりと地に足をつけて進む力があります。","あなたは感情エネルギーの中心となる人。その深い感受性が場全体の流れを変える力を持っています。","あなたは感情のリズムを整える人。自分の感情の波を把握し、建設的なエネルギーへと変換する才能があります。","あなたは感情の流れから宇宙のメッセージを受け取る人。夢、感情の揺れ、インスピレーション、すべてがあなたへのサインです。","あなたは感情と調和を統合する人。深い感受性を持ちながらも全体のバランスを保つ力があります。","あなたの感情は強い意図と結びついています。感情を意識的に使うことで、望む現実を引き寄せる力があります。","あなたは感情の流れを現実の成果に変える人。感じたことを形にするまで諦めない粘り強さが強みです。","あなたは古い感情のパターンを解放する人。感情の執着を手放すたびに、より自由で軽やかな自分へと変容します。","あなたは感情の豊かさをコミュニティと分かち合う人。その共感力と温かさが、多くの人の心を癒します。","あなたは感情と宇宙のリズムが完全に一致した存在。その純粋な感受性は、多くの魂に変容を促します。"]},
+  {name:"白い犬",en:"OC",kw:"愛・忠誠・誠実",color:"白",nature:"純粋な愛と誠実さを体現するタイプ。一度信頼した人への忠誠心は揺るぎなく、深いつながりを大切にします。",talent:"愛情・忠誠心・共感力。深い絆を結ぶ力。",wave:"愛と誠実さのウェイブ。愛のエネルギーが常に流れています。",r:["あなたは純粋な愛と誠実さを体現する人。人との深いつながりを大切にし、一度信頼した人には揺るぎない忠誠心を示します。","あなたの愛は深く尽くしすぎてしまうことも。自分への愛も大切にすることが健全な関係の鍵です。","あなたの愛は行動で示されます。","あなたは愛に安定した構造を与える人。","あなたは愛エネルギーの中心。","あなたは愛のバランスを整える人。","あなたは愛の神秘的な側面を感じる人。","あなたは愛と調和を体現する人。","あなたの愛には強い意志が宿っています。","あなたは愛を完成させる人。","あなたは愛の古いパターンを解放する人。","あなたは愛をコミュニティ全体に広げる人。","あなたは宇宙的な愛のエネルギーを体現する存在。"]},
+  {name:"青い猿",en:"CHUEN",kw:"遊び・芸術・創造",color:"青",nature:"ユーモアと創造性に溢れるタイプ。遊び心を持ちながら芸術的才能を発揮します。",talent:"創造力・ユーモア・芸術的才能。場を明るくする力。",wave:"遊びと創造のウェイブ。創造的エネルギーが溢れます。",r:["あなたは宇宙の遊び心を体現する人。ユーモアと創造性で場を明るくし、人々に笑顔をもたらします。","あなたの遊び心と責任感のバランスが課題です。","あなたは遊びを奉仕に変える人。","あなたは遊びに構造を与える人。","あなたは遊びエネルギーの中心。","あなたは遊びのリズムを整える人。","あなたは遊びを通じて宇宙の真実を発見する人。","あなたは遊びと調和を統合する人。","あなたの遊び心には強い創造的意図があります。","あなたは遊びを完成した芸術作品にする人。","あなたは遊びの定義を解放する人。","あなたは遊びをコミュニティで分かち合う人。","あなたは遊びを通じて宇宙の叡智にアクセスする存在。"]},
+  {name:"黄色い人",en:"EB",kw:"知恵・自由・影響力",color:"黄",nature:"自由意思と知恵を大切にするタイプ。自分の道を自分で切り開く力があり、学び続けることで成長します。",talent:"知恵・自由な発想・影響力。学んだことを実践する力。",wave:"知恵と自由のウェイブ。学びと影響のエネルギーが流れています。",r:["あなたは自由意思と知恵の体現者。自分の道を自分で選ぶ力があり、その選択の積み重ねが独自の人生の軌跡を描きます。学び続けることで、その知恵は深まり続けます。","あなたは知恵と経験の間で揺れ動くことがあります。その試行錯誤こそが真の知恵を育みます。","あなたは知恵を行動で示す人。","あなたは知恵を構造化する人。","あなたは知恵の中心となる人。","あなたは知恵のバランスを整える人。","あなたは知恵の神秘的な側面を探求する人。","あなたは知恵と調和を統合する人。","あなたの知恵には強い意図が伴います。","あなたは知恵を完成させる人。","あなたは知恵の古い枠組みを解放する人。","あなたは知恵をコミュニティと分かち合う人。","あなたは宇宙の知恵を体現する存在。"]},
+  {name:"赤い空歩く者",en:"BEN",kw:"探求・冒険・先駆",color:"赤",nature:"探求心と冒険心に溢れ、新しい境地を切り開くタイプ。天と地をつなぐ役割を持ちます。",talent:"探求力・先駆者精神・新境地を開く力。",wave:"探求と冒険のウェイブ。挑戦のエネルギーが流れています。",r:["あなたは天と地をつなぐ冒険者。新しい場所、新しい概念、新しい人との出会いを通じて自分の世界を広げ続けます。","あなたは探求と安定のバランスを学んでいます。","あなたは探求の成果を分かち合う人。","あなたは冒険に構造を与える人。","あなたは探求エネルギーの中心。","あなたは探求のリズムを整える人。","あなたは見えない次元も探求する人。","あなたは探求と調和を統合する人。","あなたの探求心には強い意図があります。","あなたは探求を完成させる人。","あなたは探求の定義を解放する人。","あなたは探求をコミュニティと共にする人。","あなたは宇宙的な探求者。"]},
+  {name:"白い魔法使い",en:"IX",kw:"魔法・永遠・心の力",color:"白",nature:"神秘的な力と深い内省力を持つタイプ。心の力で現実を変容させる魔法使いのような存在です。",talent:"直感力・見えない世界とのつながり。現実を変容させる意図の力。",wave:"魔法と永遠のウェイブ。神秘のエネルギーが流れています。",r:["あなたは心の力で現実を変える魔法使い。強く信じ明確に意図することで、周囲の現実が変容していきます。","あなたの魔法は信頼と懐疑の間に宿っています。自分の力を信じることが鍵です。","あなたは魔法を奉仕の形で使う人。","あなたは魔法に構造を与える人。","あなたは魔法エネルギーの中心。","あなたは魔法のリズムを整える人。","あなたはチャンネルとしての魔法使い。","あなたは魔法と調和を統合する人。","あなたの魔法には強力な意図が宿っています。","あなたは魔法を現実に完全に顕現させる人。","あなたは魔法の古いパターンを解放する人。","あなたは魔法をコミュニティと分かち合う人。","あなたは宇宙的な魔法使い。"]},
+  {name:"青い鷲",en:"MEN",kw:"視野・上昇・洞察",color:"青",nature:"高い視点から物事を俯瞰するタイプ。本質を見抜く力と先見の明を持ちます。",talent:"俯瞰力・洞察力・先見の明。全体像を把握する力。",wave:"視野と洞察のウェイブ。高い視点のエネルギーが流れています。",r:["あなたは鷲のように高い視点から物事を見渡す人。細部に惑わされず本質を見抜く力があります。","あなたは視野を広げることと深く根ざすことのバランスを学んでいます。","あなたは高い視野を奉仕のために使う人。","あなたは視野を構造に落とし込む人。","あなたは視野エネルギーの中心。","あなたは視野のバランスを整える人。","あなたは霊的な視野を持つ鷲。","あなたは視野と調和を統合する人。","あなたの視野には強い意図があります。","あなたは視野を完全に実現する人。","あなたは視野の古い限界を解放する人。","あなたは視野をコミュニティと分かち合う人。","あなたは宇宙的な視野を持つ存在。"]},
+  {name:"黄色い戦士",en:"CIB",kw:"勇気・知性・問いかけ",color:"黄",nature:"知性と勇気を兼ね備えるタイプ。恐れを超えて前進し、深い問いかけで本質を探求します。",talent:"勇気・知性・困難を乗り越える強さ。",wave:"勇気と知性のウェイブ。探求と前進のエネルギーが流れています。",r:["あなたは恐れを超えて前進する戦士。困難な状況でも知恵と勇気で道を切り開きます。","あなたは勇気と恐れの間で戦いを続けています。","あなたは勇気を奉仕のために使う人。","あなたは戦略的な戦士。","あなたは勇気エネルギーの中心。","あなたは勇気のリズムを整える人。","あなたは見えない敵とも戦える戦士。","あなたは勇気と調和を統合する人。","あなたの勇気には強い意図が宿っています。","あなたは勇気を完全に実現する戦士。","あなたは戦いの古いパターンを解放する人。","あなたは勇気をコミュニティと分かち合う人。","あなたは宇宙的な戦士。"]},
+  {name:"赤い地球",en:"CABAN",kw:"進化・同期・地球",color:"赤",nature:"地球と深くつながり自然のリズムと共鳴するタイプ。同期力が高く時代の流れを感じ取ります。",talent:"地球とのつながり・同期力・進化を促す力。",wave:"進化と同期のウェイブ。地球のエネルギーと共鳴します。",r:["あなたは地球と深くつながった人。自然のリズム、地のエネルギーと共鳴し、その流れに乗ることで人生が自然に展開していきます。","あなたは地球のリズムと自分のリズムを同期させることを学んでいます。","あなたは地球の知恵を行動で示す人。","あなたは地球の知恵を構造化する人。","あなたは地球エネルギーの中心。","あなたは地球のリズムを整える人。","あなたは地球の神秘的な側面と交流できる人。","あなたは地球と全体の調和を統合する人。","あなたの地球とのつながりは意図的です。","あなたは地球の進化を完成させる力を持っています。","あなたは地球との古い関係を解放する人。","あなたは地球の知恵をコミュニティと分かち合う人。","あなたは地球と宇宙をつなぐ存在。"]},
+  {name:"白い鏡",en:"ETZNAB",kw:"真実・反射・明晰",color:"白",nature:"真実を見抜く力と明晰さを持つタイプ。物事の本質を映し出し周囲に気づきをもたらします。",talent:"洞察力・真実を見抜く力・明晰な思考。",wave:"真実と明晰さのウェイブ。本質を照らすエネルギーが流れています。",r:["あなたは真実を映し出す鏡のような存在。嘘や偽りを自然と見抜き本質を照らし出す力があります。","あなたは真実と幻想の間に立っています。","あなたは真実を奉仕の形で示す人。","あなたは真実を構造化する人。","あなたは真実エネルギーの中心。","あなたは真実のバランスを整える人。","あなたは神秘的な真実を見る人。","あなたは真実と調和を統合する人。","あなたの真実への意図は強力です。","あなたは真実を完全に体現する人。","あなたは真実の古いパターンを解放する人。","あなたは真実をコミュニティと分かち合う人。","あなたは宇宙的な真実を映し出す鏡。"]},
+  {name:"青い嵐",en:"CAUAC",kw:"変革・自己生成・活性化",color:"青",nature:"強烈な変革エネルギーを持つタイプ。停滞を打ち破り活性化と革新をもたらします。",talent:"変革力・活性化のエネルギー・革新力。",wave:"変革と活性化のウェイブ。強烈な変化のエネルギーが流れています。",r:["あなたは変革のエネルギーを体現する嵐。その圧倒的なエネルギーで停滞した状況を一変させる力があります。","あなたは変革と安定の間で揺れています。","あなたは変革を奉仕のために使う人。","あなたは変革に構造を与える人。","あなたは変革エネルギーの中心。","あなたは変革のリズムを整える人。","あなたは宇宙的な変革の意図を受け取る人。","あなたは変革と調和を統合する人。","あなたの変革には強い意図が宿っています。","あなたは変革を完成させる嵐。","あなたは変革の概念そのものを変革する人。","あなたは変革をコミュニティと共に行う人。","あなたは宇宙的な変革のエネルギーを体現する存在。"]},
+  {name:"黄色い太陽",en:"AHAU",kw:"悟り・光・上昇",color:"黄",nature:"愛と光で周囲を照らす存在感のあるタイプ。悟りと上昇のエネルギーを持ち周囲を啓発します。",talent:"カリスマ性・悟りの力・周囲を照らす存在感。",wave:"悟りと光のウェイブ。照らすエネルギーが常に流れています。",r:["あなたは太陽のように輝く存在。愛と光で周囲を照らし、人々に温もりと希望を与えます。その輝きは生まれながらのものであり、あなたが本来の自分でいることが最大の贈り物となります。","あなたは輝くことと謙虚でいることのバランスを取っています。","あなたは光を奉仕の形で放つ人。","あなたは光に構造を与える人。","あなたは光エネルギーの中心。","あなたは光のバランスを整える人。","あなたは悟りのチャンネルを開いた人。","あなたは光と調和を統合する人。","あなたの光には強い意図が宿っています。","あなたは光を完全に体現する人。","あなたは光の古いパターンを解放する人。","あなたは光をコミュニティと分かち合う人。","あなたは宇宙的な光の体現者。"]}
+];
+
+var TONES=[
+  {num:1,name:"磁気",kw:"目的・引力",desc:"目的を定め引きつける力。「私の目的は何か」を問います。"},
+  {num:2,name:"月",kw:"挑戦・安定",desc:"安定を求め課題と向き合います。「何が私の課題か」を問います。"},
+  {num:3,name:"電気",kw:"奉仕・活性化",desc:"奉仕することで活性化されます。「どのように奉仕するか」を問います。"},
+  {num:4,name:"自己存在",kw:"定義・形式",desc:"形を定義し整えます。「形はどうあるべきか」を問います。"},
+  {num:5,name:"倍音",kw:"輝き・中心",desc:"中心から輝きを放ちます。「核心的な場は何か」を問います。"},
+  {num:6,name:"リズム",kw:"均衡・組織",desc:"バランスを整え組織化します。「何を均衡させるか」を問います。"},
+  {num:7,name:"共鳴",kw:"感応・調整",desc:"インスピレーションを受け取ります。「何を感応させるか」を問います。"},
+  {num:8,name:"銀河系",kw:"調和・一体化",desc:"調和を目指し一体化します。「私は誠実に生きているか」を問います。"},
+  {num:9,name:"太陽",kw:"意図・脈動",desc:"意図を実現し脈動します。「意図を実現するにはどうすべきか」を問います。"},
+  {num:10,name:"惑星",kw:"完成・現実化",desc:"完成させ現実化します。「何を完成させるか」を問います。"},
+  {num:11,name:"スペクトル",kw:"解放・手放し",desc:"解放し手放します。「何を手放すか」を問います。"},
+  {num:12,name:"水晶",kw:"協力・普遍化",desc:"協力して普遍化します。「どのように貢献するか」を問います。"},
+  {num:13,name:"宇宙",kw:"超越・上昇",desc:"超越し上昇します。「喜びとともに宇宙に還る」を問います。"}
+];
+
+// ===== 計算 =====
+var MOFF=[0,31,59,90,120,151,181,212,243,273,304,334];
+function isLeap(y){return(y%4===0&&y%100!==0)||y%400===0;}
+function ybase(y){
+  var b=107;
+  if(y>=1955){for(var i=1955;i<y;i++)b=(b+365)%260;}
+  else{for(var i=y;i<1955;i++)b=(b-365+260)%260;}
+  return b;
+}
+function calcKin(y,m,d){
+  var k=(ybase(y)+MOFF[m-1]+d+(isLeap(y)&&m===3?1:0))%260;
+  return k===0?260:k;
+}
+function kinInfo(kin){
+  var si=(kin-1)%20,ti=(kin-1)%13;
+  return{si:si,ti:ti,sign:SIGNS[si],tone:TONES[ti]};
+}
+var CG={"赤":[0,4,8,12,16],"白":[1,5,9,13,17],"青":[2,6,10,14,18],"黄":[3,7,11,15,19]};
+function fkin(si,ti){for(var k=1;k<=260;k++)if((k-1)%20===si&&(k-1)%13===ti)return k;return 0;}
+function related(kin,si,ti){
+  var arr=CG[SIGNS[si].color],pos=arr.indexOf(si),gsi=arr[(pos+ti)%5];
+  var osi=(si+10)%20,mk=261-kin,msi=(mk-1)%20;
+  var asi=si%2===0?si+1:si-1,abk=((kin+130-1)%260)+1,absi=(abk-1)%20;
+  return{
+    guide:{kin:fkin(gsi,ti),name:SIGNS[gsi].name},
+    opp:{kin:fkin(osi,ti),name:SIGNS[osi].name},
+    mystery:{kin:mk,name:SIGNS[msi].name},
+    analog:{kin:fkin(asi,ti),name:SIGNS[asi].name},
+    absOpp:{kin:abk,name:SIGNS[absi].name}
+  };
+}
+
+// ===== 結果HTML =====
+function resultHTML(kin,si,ti){
+  var s=SIGNS[si],t=TONES[ti],rel=related(kin,si,ti);
+  var wk=kin-ti; if(wk<1)wk+=260; var wsi=(wk-1)%20;
+  var h='<div class="kin-hero">'
+    +'<div class="kin-lbl">K I N &nbsp; N U M B E R</div>'
+    +'<div class="kin-n">'+kin+'</div>'
+    +'<div class="sign-name">'+s.name+'</div>'
+    +'<div class="sign-en">'+s.en+'</div>'
+    +'<div class="tone-pill">銀河の音 '+t.num+' ・ '+t.name+'</div>'
+    +'</div>'
+    +'<div class="sec-title">三 つ の 要 素</div>'
+    +'<div class="three-grid">'
+    +'<div class="tcard"><div class="tcard-lbl">太陽の紋章</div><div class="tcard-main">'+s.name+'</div><div class="tcard-sub">'+s.en+'</div><div class="tcard-desc">'+s.kw+'<br><br>'+s.nature+'</div></div>'
+    +'<div class="tcard"><div class="tcard-lbl">ウェイブスペル</div><div class="tcard-main">'+SIGNS[wsi].name+'</div><div class="tcard-sub">KIN '+wk+'</div><div class="tcard-desc">'+s.wave+'</div></div>'
+    +'<div class="tcard"><div class="tcard-lbl">銀河の音 '+t.num+'</div><div class="tcard-main">'+t.name+'</div><div class="tcard-sub">'+t.kw+'</div><div class="tcard-desc">'+t.desc+'</div></div>'
+    +'</div>'
+    +'<div class="sec-title">基 本 性 格 ・ 才 能</div>'
+    +'<div class="kbun"><div class="kbun-lbl">太陽の紋章からわかるあなた</div><p>'+s.nature+'</p></div>'
+    +'<div class="kbun"><div class="kbun-lbl">あなたの才能と強み</div><p>'+s.talent+'</p></div>'
+    +'<div class="kbun"><div class="kbun-lbl">銀河の音 '+t.num+' 「'+t.name+'」 が示す使命</div><p>'+t.desc+'</p></div>'
+    +'<div class="kbun"><div class="kbun-lbl">総 合 鑑 定</div><p>'+s.r[ti]+'</p></div>'
+    +'<div class="sec-title">五 つ の 関 連 K i n</div>'
+    +'<div class="related-grid">';
+  var rlist=[
+    {v:rel.guide,role:'ガイド Kin',desc:'困った時に道を照らしてくれる存在。あなたの行動の指針となります。'},
+    {v:rel.opp,role:'反対 Kin',desc:'正反対の性質を持ち、可能性を広げてくれる人。'},
+    {v:rel.mystery,role:'神秘 Kin',desc:'仕事や使命でシナジーを生む神秘的なパートナー。'},
+    {v:rel.analog,role:'類似 Kin',desc:'色のペアで補完し合う、支え合いの存在。'},
+    {v:rel.absOpp,role:'絶対反対 Kin',desc:'最高の学びをもたらす運命的な出会いの相手。'}
+  ];
+  for(var k=0;k<rlist.length;k++){
+    var rv=rlist[k];
+    h+='<div class="rkin-card"><div class="rkin-role">'+rv.role+'</div>'
+      +'<div class="rkin-sign">'+rv.v.name+'</div>'
+      +'<div class="rkin-num">KIN '+rv.v.kin+'</div>'
+      +'<div class="rkin-desc">'+rv.desc+'</div></div>';
+  }
+  return h+'</div>';
+}
+
+// ===== 人物管理（DOM直接操作） =====
+// persons[i] = {kin, si, ti} — 鑑定後に設定
+var persons=[{kin:null,si:null,ti:null}];
+
+// 年月日セレクトを初期化（DOMに既にある要素に対して）
+function initSelects(block){
+  var fy=block.querySelector('.f-y');
+  var fm=block.querySelector('.f-m');
+  var fd=block.querySelector('.f-d');
+  fy.innerHTML='<option value="0">年</option>';
+  for(var y=2010;y>=1900;y--) fy.innerHTML+='<option value="'+y+'">'+y+'</option>';
+  fm.innerHTML='<option value="0">月</option>';
+  for(var m=1;m<=12;m++) fm.innerHTML+='<option value="'+m+'">'+m+'</option>';
+  fd.innerHTML='<option value="0">日</option>';
+  for(var d=1;d<=31;d++) fd.innerHTML+='<option value="'+d+'">'+d+'</option>';
+}
+
+// 初期ブロックのセレクトを初期化
+initSelects(document.getElementById('block-0'));
+
+// 人物追加
+document.getElementById('addBtn').addEventListener('click',function(){
+  var idx=persons.length;
+  persons.push({kin:null,si:null,ti:null});
+
+  // 既存ブロックを非表示
+  document.querySelectorAll('.person-block').forEach(function(b){b.classList.remove('active');});
+  // タブを非アクティブ
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+
+  // 新ブロック作成
+  var block=document.createElement('div');
+  block.className='person-block active';
+  block.id='block-'+idx;
+  block.innerHTML=
+    '<div class="input-card">'
+    +'<div class="field"><label>名前（任意）</label>'
+    +'<input type="text" class="f-name" placeholder="例：超人"></div>'
+    +'<div class="field"><label>生年月日</label>'
+    +'<div class="dob-row">'
+    +'<select class="f-y"></select>'
+    +'<select class="f-m"></select>'
+    +'<select class="f-d"></select>'
+    +'</div></div>'
+    +'<button class="kantei-btn">鑑　定　す　る</button>'
+    +'</div>'
+    +'<div class="result-area"></div>';
+  document.getElementById('persons-wrap').appendChild(block);
+  initSelects(block);
+
+  // 新タブ追加（追加ボタンの前に挿入）
+  var newTab=document.createElement('button');
+  newTab.className='tab-btn active';
+  newTab.dataset.target='block-'+idx;
+  newTab.textContent='人物'+(idx+1);
+  document.getElementById('tabsRow').insertBefore(newTab,document.getElementById('addBtn'));
+
+  // 鑑定ボタンにイベント
+  block.querySelector('.kantei-btn').addEventListener('click',function(){
+    doKantei(idx,block);
+  });
+  // 名前入力でタブ更新
+  block.querySelector('.f-name').addEventListener('input',function(){
+    newTab.textContent=this.value||'人物'+(idx+1);
+  });
+});
+
+// タブ切り替え（イベント委任）
+document.getElementById('tabsRow').addEventListener('click',function(e){
+  var btn=e.target.closest('.tab-btn');
+  if(!btn||btn.id==='addBtn')return;
+  var target=btn.dataset.target;
+  if(!target)return;
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  document.querySelectorAll('.person-block').forEach(function(b){b.classList.remove('active');});
+  var block=document.getElementById(target);
+  if(block)block.classList.add('active');
+});
+
+// 最初のブロックの鑑定ボタン
+document.querySelector('#block-0 .kantei-btn').addEventListener('click',function(){
+  doKantei(0,document.getElementById('block-0'));
+});
+// 最初のブロックの名前入力
+document.querySelector('#block-0 .f-name').addEventListener('input',function(){
+  var tab=document.querySelector('[data-target="block-0"]');
+  if(tab)tab.textContent=this.value||'人物1';
+});
+
+// 鑑定処理
+function doKantei(idx,block){
+  var y=parseInt(block.querySelector('.f-y').value,10);
+  var m=parseInt(block.querySelector('.f-m').value,10);
+  var d=parseInt(block.querySelector('.f-d').value,10);
+  if(!y||!m||!d){alert('生年月日を選択してください');return;}
+  var kin=calcKin(y,m,d);
+  var info=kinInfo(kin);
+  persons[idx]={kin:kin,si:info.si,ti:info.ti};
+  block.querySelector('.result-area').innerHTML=resultHTML(kin,info.si,info.ti);
+  updateCompat();
+}
+
+// 相性
+function updateCompat(){
+  var done=[];
+  for(var i=0;i<persons.length;i++)if(persons[i].kin)done.push(i);
+  var wrap=document.getElementById('compatWrap');
+  if(done.length<2){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  var opts='',nameInp;
+  for(var j=0;j<done.length;j++){
+    var i=done[j];
+    var block=document.getElementById('block-'+i);
+    var name=(block&&block.querySelector('.f-name').value)||('人物'+(i+1));
+    opts+='<option value="'+i+'">'+name+'（KIN'+persons[i].kin+'）</option>';
+  }
+  document.getElementById('compatA').innerHTML=opts;
+  document.getElementById('compatB').innerHTML=opts;
+  if(document.getElementById('compatB').options.length>1)
+    document.getElementById('compatB').selectedIndex=1;
+}
+
+function scC(a,b){
+  var d=Math.abs(a-b),ca=SIGNS[a].color,cb=SIGNS[b].color;
+  var cp={"赤":"白","白":"赤","青":"黄","黄":"青"};
+  if(d===0)return{score:95,label:"同じ紋章 — 魂の鏡",text:"同じ紋章を持つ稀有な出会いです。まるで魂の鏡のような存在同士で、深い理解と共感が自然に生まれる関係です。"};
+  if(d===10)return{score:88,label:"反対の紋章 — 最高の学び合い",text:"マヤ暦で対極のKinと呼ばれる特別な関係です。真逆のように見えて、実はお互いの欠けている部分を完全に補い合います。"};
+  if(ca===cb)return{score:80,label:"同色の紋章 — 自然な調和",text:"同じ色のエネルギーを持つ仲間です。価値観の根っこが似ているため、大切なことについて深く共鳴できます。"};
+  if(cp[ca]===cb)return{score:75,label:"補完し合う紋章 — 協力関係",text:"異なる色のエネルギーが補い合う関係です。得意なことが違うからこそ、二人で組むと大きな力を発揮します。"};
+  return{score:60,label:"個性的な化学反応",text:"お互いの違いが際立つ関係ですが、それはむしろ刺激とチャンスです。個性を尊重することで予想外の化学反応が生まれます。"};
+}
+function tcC(a,b){
+  var d=Math.abs(a-b);
+  if(d===0)return{score:92,label:"同じ音 — 完全共鳴"};
+  if(d===6||d===7)return{score:85,label:"対の音 — 深い絆"};
+  if([1,4,5,8,12].indexOf(d)>=0)return{score:72,label:"調和する音"};
+  return{score:58,label:"個性的なリズム"};
+}
+
+document.getElementById('compatBtn').addEventListener('click',function(){
+  var iA=parseInt(document.getElementById('compatA').value,10);
+  var iB=parseInt(document.getElementById('compatB').value,10);
+  if(iA===iB){alert('異なる人物を選んでください');return;}
+  var a=persons[iA],b=persons[iB];
+  var sc=scC(a.si,b.si),tc=tcC(a.ti,b.ti),ov=Math.round((sc.score+tc.score)/2);
+  document.getElementById('compatResult').innerHTML=
+    '<div class="score-box">'
+    +'<div class="score-big">'+ov+'<span style="font-size:20px;font-weight:300;color:#b0a090"> %</span></div>'
+    +'<div class="score-sub">総 合 相 性 ス コ ア</div>'
+    +'<div class="bar-grid">'
+    +'<div><div class="blr"><span>紋章の相性</span><span>'+sc.score+'%</span></div><div class="bar"><div class="barf" style="width:'+sc.score+'%"></div></div><div class="bar-note">'+sc.label+'</div></div>'
+    +'<div><div class="blr"><span>音の共鳴</span><span>'+tc.score+'%</span></div><div class="bar"><div class="barf" style="width:'+tc.score+'%"></div></div><div class="bar-note">'+tc.label+'</div></div>'
+    +'</div><div class="ctext">'+sc.text+'</div></div>';
+});
+</script>
+</body>
+</html>

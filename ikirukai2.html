@@ -1,0 +1,556 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@400;600&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans JP',sans-serif; background:#FDFAF5; color:#2C2A1E; }
+a { text-decoration:none; color:inherit; }
+
+nav {
+  position:sticky; top:0; z-index:200;
+  padding:0 5%; height:58px;
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(20,16,8,0.82); backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.logo { font-family:'Noto Serif JP',serif; font-size:20px; font-weight:700; color:#fff; letter-spacing:0.06em; }
+.logo span { color:#A8C86A; }
+.nav-links { display:flex; gap:28px; font-size:13px; color:rgba(255,255,255,0.7); }
+.nav-links a:hover { color:#A8C86A; }
+.nav-cta { background:#7A9A4A; color:#fff; padding:8px 18px; border-radius:20px; font-size:13px; font-weight:600; }
+
+/* HERO */
+.hero {
+  position:relative; min-height:560px;
+  display:flex; align-items:flex-end;
+  overflow:hidden;
+}
+.hero-svg-bg { position:absolute; inset:0; width:100%; height:100%; }
+.hero-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(to top, rgba(8,6,2,0.88) 0%, rgba(8,6,2,0.45) 55%, rgba(8,6,2,0.15) 100%);
+}
+.hero-content { position:relative; z-index:2; padding:0 6% 64px; max-width:680px; }
+.hero-eyebrow { font-size:11px; letter-spacing:0.26em; color:#A8C86A; text-transform:uppercase; margin-bottom:16px; }
+.hero-title { font-family:'Noto Serif JP',serif; font-size:52px; line-height:1.28; font-weight:700; color:#fff; margin-bottom:20px; }
+.hero-title em { font-style:normal; color:#C8E08A; }
+.hero-desc { font-size:14px; line-height:2; color:rgba(255,255,255,0.78); margin-bottom:32px; max-width:460px; }
+.hero-btns { display:flex; gap:12px; flex-wrap:wrap; }
+.btn-green { background:#7A9A4A; color:#fff; padding:13px 30px; border-radius:26px; font-size:14px; font-weight:600; display:inline-block; }
+.btn-ghost { border:1.5px solid rgba(255,255,255,0.55); color:#fff; padding:12px 26px; border-radius:26px; font-size:14px; display:inline-block; }
+
+.scroll-hint { position:absolute; bottom:22px; right:5%; z-index:3; display:flex; flex-direction:column; align-items:center; gap:6px; }
+.scroll-hint span { font-size:10px; letter-spacing:0.18em; color:rgba(255,255,255,0.4); }
+.scroll-line { width:1px; height:36px; background:linear-gradient(to bottom,rgba(255,255,255,0.45),transparent); animation:sp 1.8s ease infinite; }
+@keyframes sp { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+/* STATS */
+.stats { background:#1E1C14; padding:26px 5%; display:flex; justify-content:center; gap:56px; flex-wrap:wrap; }
+.stat-num { font-family:'Noto Serif JP',serif; font-size:30px; font-weight:700; color:#C8E08A; }
+.stat-lbl { font-size:11px; color:#7A7060; margin-top:3px; letter-spacing:0.1em; text-align:center; }
+
+/* PHOTO STRIP */
+.strip { display:flex; height:220px; overflow:hidden; background:#111; }
+.strip-cell { flex:1; position:relative; overflow:hidden; cursor:pointer; transition:flex 0.4s ease; }
+.strip-cell:hover { flex:2.2; }
+.strip-cell .inner { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; transition:transform 0.4s; }
+.strip-cell:hover .inner { transform:scale(1.06); }
+.strip-label {
+  position:absolute; bottom:0; left:0; right:0; padding:12px 14px;
+  background:linear-gradient(to top,rgba(0,0,0,0.7),transparent);
+  color:#fff; font-size:12px; font-weight:600; letter-spacing:0.05em;
+}
+
+/* SECTION */
+.sec-wrap { padding:64px 5%; }
+.sec-eyebrow { font-size:11px; letter-spacing:0.22em; color:#7A9A4A; text-transform:uppercase; margin-bottom:6px; }
+.sec-title { font-family:'Noto Serif JP',serif; font-size:28px; font-weight:700; color:#2C2A1E; margin-bottom:8px; }
+.sec-sub { font-size:13px; color:#6A6050; line-height:1.9; max-width:500px; }
+
+/* BLOG */
+.blog-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:32px; flex-wrap:wrap; gap:10px; }
+.blog-more { font-size:13px; color:#7A9A4A; font-weight:600; }
+.blog-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:22px; }
+.blog-card { background:#fff; border-radius:14px; overflow:hidden; border:1px solid #EAE0CC; transition:transform 0.2s,box-shadow 0.2s; }
+.blog-card:hover { transform:translateY(-4px); box-shadow:0 10px 28px rgba(40,30,10,0.10); }
+.blog-card.feat { grid-column:1 / -1; display:grid; grid-template-columns:1fr 1fr; }
+.blog-card.feat .card-thumb { min-height:240px; }
+.card-thumb { height:170px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+.card-thumb svg { width:100%; height:100%; }
+.card-tag { position:absolute; top:10px; left:10px; font-size:10px; padding:3px 9px; border-radius:10px; font-weight:700; letter-spacing:0.06em; }
+.tag-reform { background:#7A9A4A; color:#fff; }
+.tag-market { background:#BA7517; color:#fff; }
+.tag-farm { background:#1D7A6A; color:#fff; }
+.tag-new { background:#C83838; color:#fff; }
+.card-body { padding:18px 20px; }
+.card-date { font-size:11px; color:#9A9080; letter-spacing:0.1em; margin-bottom:7px; }
+.card-title { font-family:'Noto Serif JP',serif; font-size:15px; font-weight:700; line-height:1.55; margin-bottom:8px; color:#2C2A1E; }
+.card-desc { font-size:12px; color:#6A6050; line-height:1.8; }
+.card-link { display:inline-block; margin-top:12px; font-size:12px; color:#7A9A4A; font-weight:600; }
+
+/* SERVICES */
+.services-bg { background:#F5EDD8; }
+.svc-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px; margin-top:32px; }
+.svc-card { background:#fff; border-radius:13px; padding:22px; border:1px solid #E0D4B8; }
+.svc-icon { font-size:34px; margin-bottom:10px; }
+.svc-title { font-family:'Noto Serif JP',serif; font-size:15px; font-weight:700; margin-bottom:6px; }
+.svc-desc { font-size:12px; color:#6A6050; line-height:1.8; }
+.svc-link { font-size:12px; color:#7A9A4A; font-weight:600; margin-top:10px; display:inline-block; }
+
+/* SNS */
+.sns-bg { background:#1E1C14; padding:52px 5%; text-align:center; }
+.sns-title { font-family:'Noto Serif JP',serif; font-size:21px; color:#fff; margin-bottom:6px; }
+.sns-sub { font-size:13px; color:#7A7060; margin-bottom:26px; }
+.sns-links { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
+.sns-btn { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.82); padding:10px 20px; border-radius:22px; font-size:13px; border:1px solid rgba(255,255,255,0.13); display:inline-flex; align-items:center; gap:7px; }
+.sns-btn:hover { background:rgba(122,154,74,0.22); border-color:#7A9A4A; }
+
+footer { background:#141208; padding:24px 5%; display:flex; justify-content:space-between; align-items:center; font-size:12px; color:#5A5040; }
+.foot-logo { font-family:'Noto Serif JP',serif; font-size:16px; color:#C8B898; }
+
+@media(max-width:680px){
+  .hero-title{font-size:34px;}
+  .nav-links{display:none;}
+  .blog-card.feat{grid-template-columns:1fr;}
+  .strip{height:150px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">いきる<span>会</span></div>
+  <div class="nav-links">
+    <a href="#blog">ブログ</a>
+    <a href="#services">事業</a>
+    <a href="#sns">SNS</a>
+  </div>
+  <a href="https://line.me/R/ti/p/@237cjmhh" class="nav-cta">LINE登録</a>
+</nav>
+
+<!-- HERO with SVG background -->
+<div class="hero">
+  <!-- SVG 古民家×里山の風景 -->
+  <svg class="hero-svg-bg" viewBox="0 0 1200 560" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <!-- 空 -->
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#1A2A0A"/>
+        <stop offset="100%" stop-color="#3A4E1A"/>
+      </linearGradient>
+      <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2A3A10"/>
+        <stop offset="100%" stop-color="#1A2808"/>
+      </linearGradient>
+      <filter id="blur1"><feGaussianBlur stdDeviation="2"/></filter>
+      <filter id="blur2"><feGaussianBlur stdDeviation="4"/></filter>
+    </defs>
+    <rect width="1200" height="560" fill="url(#sky)"/>
+    <!-- 月 -->
+    <circle cx="960" cy="90" r="52" fill="#F5E090" opacity="0.18"/>
+    <circle cx="960" cy="90" r="38" fill="#F8ECA0" opacity="0.22"/>
+    <!-- 星 -->
+    <circle cx="120" cy="60" r="1.5" fill="#fff" opacity="0.6"/>
+    <circle cx="300" cy="30" r="1" fill="#fff" opacity="0.5"/>
+    <circle cx="500" cy="50" r="1.5" fill="#fff" opacity="0.4"/>
+    <circle cx="700" cy="20" r="1" fill="#fff" opacity="0.6"/>
+    <circle cx="850" cy="45" r="2" fill="#fff" opacity="0.35"/>
+    <circle cx="1100" cy="35" r="1.5" fill="#fff" opacity="0.5"/>
+    <circle cx="200" cy="110" r="1" fill="#fff" opacity="0.3"/>
+    <circle cx="1050" cy="130" r="1" fill="#fff" opacity="0.4"/>
+    <!-- 遠景の山 -->
+    <polygon points="0,340 180,180 380,300 560,160 760,280 940,150 1100,240 1200,200 1200,400 0,400" fill="#1C2E0C" opacity="0.9"/>
+    <polygon points="0,360 200,240 360,320 520,210 700,310 880,200 1040,290 1200,250 1200,420 0,420" fill="#243610" opacity="0.85"/>
+    <!-- 地面 -->
+    <rect x="0" y="400" width="1200" height="160" fill="url(#ground)"/>
+    <!-- 畑/田んぼライン -->
+    <line x1="0" y1="430" x2="400" y2="420" stroke="#3A5018" stroke-width="1.5" opacity="0.6"/>
+    <line x1="0" y1="450" x2="380" y2="440" stroke="#3A5018" stroke-width="1" opacity="0.4"/>
+    <line x1="0" y1="470" x2="420" y2="458" stroke="#3A5018" stroke-width="1" opacity="0.35"/>
+    <!-- 古民家 本体 -->
+    <!-- 基礎 -->
+    <rect x="380" y="340" width="320" height="140" rx="2" fill="#4A3C28"/>
+    <!-- 壁 -->
+    <rect x="390" y="285" width="300" height="160" fill="#6A5C3C"/>
+    <!-- 柱 -->
+    <rect x="398" y="290" width="10" height="155" fill="#5A4C2C"/>
+    <rect x="472" y="290" width="10" height="155" fill="#5A4C2C"/>
+    <rect x="598" y="290" width="10" height="155" fill="#5A4C2C"/>
+    <rect x="672" y="290" width="10" height="155" fill="#5A4C2C"/>
+    <!-- 障子・窓 -->
+    <rect x="410" y="310" width="60" height="80" rx="1" fill="#D4C890" opacity="0.4"/>
+    <line x1="440" y1="310" x2="440" y2="390" stroke="#8A7840" stroke-width="1" opacity="0.7"/>
+    <line x1="410" y1="350" x2="470" y2="350" stroke="#8A7840" stroke-width="1" opacity="0.7"/>
+    <rect x="615" y="310" width="60" height="80" rx="1" fill="#D4C890" opacity="0.4"/>
+    <line x1="645" y1="310" x2="645" y2="390" stroke="#8A7840" stroke-width="1" opacity="0.7"/>
+    <line x1="615" y1="350" x2="675" y2="350" stroke="#8A7840" stroke-width="1" opacity="0.7"/>
+    <!-- 玄関 -->
+    <rect x="505" y="360" width="70" height="85" rx="1" fill="#3A2C18"/>
+    <rect x="508" y="363" width="30" height="82" fill="#3E3020"/>
+    <rect x="542" y="363" width="30" height="82" fill="#3E3020"/>
+    <!-- 屋根 大屋根 -->
+    <polygon points="360,290 720,290 680,190 400,190" fill="#2C2018"/>
+    <!-- 屋根 棟 -->
+    <rect x="398" y="185" width="284" height="12" rx="2" fill="#1C1410"/>
+    <!-- 軒先の影 -->
+    <polygon points="360,290 720,290 700,300 340,300" fill="#1A1208" opacity="0.5"/>
+    <!-- 屋根の瓦ライン -->
+    <line x1="400" y1="220" x2="680" y2="220" stroke="#1C1410" stroke-width="1.5" opacity="0.5"/>
+    <line x1="410" y1="240" x2="670" y2="240" stroke="#1C1410" stroke-width="1.5" opacity="0.4"/>
+    <line x1="420" y1="260" x2="660" y2="260" stroke="#1C1410" stroke-width="1.5" opacity="0.35"/>
+    <!-- 煙突 -->
+    <rect x="590" y="165" width="18" height="28" fill="#2A2018"/>
+    <!-- 煙 -->
+    <circle cx="599" cy="155" r="8" fill="#8A8878" opacity="0.25" filter="url(#blur1)"/>
+    <circle cx="602" cy="140" r="10" fill="#8A8878" opacity="0.18" filter="url(#blur2)"/>
+    <!-- 左側 大木 -->
+    <rect x="200" y="300" width="18" height="160" rx="4" fill="#3C2C14"/>
+    <ellipse cx="209" cy="295" rx="55" ry="70" fill="#1A3808" opacity="0.85"/>
+    <ellipse cx="195" cy="310" rx="38" ry="55" fill="#223C0C" opacity="0.8"/>
+    <ellipse cx="225" cy="305" rx="42" ry="60" fill="#1E400A" opacity="0.75"/>
+    <!-- 右側 木々 -->
+    <rect x="760" y="330" width="14" height="130" rx="3" fill="#3C2C14"/>
+    <ellipse cx="767" cy="320" rx="46" ry="60" fill="#1A3808" opacity="0.8"/>
+    <rect x="820" y="350" width="10" height="110" rx="3" fill="#3C2C14"/>
+    <ellipse cx="825" cy="342" rx="34" ry="46" fill="#223C0C" opacity="0.75"/>
+    <!-- 竹 左 -->
+    <rect x="330" y="260" width="5" height="200" rx="2" fill="#3A5A14" opacity="0.8"/>
+    <rect x="345" y="240" width="4" height="220" rx="2" fill="#3A5A14" opacity="0.7"/>
+    <rect x="315" y="280" width="4" height="180" rx="2" fill="#3A5A14" opacity="0.6"/>
+    <!-- 竹の葉 -->
+    <ellipse cx="333" cy="270" rx="18" ry="6" fill="#4A7020" opacity="0.7" transform="rotate(-30 333 270)"/>
+    <ellipse cx="349" cy="250" rx="16" ry="5" fill="#4A7020" opacity="0.65" transform="rotate(25 349 250)"/>
+    <!-- 右奥 小屋 -->
+    <rect x="840" y="360" width="100" height="80" fill="#5A4A2C" opacity="0.6"/>
+    <polygon points="830,360 950,360 895,310" fill="#2C2018" opacity="0.65"/>
+    <!-- 灯り（障子の光） -->
+    <rect x="410" y="310" width="60" height="80" rx="1" fill="#F5E8A0" opacity="0.12"/>
+    <rect x="615" y="310" width="60" height="80" rx="1" fill="#F5E8A0" opacity="0.10"/>
+    <!-- 前景の草 -->
+    <path d="M0,480 Q60,460 120,475 Q180,490 240,472 Q300,455 360,470 Q420,485 480,468 Q540,452 600,466 Q660,480 720,465 Q780,450 840,468 Q900,485 960,470 Q1020,455 1080,470 Q1140,485 1200,468 L1200,560 L0,560 Z" fill="#1A2A08" opacity="0.9"/>
+    <path d="M0,500 Q80,485 160,498 Q240,511 320,495 Q400,479 480,495 Q560,511 640,495 Q720,479 800,495 Q880,511 960,496 Q1040,481 1120,497 Q1160,505 1200,498 L1200,560 L0,560 Z" fill="#141E06"/>
+  </svg>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">美作・岡山 ／ 古民家再生・地域再生プロジェクト</div>
+    <h1 class="hero-title">古い家に、<br><em>新しいいのちを。</em></h1>
+    <p class="hero-desc">いきる会は、美作地域の空き家・古民家を舞台に<br>リフォーム体験・農業・不動産・キャンプを通じて<br>「ここで生きたい」と思える場所をつくっています。</p>
+    <div class="hero-btns">
+      <a href="#blog" class="btn-green">活動ブログを読む</a>
+      <a href="https://satoyama3.my.canva.site/dahf1-9f-j8" class="btn-ghost">会員証を取得</a>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span>SCROLL</span>
+    <div class="scroll-line"></div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-num">6回+</div><div class="stat-lbl">リフォーム体験塾</div></div>
+  <div class="stat"><div class="stat-num">古民家</div><div class="stat-lbl">再生プロジェクト</div></div>
+  <div class="stat"><div class="stat-num">美作</div><div class="stat-lbl">岡山県エリア活動</div></div>
+  <div class="stat"><div class="stat-num">4事業</div><div class="stat-lbl">地域密着サービス</div></div>
+</div>
+
+<!-- PHOTO STRIP -->
+<div class="strip">
+  <div class="strip-cell">
+    <div class="inner">
+      <svg viewBox="0 0 300 220" xmlns="http://www.w3.org/2000/svg">
+        <rect width="300" height="220" fill="#2A2010"/>
+        <rect x="60" y="80" width="180" height="100" fill="#5A4A2C"/>
+        <polygon points="50,80 250,80 220,30 80,30" fill="#1E1810"/>
+        <rect x="110" y="120" width="40" height="60" fill="#3A2C18"/>
+        <rect x="68" y="95" width="35" height="30" fill="#C8BC80" opacity="0.3"/>
+        <rect x="197" y="95" width="35" height="30" fill="#C8BC80" opacity="0.3"/>
+        <rect x="0" y="160" width="300" height="60" fill="#1A2808"/>
+      </svg>
+    </div>
+    <div class="strip-label">古民家の原風景</div>
+  </div>
+  <div class="strip-cell">
+    <div class="inner">
+      <svg viewBox="0 0 300 220" xmlns="http://www.w3.org/2000/svg">
+        <rect width="300" height="220" fill="#3A3020"/>
+        <rect x="40" y="60" width="220" height="120" fill="#8A7050"/>
+        <rect x="40" y="60" width="220" height="8" fill="#C8A060"/>
+        <rect x="40" y="60" width="8" height="120" fill="#B89050"/>
+        <rect x="252" y="60" width="8" height="120" fill="#B89050"/>
+        <!-- 壁塗り中の人 -->
+        <rect x="130" y="100" width="40" height="70" rx="4" fill="#4A3C28"/>
+        <circle cx="150" cy="92" r="16" fill="#C8A878"/>
+        <!-- ローラー -->
+        <rect x="165" y="105" width="4" height="30" fill="#888"/>
+        <rect x="162" y="100" width="20" height="10" rx="2" fill="#D4A040"/>
+        <!-- 塗られた壁部分 -->
+        <rect x="60" y="75" width="80" height="90" fill="#F0E8D0" opacity="0.6"/>
+        <rect x="0" y="170" width="300" height="50" fill="#2A2010"/>
+      </svg>
+    </div>
+    <div class="strip-label">壁を塗る・床を張る</div>
+  </div>
+  <div class="strip-cell">
+    <div class="inner">
+      <svg viewBox="0 0 300 220" xmlns="http://www.w3.org/2000/svg">
+        <rect width="300" height="220" fill="#F5EDD8"/>
+        <rect x="30" y="60" width="240" height="130" fill="#fff"/>
+        <polygon points="20,60 280,60 250,20 50,20" fill="#4A3C28"/>
+        <rect x="110" y="120" width="80" height="70" fill="#D4C890" opacity="0.4"/>
+        <!-- 木の床 -->
+        <rect x="30" y="155" width="240" height="8" fill="#B8903C"/>
+        <rect x="30" y="163" width="240" height="8" fill="#C09840"/>
+        <rect x="30" y="171" width="240" height="8" fill="#B8903C"/>
+        <rect x="30" y="179" width="240" height="11" fill="#C09840"/>
+        <!-- 植物 -->
+        <rect x="240" y="130" width="6" height="50" fill="#5A8030"/>
+        <ellipse cx="243" cy="122" rx="22" ry="28" fill="#4A9020"/>
+        <ellipse cx="230" cy="135" rx="16" ry="20" fill="#5A9A28"/>
+        <rect x="50" y="140" width="5" height="40" fill="#5A8030"/>
+        <ellipse cx="53" cy="133" rx="18" ry="22" fill="#4A9020"/>
+        <rect x="0" y="190" width="300" height="30" fill="#E8DFC8"/>
+      </svg>
+    </div>
+    <div class="strip-label">再生した暮らし</div>
+  </div>
+  <div class="strip-cell">
+    <div class="inner">
+      <svg viewBox="0 0 300 220" xmlns="http://www.w3.org/2000/svg">
+        <rect width="300" height="220" fill="#1A2808"/>
+        <polygon points="0,180 80,100 160,150 220,80 300,120 300,220 0,220" fill="#2A4010"/>
+        <polygon points="0,200 100,140 180,170 260,120 300,145 300,220 0,220" fill="#1A2E08"/>
+        <!-- 焚き火 -->
+        <circle cx="150" cy="185" r="25" fill="#2A2010"/>
+        <polygon points="150,155 140,185 160,185" fill="#E05A10" opacity="0.9"/>
+        <polygon points="150,160 135,185 165,185" fill="#F08020" opacity="0.7"/>
+        <polygon points="148,162 142,185 154,185" fill="#F8C030" opacity="0.8"/>
+        <!-- 炎の光 -->
+        <circle cx="150" cy="178" r="20" fill="#F08020" opacity="0.1"/>
+        <!-- 星 -->
+        <circle cx="60" cy="40" r="2" fill="#fff" opacity="0.7"/>
+        <circle cx="180" cy="25" r="1.5" fill="#fff" opacity="0.6"/>
+        <circle cx="260" cy="50" r="2" fill="#fff" opacity="0.5"/>
+        <circle cx="120" cy="60" r="1" fill="#fff" opacity="0.4"/>
+        <!-- 月 -->
+        <circle cx="240" cy="45" r="22" fill="#F5E090" opacity="0.25"/>
+      </svg>
+    </div>
+    <div class="strip-label">美作の夜・キャンプ</div>
+  </div>
+</div>
+
+<!-- BLOG -->
+<section class="sec-wrap" id="blog" style="background:#FDFAF5;">
+  <div class="blog-header">
+    <div>
+      <div class="sec-eyebrow">Blog / Events</div>
+      <h2 class="sec-title">活動ブログ・イベント一覧</h2>
+      <p class="sec-sub">いきる会の日々の活動、体験イベント、お知らせを発信しています。</p>
+    </div>
+    <a href="https://ikirukai.com/" class="blog-more">すべて見る →</a>
+  </div>
+  <div class="blog-grid">
+
+    <!-- FEATURED -->
+    <div class="blog-card feat">
+      <div class="card-thumb" style="background:#3A2C14; min-height:240px;">
+        <svg viewBox="0 0 500 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+          <rect width="500" height="240" fill="#2C2010"/>
+          <rect x="100" y="60" width="300" height="150" fill="#6A5A38"/>
+          <polygon points="80,60 420,60 380,10 120,10" fill="#1E1810"/>
+          <rect x="80" y="60" width="340" height="8" fill="#2C2418"/>
+          <rect x="190" y="130" width="60" height="80" fill="#3A2A14"/>
+          <rect x="110" y="80" width="55" height="45" fill="#C8BC80" opacity="0.35"/>
+          <rect x="335" y="80" width="55" height="45" fill="#C8BC80" opacity="0.35"/>
+          <!-- ローラーで壁塗り中の人 -->
+          <rect x="310" y="100" width="30" height="60" rx="3" fill="#5A4A30"/>
+          <circle cx="325" cy="93" r="13" fill="#C8A878"/>
+          <rect x="338" y="110" width="3" height="25" fill="#888"/>
+          <rect x="336" y="105" width="16" height="8" rx="2" fill="#D4A040"/>
+          <!-- 塗られた壁 -->
+          <rect x="115" y="88" width="48" height="38" fill="#F0E8D0" opacity="0.5"/>
+          <rect x="0" y="185" width="500" height="55" fill="#1A2808"/>
+          <rect x="0" y="200" width="500" height="40" fill="#223210"/>
+        </svg>
+        <span class="card-tag tag-new">最新</span>
+      </div>
+      <div class="card-body">
+        <div class="card-date">2025.05.04</div>
+        <div class="card-title">【第6回】リフォーム体験塾 ― 古民家の床を自分の手で張る一日</div>
+        <div class="card-desc">参加者が鋸と金槌を握り、古い床を剥がすところから新しい床材を張るまでを体験。「壊して、直す」という行為が地域との絆をつくる。</div>
+        <a href="https://satoyama3.my.canva.site/6kai" class="card-link">続きを読む →</a>
+      </div>
+    </div>
+
+    <!-- CARD 2 -->
+    <div class="blog-card">
+      <div class="card-thumb" style="background:#2A3418;">
+        <svg viewBox="0 0 260 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+          <rect width="260" height="170" fill="#2A3418"/>
+          <rect x="0" y="100" width="260" height="70" fill="#1A2808"/>
+          <!-- 畑の畝 -->
+          <ellipse cx="130" cy="115" rx="100" ry="12" fill="#3A5018" opacity="0.7"/>
+          <ellipse cx="130" cy="130" rx="100" ry="10" fill="#304010" opacity="0.6"/>
+          <ellipse cx="130" cy="145" rx="100" ry="8" fill="#3A5018" opacity="0.5"/>
+          <!-- 芽 -->
+          <rect x="80" y="88" width="4" height="20" fill="#5A8020"/>
+          <ellipse cx="82" cy="85" rx="10" ry="13" fill="#4A9018"/>
+          <rect x="120" y="84" width="4" height="22" fill="#5A8020"/>
+          <ellipse cx="122" cy="80" rx="12" ry="16" fill="#5A9820"/>
+          <rect x="160" y="86" width="4" height="20" fill="#5A8020"/>
+          <ellipse cx="162" cy="82" rx="10" ry="14" fill="#4A9018"/>
+          <!-- 空 -->
+          <rect x="0" y="0" width="260" height="100" fill="#1A2A3A"/>
+          <circle cx="200" cy="40" r="24" fill="#F0C860" opacity="0.22"/>
+        </svg>
+        <span class="card-tag tag-farm">農業</span>
+      </div>
+      <div class="card-body">
+        <div class="card-date">2025.03.20</div>
+        <div class="card-title">農業体験塾 ― 種をまく、育てる、食べる</div>
+        <div class="card-desc">美作の畑で土に触れる一日。初心者も安心のプロ指導付き。</div>
+        <a href="https://satoyama3.my.canva.site/hata1" class="card-link">続きを読む →</a>
+      </div>
+    </div>
+
+    <!-- CARD 3 -->
+    <div class="blog-card">
+      <div class="card-thumb" style="background:#3A2C10;">
+        <svg viewBox="0 0 260 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+          <rect width="260" height="170" fill="#3A3018"/>
+          <!-- テーブル・マーケット -->
+          <rect x="20" y="90" width="220" height="10" rx="2" fill="#8A6A30"/>
+          <rect x="30" y="100" width="10" height="40" fill="#7A5A28"/>
+          <rect x="220" y="100" width="10" height="40" fill="#7A5A28"/>
+          <!-- 商品 -->
+          <rect x="40" y="65" width="30" height="28" rx="2" fill="#C89040"/>
+          <rect x="80" y="70" width="25" height="22" rx="2" fill="#A06030"/>
+          <rect x="115" y="60" width="35" height="32" rx="3" fill="#8A7040"/>
+          <rect x="160" y="68" width="28" height="24" rx="2" fill="#B87040"/>
+          <rect x="198" y="72" width="22" height="20" rx="2" fill="#C0A050"/>
+          <!-- のれん -->
+          <rect x="0" y="0" width="260" height="50" fill="#4A3820"/>
+          <rect x="20" y="0" width="30" height="55" rx="0 0 4 4" fill="#8A6030"/>
+          <rect x="60" y="0" width="30" height="52" rx="0 0 4 4" fill="#7A5028"/>
+          <rect x="100" y="0" width="30" height="56" rx="0 0 4 4" fill="#8A6030"/>
+          <rect x="140" y="0" width="30" height="50" rx="0 0 4 4" fill="#7A5028"/>
+          <rect x="180" y="0" width="30" height="54" rx="0 0 4 4" fill="#8A6030"/>
+          <rect x="220" y="0" width="30" height="52" rx="0 0 4 4" fill="#7A5028"/>
+          <rect x="0" y="125" width="260" height="45" fill="#2A2010"/>
+        </svg>
+        <span class="card-tag tag-market">マーケット</span>
+      </div>
+      <div class="card-body">
+        <div class="card-date">2025.02.22</div>
+        <div class="card-title">お宝探しマーケット開催レポート</div>
+        <div class="card-desc">地域に眠る道具・家具・雑貨が大集合。出会いが人をつないだ一日。</div>
+        <a href="https://satoyama3.my.canva.site/takara1" class="card-link">続きを読む →</a>
+      </div>
+    </div>
+
+    <!-- CARD 4 -->
+    <div class="blog-card">
+      <div class="card-thumb" style="background:#1A2010;">
+        <svg viewBox="0 0 260 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+          <rect width="260" height="170" fill="#1A1A0A"/>
+          <!-- 夜空 -->
+          <circle cx="40" cy="30" r="2" fill="#fff" opacity="0.6"/>
+          <circle cx="100" cy="15" r="1.5" fill="#fff" opacity="0.5"/>
+          <circle cx="180" cy="25" r="2" fill="#fff" opacity="0.6"/>
+          <circle cx="230" cy="10" r="1" fill="#fff" opacity="0.4"/>
+          <!-- テント -->
+          <polygon points="70,140 130,60 190,140" fill="#4A6A3A"/>
+          <polygon points="75,140 130,65 185,140" fill="#3A5A2A"/>
+          <rect x="108" y="100" width="44" height="40" fill="#2A3A1A"/>
+          <!-- 焚き火 -->
+          <circle cx="130" cy="148" r="15" fill="#1A1208"/>
+          <polygon points="130,128 122,148 138,148" fill="#E05010" opacity="0.9"/>
+          <polygon points="130,132 118,148 142,148" fill="#F07818" opacity="0.7"/>
+          <polygon points="128,135 124,148 132,148" fill="#F8C028" opacity="0.8"/>
+          <circle cx="130" cy="143" r="14" fill="#F06010" opacity="0.08"/>
+          <!-- 木 -->
+          <rect x="28" y="100" width="8" height="70" rx="2" fill="#2A1E0A"/>
+          <ellipse cx="32" cy="93" rx="22" ry="30" fill="#1A3408"/>
+          <rect x="210" y="110" width="7" height="60" rx="2" fill="#2A1E0A"/>
+          <ellipse cx="213" cy="103" rx="18" ry="25" fill="#1A3408"/>
+          <rect x="0" y="150" width="260" height="20" fill="#141008"/>
+        </svg>
+        <span class="card-tag" style="background:#4A5A9A;color:#fff;">キャンプ</span>
+      </div>
+      <div class="card-body">
+        <div class="card-date">2024.12.08</div>
+        <div class="card-title">キャンプ場オープン準備中！美作の星空の下で</div>
+        <div class="card-desc">焚き火、星空、里山の空気。まもなくオープン予定です。</div>
+        <a href="https://ikirukai.com/" class="card-link">詳細はこちら →</a>
+      </div>
+    </div>
+
+    <!-- CARD 5 -->
+    <div class="blog-card">
+      <div class="card-thumb" style="background:#3A2A10;">
+        <svg viewBox="0 0 260 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+          <rect width="260" height="170" fill="#2A2010"/>
+          <rect x="60" y="60" width="140" height="90" fill="#6A5A38"/>
+          <polygon points="48,60 212,60 188,20 72,20" fill="#1E1810"/>
+          <rect x="80" y="80" width="40" height="35" fill="#B8B080" opacity="0.3"/>
+          <rect x="140" y="80" width="40" height="35" fill="#B8B080" opacity="0.3"/>
+          <rect x="108" y="110" width="44" height="40" fill="#3A2A14"/>
+          <!-- ペンキバケツ -->
+          <rect x="195" y="100" width="20" height="22" rx="2" fill="#C04020"/>
+          <path d="M195,100 Q205,95 215,100" stroke="#888" stroke-width="2" fill="none"/>
+          <!-- ハケ -->
+          <rect x="205" y="80" width="4" height="22" fill="#8A7040"/>
+          <rect x="200" y="96" width="14" height="8" rx="1" fill="#C8A060"/>
+          <rect x="0" y="155" width="260" height="15" fill="#1A1208"/>
+        </svg>
+        <span class="card-tag tag-reform">リフォーム</span>
+      </div>
+      <div class="card-body">
+        <div class="card-date">2025.04.12</div>
+        <div class="card-title">【第5回】リフォーム体験塾 ― 漆喰壁塗り編</div>
+        <div class="card-desc">左官職人と一緒に漆喰壁を塗る体験。白い壁が生まれるたびに歓声。</div>
+        <a href="https://satoyama3.my.canva.site/5kai" class="card-link">続きを読む →</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="sec-wrap services-bg" id="services">
+  <div class="sec-eyebrow">Services</div>
+  <h2 class="sec-title">事業内容</h2>
+  <p class="sec-sub">暮らしに必要なことを、地域の力でまるごとサポートします。</p>
+  <div class="svc-grid">
+    <div class="svc-card"><div class="svc-icon">🔧</div><div class="svc-title">安い便利屋さん</div><div class="svc-desc">ちょっとした困りごとから、まとめて頼める作業まで。地域密着で素早く対応。</div><a href="https://satoyama3.my.canva.site/benri" class="svc-link">詳細 →</a></div>
+    <div class="svc-card"><div class="svc-icon">🏠</div><div class="svc-title">不動産部</div><div class="svc-desc">美作・岡山の物件売買・賃貸・空き家活用。地元に詳しいからこその提案を。</div><a href="https://satoyama3.my.canva.site/fudosan" class="svc-link">詳細 →</a></div>
+    <div class="svc-card"><div class="svc-icon">🎪</div><div class="svc-title">体験塾</div><div class="svc-desc">リフォーム・農業・ものづくりなど「やってみる」を応援するワークショップ。</div><a href="#blog" class="svc-link">一覧 →</a></div>
+    <div class="svc-card"><div class="svc-icon">⛺</div><div class="svc-title">キャンプ場</div><div class="svc-desc">美作の自然の中で、焚き火と星空を。家族や仲間との特別な時間を。</div><a href="https://ikirukai.com/" class="svc-link">詳細 →</a></div>
+  </div>
+</section>
+
+<!-- SNS -->
+<div class="sns-bg" id="sns">
+  <div class="sns-title">SNS・お問い合わせ</div>
+  <div class="sns-sub">各種SNSやLINEでもご連絡いただけます</div>
+  <div class="sns-links">
+    <a href="https://ikirukai.com/" class="sns-btn">🌐 公式HP</a>
+    <a href="https://www.instagram.com/ikirukai3/" class="sns-btn">📸 Instagram</a>
+    <a href="https://line.me/R/ti/p/@237cjmhh?oat_content=url&ts=05040839" class="sns-btn">💬 公式LINE</a>
+    <a href="https://maps.app.goo.gl/kRf3v6cdccvaFyr58" class="sns-btn">📍 Google MAP</a>
+    <a href="https://satoyama3.my.canva.site/dahf1-9f-j8" class="sns-btn">🪪 会員証</a>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-logo">いきる会</div>
+  <div>© 2025 いきる会 / 美作・岡山</div>
+</footer>
+
+</body>
+</html>
+

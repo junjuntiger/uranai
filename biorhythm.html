@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>バイオリズム</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+    background: #f5f5f3;
+    color: #1a1a1a;
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+  }
+
+  .app {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    letter-spacing: 0.02em;
+    color: #1a1a1a;
+  }
+
+  /* Inputs */
+  .inputs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+    background: #fff;
+    border: 1px solid #e0e0de;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 12px; color: #666; }
+  .field input[type="date"] {
+    font-size: 14px;
+    padding: 7px 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    color: #1a1a1a;
+    outline: none;
+    cursor: pointer;
+  }
+  .field input[type="date"]:focus { border-color: #185FA5; background: #fff; }
+
+  .btn {
+    font-size: 13px;
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    color: #333;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .btn:hover { background: #f0f0f0; }
+  .btn:active { transform: scale(0.97); }
+
+  /* Nav */
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+  .nav-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    text-align: center;
+    flex: 1;
+  }
+
+  /* Cards */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid #e0e0de;
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .card .clabel { font-size: 11px; color: #888; margin-bottom: 4px; }
+  .card .cval { font-size: 22px; font-weight: 500; line-height: 1.2; }
+  .card .cdesc { font-size: 11px; color: #999; margin-top: 3px; }
+
+  /* Chart area */
+  .chart-wrap {
+    background: #fff;
+    border: 1px solid #e0e0de;
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: #777;
+  }
+  .legend span { display: flex; align-items: center; gap: 6px; }
+  .leg-line { width: 22px; height: 3px; border-radius: 2px; flex-shrink: 0; }
+
+  .canvas-wrapper { position: relative; width: 100%; height: 260px; }
+
+  @media (max-width: 480px) {
+    .cards { grid-template-columns: repeat(3, 1fr); }
+    .card .cval { font-size: 18px; }
+    .card { padding: 10px; }
+    h1 { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>バイオリズム</h1>
+
+  <div class="inputs">
+    <div class="field">
+      <label for="bday">生年月日</label>
+      <input type="date" id="bday" value="1990-01-01">
+    </div>
+    <div class="field">
+      <label for="tday">確認したい日</label>
+      <input type="date" id="tday">
+    </div>
+    <button class="btn" onclick="goToday()">今日</button>
+  </div>
+
+  <div class="nav">
+    <button class="btn" onclick="shiftWeek(-1)">&#8249; 前の週</button>
+    <span class="nav-label" id="center-label"></span>
+    <button class="btn" onclick="shiftWeek(1)">次の週 &#8250;</button>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="clabel">身体リズム（23日）</div>
+      <div class="cval" id="val-p" style="color:#185FA5"></div>
+      <div class="cdesc" id="desc-p"></div>
+    </div>
+    <div class="card">
+      <div class="clabel">感情リズム（28日）</div>
+      <div class="cval" id="val-e" style="color:#3B6D11"></div>
+      <div class="cdesc" id="desc-e"></div>
+    </div>
+    <div class="card">
+      <div class="clabel">知性リズム（33日）</div>
+      <div class="cval" id="val-i" style="color:#854F0B"></div>
+      <div class="cdesc" id="desc-i"></div>
+    </div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="legend">
+      <span><span class="leg-line" style="background:#185FA5"></span>身体</span>
+      <span><span class="leg-line" style="background:#3B6D11;background:repeating-linear-gradient(90deg,#3B6D11 0 5px,transparent 5px 8px)"></span>感情</span>
+      <span><span class="leg-line" style="background:repeating-linear-gradient(90deg,#854F0B 0 2px,transparent 2px 4px)"></span>知性</span>
+    </div>
+    <div class="canvas-wrapper">
+      <canvas id="bioChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+let chart = null;
+let centerDate = new Date();
+
+function fmtShort(d) {
+  return d.toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric', weekday: 'short' });
+}
+function fmtFull(d) {
+  return d.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
+}
+function toDateStr(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+function parseDateStr(s) {
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+function daysSince(birth, target) {
+  return Math.floor((target - birth) / 86400000);
+}
+function bio(days, period) {
+  return Math.sin(2 * Math.PI * days / period);
+}
+function level(v) {
+  const pct = Math.round(v * 100);
+  if (Math.abs(v) < 0.15) return { pct, desc: '転換点 ⚠' };
+  if (v > 0.7) return { pct, desc: '絶好調 ↑' };
+  if (v > 0.3) return { pct, desc: '好調' };
+  if (v > -0.3) return { pct, desc: '普通' };
+  if (v > -0.7) return { pct, desc: '低調' };
+  return { pct, desc: '要注意 ↓' };
+}
+
+function getBirth() {
+  const v = document.getElementById('bday').value;
+  return v ? parseDateStr(v) : null;
+}
+
+function render() {
+  const birth = getBirth();
+  if (!birth) return;
+
+  const tStr = document.getElementById('tday').value;
+  const target = tStr ? parseDateStr(tStr) : centerDate;
+
+  document.getElementById('center-label').textContent = fmtFull(centerDate);
+
+  const days14 = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date(centerDate);
+    d.setDate(d.getDate() - 7 + i);
+    return d;
+  });
+
+  const labels = days14.map(fmtShort);
+  const pD = days14.map(d => +bio(daysSince(birth, d), 23).toFixed(3));
+  const eD = days14.map(d => +bio(daysSince(birth, d), 28).toFixed(3));
+  const iD = days14.map(d => +bio(daysSince(birth, d), 33).toFixed(3));
+
+  const tDays = daysSince(birth, target);
+  const pv = bio(tDays, 23), ev = bio(tDays, 28), iv = bio(tDays, 33);
+
+  const lp = level(pv), le = level(ev), li = level(iv);
+  document.getElementById('val-p').textContent = (pv >= 0 ? '+' : '') + lp.pct + '%';
+  document.getElementById('desc-p').textContent = lp.desc;
+  document.getElementById('val-e').textContent = (ev >= 0 ? '+' : '') + le.pct + '%';
+  document.getElementById('desc-e').textContent = le.desc;
+  document.getElementById('val-i').textContent = (iv >= 0 ? '+' : '') + li.pct + '%';
+  document.getElementById('desc-i').textContent = li.desc;
+
+  const todayIdx = days14.findIndex(d => toDateStr(d) === toDateStr(target));
+
+  if (chart) { chart.destroy(); chart = null; }
+  const ctx = document.getElementById('bioChart').getContext('2d');
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: '身体', data: pD,
+          borderColor: '#185FA5', borderWidth: 2,
+          pointRadius: 3, pointHoverRadius: 5,
+          tension: 0.4, fill: false
+        },
+        {
+          label: '感情', data: eD,
+          borderColor: '#3B6D11', borderWidth: 2,
+          borderDash: [6, 3],
+          pointRadius: 3, pointHoverRadius: 5,
+          tension: 0.4, fill: false
+        },
+        {
+          label: '知性', data: iD,
+          borderColor: '#854F0B', borderWidth: 2,
+          borderDash: [2, 2],
+          pointRadius: 3, pointHoverRadius: 5,
+          tension: 0.4, fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const v = ctx.raw;
+              return ` ${ctx.dataset.label}: ${v >= 0 ? '+' : ''}${Math.round(v * 100)}%`;
+            }
+          }
+        },
+        annotation: todayIdx >= 0 ? {
+          annotations: {
+            today: {
+              type: 'line', xMin: todayIdx, xMax: todayIdx,
+              borderColor: 'rgba(100,100,100,0.4)', borderWidth: 1.5, borderDash: [4, 3]
+            }
+          }
+        } : undefined
+      },
+      scales: {
+        y: {
+          min: -1.15, max: 1.15,
+          ticks: {
+            callback: v => v === 0 ? '0' : (v > 0 ? '+' : '') + Math.round(v * 100) + '%',
+            font: { size: 11 },
+            color: '#999'
+          },
+          grid: { color: 'rgba(0,0,0,0.07)' }
+        },
+        x: {
+          ticks: {
+            font: { size: 10 },
+            maxRotation: 45,
+            autoSkip: false,
+            color: '#999'
+          },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function goToday() {
+  centerDate = new Date();
+  document.getElementById('tday').value = toDateStr(centerDate);
+  render();
+}
+
+function shiftWeek(dir) {
+  centerDate = new Date(centerDate);
+  centerDate.setDate(centerDate.getDate() + dir * 7);
+  document.getElementById('tday').value = toDateStr(centerDate);
+  render();
+}
+
+document.getElementById('bday').addEventListener('change', render);
+document.getElementById('tday').addEventListener('change', e => {
+  if (e.target.value) centerDate = parseDateStr(e.target.value);
+  render();
+});
+
+const today = new Date();
+document.getElementById('tday').value = toDateStr(today);
+render();
+</script>
+</body>
+</html>
