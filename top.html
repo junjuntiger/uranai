@@ -171,8 +171,10 @@
       text-decoration: none;
       border-radius: 20px;
       overflow: hidden;
-      background: linear-gradient(135deg, #faf5ff, #ede9ff 50%, #e0f2fe);
-      border: 1.5px solid #ddd6fe;
+      background: linear-gradient(135deg, rgba(250,245,255,0.08), rgba(237,233,255,0.08) 50%, rgba(224,242,254,0.08));
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1.5px solid rgba(221,214,254,0.6);
       padding: 2.2rem 2rem;
       text-align: center;
       transition: transform 0.25s, box-shadow 0.25s;
@@ -314,11 +316,11 @@
 </div>
 
 <!-- 占い・診断 -->
-<section id="uranai">
+<section id="uranai" style="margin-top:-300px; position:relative; z-index:2;">
   <div class="section-label">占い・診断ツール</div>
   <h2 class="section-title">🔮 占い・診断ツール</h2>
   <p class="section-desc">生年月日と名前から、あなたの宿命・性格・運勢を読み解く14のツール。</p>
-  <a class="uranai-card" href="index_watercolor.html">
+  <a class="uranai-card" href="top-uranai.html">
     <span class="uranai-card-icon">✨</span>
     <div class="uranai-card-title">占い・診断ツール一覧へ</div>
     <p class="uranai-card-desc">
@@ -328,10 +330,10 @@
     <span class="uranai-card-btn">ツールを使う →</span>
   </a>
   <div class="mini-cards">
-    <a class="mini-card" href="index_watercolor.html#shukumei"><span class="mini-card-icon">🔭</span>宿命・使命を知る</a>
-    <a class="mini-card" href="index_watercolor.html#honshitsu"><span class="mini-card-icon">🪞</span>本質・性格を知る</a>
-    <a class="mini-card" href="index_watercolor.html#unsei"><span class="mini-card-icon">🌊</span>運勢・タイミング</a>
-    <a class="mini-card" href="index_watercolor.html#message"><span class="mini-card-icon">🃏</span>今すぐメッセージ</a>
+    <a class="mini-card" href="top-uranai.html#shukumei"><span class="mini-card-icon">🔭</span>宿命・使命を知る</a>
+    <a class="mini-card" href="top-uranai.html#honshitsu"><span class="mini-card-icon">🪞</span>本質・性格を知る</a>
+    <a class="mini-card" href="top-uranai.html#unsei"><span class="mini-card-icon">🌊</span>運勢・タイミング</a>
+    <a class="mini-card" href="top-uranai.html#message"><span class="mini-card-icon">🃏</span>今すぐメッセージ</a>
   </div>
 </section>
 

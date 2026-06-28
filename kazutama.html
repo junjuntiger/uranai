@@ -417,7 +417,8 @@
 </head>
 <body>
 
-<header>
+<header style="position:relative;">
+  <a href="top-uranai.html" style="position:absolute; top:1rem; right:1rem; padding:7px 16px; border:1px solid var(--border); border-radius:20px; font-size:12px; color:var(--ink-mid); text-decoration:none; background:var(--paper); letter-spacing:0.05em;">← TOP</a>
   <div class="header-kana"></div>
   <h1>かずたま数秘術</h1>
   <p>名前と誕生日から導く、人生の設計図</p>
@@ -483,7 +484,6 @@ const NUM_MEANINGS = {
   7:{title:"探求",kw:"分析・内省・深い洞察"},
   8:{title:"力・繁栄",kw:"実行力・成功・社会的スケール"},
   9:{title:"完成・博愛",kw:"包容力・手放し・人類への貢献"},
-  10:{title:"完結と再生",kw:"終わりと始まりを同時に生きる"},
   11:{title:"啓示",kw:"霊感・ビジョン・高次の知恵"},
   22:{title:"マスタービルダー",kw:"夢を現実化・大きな使命"},
   33:{title:"マスターティーチャー",kw:"深い愛と癒しで人を導く"},
@@ -517,7 +517,8 @@ function reduce(n) {
 function calcNums(name, by, bm, bd, targetYear) {
   const y = parseInt(by), m = parseInt(bm), day = parseInt(bd);
 
-  const life = reduce([...String(y),...String(m),...String(day)].map(Number).reduce((a,b)=>a+b,0));
+  const lifeRaw = [...String(y),...String(m),...String(day)].map(Number).reduce((a,b)=>a+b,0);
+  const life = reduce(lifeRaw);
   const destiny = reduce([...String(m),...String(day)].map(Number).reduce((a,b)=>a+b,0));
   const soul = reduce([...String(day)].map(Number).reduce((a,b)=>a+b,0));
   const persona = reduce([...String(y)].map(Number).reduce((a,b)=>a+b,0));
@@ -531,7 +532,7 @@ function calcNums(name, by, bm, bd, targetYear) {
   const pySum = [...String(targetYear),...String(m),...String(day)].map(Number).reduce((a,b)=>a+b,0);
   const personalYear = reduce(pySum);
 
-  return { life, destiny, soul, persona, expr, mission, personalYear };
+  return { life, lifeRaw, destiny, soul, persona, expr, mission, personalYear };
 }
 
 // ========== UI ==========
@@ -641,18 +642,28 @@ function calculate() {
       <div class="nums-grid">
         ${[
           ['ソウル', n.soul, '魂の欲求'],
-          ['デスティニー', n.destiny, '宿命・使命'],
           ['ライフパス', n.life, '人生のテーマ'],
-          ['ペルソナ', n.persona, '外に見せる顔'],
+          ['デスティニー', n.destiny, '宿命・使命'],
           ['表現数', n.expr, '名前の数霊'],
           ['ミッション', n.mission, '今世の役割'],
-        ].map(([label, val, name]) => `
-          <div class="num-cell">
+          ['総合数', n.lifeRaw, '生年月日の合計', true],
+        ].map(([label, val, name, clickable]) => `
+          <div class="num-cell${clickable?' num-cell-link':''}" ${clickable?`onclick="scrollToSogo(${val})" title="総合数の特徴へ"`:''}>
             <div class="num-cell-label">${label}</div>
             <div class="num-cell-val ${isMaster(val)?'master':''}">${val}</div>
-            <div class="num-cell-name">${name}</div>
+            <div class="num-cell-name">${name}${clickable?' ↓':''}</div>
           </div>
         `).join('')}
+        <div class="num-cell">
+          <div class="num-cell-label">ペルソナ</div>
+          <div class="num-cell-val ${isMaster(n.persona)?'master':''}">${n.persona}</div>
+          <div class="num-cell-name">外に見せる顔</div>
+        </div>
+        <div class="num-cell">
+          <div class="num-cell-label">干支</div>
+          <div class="num-cell-val" style="font-size:1.4rem;">${['申','酉','戌','亥','子','丑','寅','卯','辰','巳','午','未'][parseInt(person.by) % 12]}</div>
+          <div class="num-cell-name">${['さる','とり','いぬ','い','ね','うし','とら','う','たつ','み','うま','ひつじ'][parseInt(person.by) % 12]}</div>
+        </div>
       </div>
       <div class="timing-badge">
         ${targetYear}年の個人年数 <strong>${n.personalYear}</strong>${NUM_MEANINGS[n.personalYear]?.title||''}
@@ -974,6 +985,20 @@ function generateCompatReading(a, b) {
 
 // 初期化
 addPerson();
+
+function scrollToSogo(num) {
+  const cards = document.querySelectorAll('.num-guide-num');
+  for (const el of cards) {
+    if (parseInt(el.textContent) === num) {
+      el.closest('.num-guide-card').scrollIntoView({ behavior:'smooth', block:'center' });
+      const card = el.closest('.num-guide-card');
+      card.style.transition = 'box-shadow 0.3s';
+      card.style.boxShadow = '0 0 0 3px var(--gold)';
+      setTimeout(() => card.style.boxShadow = '', 2000);
+      return;
+    }
+  }
+}
 </script>
 
 <!-- ===== バランスボックス ===== -->
@@ -991,8 +1016,15 @@ addPerson();
     background:var(--paper); color:var(--ink); outline:none; transition:border-color 0.2s;
   }
   .bb-inputs input:focus { border-color:var(--gold); }
+  .bb-name-in { width:80px; }
   .bb-iny { width:64px; } .bb-inmd { width:40px; }
   .bb-unit { font-size:12px; color:var(--ink-light); }
+  .bb-remove-btn {
+    margin-left:auto; padding:4px 10px; border:1px solid #ddd; border-radius:4px;
+    background:none; color:var(--ink-light); font-size:13px; cursor:pointer;
+    font-family:'Noto Sans JP',sans-serif; transition:all 0.2s; flex-shrink:0;
+  }
+  .bb-remove-btn:hover { border-color:#c0392b; color:#c0392b; }
 
   .bb-add-btn {
     width:100%; padding:9px; border:1px dashed var(--border); border-radius:6px;
@@ -1077,39 +1109,64 @@ const BB_MAP = {
   11:[0,2], 22:[1,2], 33:[1,1]
 };
 
-let bbCount = 3;
+let bbActiveLabels = ['A','B','C'];
+
+function bbRowHTML(lbl, color) {
+  return `<div class="bb-person-row" id="bb-row-${lbl}">
+    <span class="bb-person-lbl" style="color:${color}">${lbl}</span>
+    <div class="bb-inputs">
+      <input class="bb-name-in" type="text" placeholder="${lbl}さん" id="bbn-${lbl}" oninput="bbUpdateLabel('${lbl}')">
+      <input class="bb-iny" type="text" inputmode="numeric" maxlength="4" placeholder="1990" id="bby-${lbl}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)">
+      <span class="bb-unit">年</span>
+      <input class="bb-inmd" type="text" inputmode="numeric" maxlength="2" placeholder="11" id="bbm-${lbl}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)">
+      <span class="bb-unit">月</span>
+      <input class="bb-inmd" type="text" inputmode="numeric" maxlength="2" placeholder="22" id="bbd-${lbl}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)">
+      <span class="bb-unit">日</span>
+    </div>
+    <button class="bb-remove-btn" id="bb-rm-${lbl}" onclick="bbRemovePerson('${lbl}')">削除</button>
+  </div>`;
+}
+
+function bbUpdateLabel(lbl) {
+  const nameVal = document.getElementById(`bbn-${lbl}`)?.value.trim();
+  const span = document.querySelector(`#bb-row-${lbl} .bb-person-lbl`);
+  if (span) span.textContent = nameVal ? nameVal : lbl;
+}
+
+function updateRemoveBtns() {
+  bbActiveLabels.forEach(lbl => {
+    const btn = document.getElementById(`bb-rm-${lbl}`);
+    if (btn) btn.style.display = bbActiveLabels.length <= 1 ? 'none' : '';
+  });
+}
 
 function bbRenderRows() {
   const c = document.getElementById('bb-rows');
   c.innerHTML = '';
-  for (let i = 0; i < bbCount; i++) {
-    const lbl = BB_ALL_LABELS[i], color = BB_ALL_COLORS[i];
-    c.innerHTML += `<div class="bb-person-row">
-      <span class="bb-person-lbl" style="color:${color}">${lbl} さん</span>
-      <div class="bb-inputs">
-        <input class="bb-iny" type="text" inputmode="numeric" maxlength="4" placeholder="1990" id="bby-${lbl}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)">
-        <span class="bb-unit">年</span>
-        <input class="bb-inmd" type="text" inputmode="numeric" maxlength="2" placeholder="11" id="bbm-${lbl}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)">
-        <span class="bb-unit">月</span>
-        <input class="bb-inmd" type="text" inputmode="numeric" maxlength="2" placeholder="22" id="bbd-${lbl}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)">
-        <span class="bb-unit">日</span>
-      </div>
-    </div>`;
-  }
-  document.getElementById('bb-add-btn').style.display = bbCount >= 10 ? 'none' : '';
+  bbActiveLabels.forEach(lbl => {
+    const i = BB_ALL_LABELS.indexOf(lbl);
+    c.innerHTML += bbRowHTML(lbl, BB_ALL_COLORS[i]);
+  });
+  document.getElementById('bb-add-btn').style.display = bbActiveLabels.length >= 10 ? 'none' : '';
+  updateRemoveBtns();
+}
+
+function bbRemovePerson(lbl) {
+  document.getElementById(`bb-row-${lbl}`)?.remove();
+  bbActiveLabels = bbActiveLabels.filter(l => l !== lbl);
+  document.getElementById('bb-add-btn').style.display = bbActiveLabels.length >= 10 ? 'none' : '';
+  updateRemoveBtns();
 }
 
 function bbAddPerson() {
-  if (bbCount >= 10) return;
-  const i = bbCount;
-  bbCount++;
-  const lbl = BB_ALL_LABELS[i], color = BB_ALL_COLORS[i];
-  const c = document.getElementById('bb-rows');
-  const div = document.createElement('div');
-  div.className = 'bb-person-row';
-  div.innerHTML = `<span class="bb-person-lbl" style="color:${color}">${lbl} さん</span><div class="bb-inputs"><input class="bb-iny" type="text" inputmode="numeric" maxlength="4" placeholder="1990" id="bby-${lbl}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)"><span class="bb-unit">年</span><input class="bb-inmd" type="text" inputmode="numeric" maxlength="2" placeholder="11" id="bbm-${lbl}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)"><span class="bb-unit">月</span><input class="bb-inmd" type="text" inputmode="numeric" maxlength="2" placeholder="22" id="bbd-${lbl}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,2)"><span class="bb-unit">日</span></div>`;
-  c.appendChild(div);
-  if (bbCount >= 10) document.getElementById('bb-add-btn').style.display = 'none';
+  if (bbActiveLabels.length >= 10) return;
+  const next = BB_ALL_LABELS.find(l => !bbActiveLabels.includes(l));
+  if (!next) return;
+  bbActiveLabels.push(next);
+  const i = BB_ALL_LABELS.indexOf(next);
+  document.getElementById('bb-rows').insertAdjacentHTML('beforeend', bbRowHTML(next, BB_ALL_COLORS[i]));
+  document.getElementById('bb-add-btn').style.display = bbActiveLabels.length >= 10 ? 'none' : '';
+  updateRemoveBtns();
 }
 
 function bbDigitSum(n) {
@@ -1126,12 +1183,14 @@ function calcBBNums(y, m, d) {
 
 function calcBB() {
   const people = [];
-  for (let i = 0; i < bbCount; i++) {
-    const lbl = BB_ALL_LABELS[i];
+  for (const lbl of bbActiveLabels) {
+    const i = BB_ALL_LABELS.indexOf(lbl);
     const y = document.getElementById(`bby-${lbl}`)?.value;
     const m = document.getElementById(`bbm-${lbl}`)?.value;
     const d = document.getElementById(`bbd-${lbl}`)?.value;
-    if (y && m && d) people.push({ lbl, color: BB_ALL_COLORS[i], nums: calcBBNums(y, m, d) });
+    const nameVal = document.getElementById(`bbn-${lbl}`)?.value.trim();
+    const displayName = nameVal || `${lbl}さん`;
+    if (y && m && d) people.push({ lbl, displayName, color: BB_ALL_COLORS[i], nums: calcBBNums(y, m, d) });
   }
   if (!people.length) { alert('生年月日を1名以上入力してください'); return; }
 
@@ -1152,7 +1211,7 @@ function calcBB() {
       const destClass = ni === 3 ? ' destiny' : '';
       return '<div class="bb-circle' + destClass + '" style="border-color:' + p.color + ';color:' + p.color + ';' + destStyle + '">' + n + '</div>';
     }).join('');
-    leftHtml += '<div class="bb-prow"><div class="bb-plbl" style="color:' + p.color + '">' + p.lbl + 'さん</div>' + circles + '</div>';
+    leftHtml += '<div class="bb-prow"><div class="bb-plbl" style="color:' + p.color + '">' + p.displayName + '</div>' + circles + '</div>';
   });
   leftHtml += '</div>';
 
@@ -1184,7 +1243,7 @@ function calcBB() {
     let text = `${BB_ROWS[dr]}の傾向が強く、${ROW_KW[dr]}があります。集団の中では${BB_COLS[dc]}として${COL_KW[dc]}を発揮するタイプです。`;
     if (spread >= 5) text += '　数字がグリッド全体に広がっており、バランスよく多面的な才能を持っています。';
     else if (spread <= 2) text += '　特定のエリアに集中しており、その分野で際立った個性と集中力を持ちます。';
-    summaryHtml += `<div class="bb-summary-card"><div class="bb-summary-name" style="color:${p.color}">${p.lbl}さん</div><div class="bb-summary-text">${text}</div></div>`;
+    summaryHtml += `<div class="bb-summary-card"><div class="bb-summary-name" style="color:${p.color}">${p.displayName}</div><div class="bb-summary-text">${text}</div></div>`;
   });
   summaryHtml += '</div>';
 
@@ -1200,7 +1259,7 @@ function calcBB() {
 bbRenderRows();
 </script>
 
-<!-- ===== 数字の特徴 1〜33 ===== -->
+<!-- ===== 総合数の特徴 1〜48 ===== -->
 <style>
   .num-guide-section { border-top:2px solid var(--border); padding-top:2.5rem; padding-bottom:4rem; }
   .num-guide-title { font-family:'Noto Serif JP',serif; font-size:18px; font-weight:400; letter-spacing:0.15em; margin-bottom:1.5rem; }
@@ -1221,14 +1280,17 @@ bbRenderRows();
   .num-guide-card.master-card .num-guide-num { color:var(--gold); }
   .num-guide-kw { font-size:12px; font-weight:700; color:var(--ink); letter-spacing:0.05em; }
   .num-guide-desc { font-size:11px; color:var(--ink-light); line-height:1.7; }
+  .num-cell-link { cursor:pointer; transition:box-shadow 0.2s; }
+  .num-cell-link:hover { box-shadow:0 0 0 2px var(--gold); }
   .num-guide-master-badge {
     font-size:9px; color:var(--gold); border:1px solid var(--gold);
-    border-radius:3px; padding:1px 4px; display:inline-block; margin-bottom:2px; letter-spacing:0.05em;
+    border-radius:3px; padding:1px 4px; display:inline-block; letter-spacing:0.05em; white-space:nowrap;
   }
+  .num-guide-num-row { display:flex; align-items:center; gap:6px; }
 </style>
 
 <div class="container num-guide-section">
-  <h2 class="num-guide-title">数字の特徴 1〜33</h2>
+  <h2 class="num-guide-title">総合数の特徴 1〜48</h2>
   <div class="num-guide-grid">
     <div class="num-guide-card">
       <div class="num-guide-num">1</div>
@@ -1281,8 +1343,7 @@ bbRenderRows();
       <div class="num-guide-desc">ひとつのサイクルが終わり新たな始まりへ。過去の経験を活かしながら次のステージへ踏み出す。</div>
     </div>
     <div class="num-guide-card master-card">
-      <div class="num-guide-master-badge">マスターナンバー</div>
-      <div class="num-guide-num">11</div>
+      <div class="num-guide-num-row"><div class="num-guide-num">11</div><div class="num-guide-master-badge">マスターナンバー</div></div>
       <div class="num-guide-kw">直感・インスピレーション・使命</div>
       <div class="num-guide-desc">高い感受性と霊的な直感力を持つ。人々に光を与える啓発者として大きな使命を担う。</div>
     </div>
@@ -1337,8 +1398,7 @@ bbRenderRows();
       <div class="num-guide-desc">個性と社交性が花開く明るい数。自己表現を通じて人と世界をつなぎ豊かな成果を生む。</div>
     </div>
     <div class="num-guide-card master-card">
-      <div class="num-guide-master-badge">マスターナンバー</div>
-      <div class="num-guide-num">22</div>
+      <div class="num-guide-num-row"><div class="num-guide-num">22</div><div class="num-guide-master-badge">マスターナンバー</div></div>
       <div class="num-guide-kw">建設・夢の実現・大きな力</div>
       <div class="num-guide-desc">夢を現実に変えるマスタービルダー。大規模なビジョンを実現する実行力と責任感を持つ。</div>
     </div>
@@ -1393,13 +1453,140 @@ bbRenderRows();
       <div class="num-guide-desc">人との縁と言葉の力を持つ数。豊かな表現力と社交性で多くの人と深いつながりを結ぶ。</div>
     </div>
     <div class="num-guide-card master-card">
-      <div class="num-guide-master-badge">マスターナンバー</div>
-      <div class="num-guide-num">33</div>
+      <div class="num-guide-num-row"><div class="num-guide-num">33</div><div class="num-guide-master-badge">マスターナンバー</div></div>
       <div class="num-guide-kw">奉仕・慈愛・癒し</div>
       <div class="num-guide-desc">無条件の愛で世界に貢献するマスターティーチャー。深い思いやりで人を癒し導く存在。</div>
     </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">34</div>
+      <div class="num-guide-kw">変化の中の安定</div>
+      <div class="num-guide-desc">自由を求めながらも地に足のついた安定を築く数。変化と秩序を同時に生きる力を持つ。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">35</div>
+      <div class="num-guide-kw">創造と冒険</div>
+      <div class="num-guide-desc">豊かな表現力と好奇心で新しい世界を切り開く数。自由な発想が人生を彩り可能性を広げる。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">36</div>
+      <div class="num-guide-kw">愛と創造の調和</div>
+      <div class="num-guide-desc">愛と表現を結びつける力を持つ数。人を愛することと自己表現が一体となり豊かな人生を生む。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">37</div>
+      <div class="num-guide-kw">独自性と精神的探求</div>
+      <div class="num-guide-desc">独立した精神と深い内省を兼ね備えた数。自分だけの視点で真理を探り独自の世界を確立する。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">38</div>
+      <div class="num-guide-kw">力と表現・成功</div>
+      <div class="num-guide-desc">強い実行力と豊かな表現が融合した数。創造的なエネルギーで大きな成果を現実に引き寄せる。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">39</div>
+      <div class="num-guide-kw">完成への表現</div>
+      <div class="num-guide-desc">創造と完成を結びつける数。人生を通じた表現の積み重ねが大きな完成へとつながっていく。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">40</div>
+      <div class="num-guide-kw">堅実な基盤・完成</div>
+      <div class="num-guide-desc">地道な努力で揺るぎない基盤を作る数。誠実さと継続力で人生の完成形を着実に築く。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">41</div>
+      <div class="num-guide-kw">先駆と安定の融合</div>
+      <div class="num-guide-desc">開拓者の精神と堅実さを併せ持つ数。新しいことに挑みながらも確かな足場を失わない。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">42</div>
+      <div class="num-guide-kw">調和と奉仕・絆</div>
+      <div class="num-guide-desc">人との深いつながりと奉仕の心を持つ数。周囲との調和を大切にしながら絆を育てていく。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">43</div>
+      <div class="num-guide-kw">実践と表現の統合</div>
+      <div class="num-guide-desc">言葉と行動を一致させる誠実な数。地に足のついた表現力で周囲に確かな信頼を与える。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">44</div>
+      <div class="num-guide-kw">強固な基盤・使命</div>
+      <div class="num-guide-desc">物質と精神の両面で強固な土台を築く力を持つ数。大きな使命を現実の形として残していく。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">45</div>
+      <div class="num-guide-kw">変化と実行・挑戦</div>
+      <div class="num-guide-desc">変化を恐れず実行する力を持つ数。安定した基盤の上で自由に動き新しい可能性を開く。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">46</div>
+      <div class="num-guide-kw">愛と実行・責任</div>
+      <div class="num-guide-desc">愛する人のために行動する力を持つ数。責任感と温かさで周囲を守り支え続ける存在。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">47</div>
+      <div class="num-guide-kw">直感と実現・深化</div>
+      <div class="num-guide-desc">深い直感と実行力を兼ね備えた数。内なる知恵を現実の成果へと結びつける力を持つ。</div>
+    </div>
+    <div class="num-guide-card">
+      <div class="num-guide-num">48</div>
+      <div class="num-guide-kw">繁栄と完成・大成</div>
+      <div class="num-guide-desc">大きな力と完成へのエネルギーを持つ数。努力と実行の積み重ねが豊かな繁栄として実を結ぶ。</div>
+    </div>
   </div>
 </div>
+
+<!-- ===== 鑑定数字の深読み 1〜9・11・22・33 ===== -->
+<style>
+  .deep-section { border-top:2px solid var(--border); padding-top:2.5rem; padding-bottom:4rem; }
+  .deep-title { font-family:'Noto Serif JP',serif; font-size:18px; font-weight:400; letter-spacing:0.15em; margin-bottom:0.5rem; }
+  .deep-subtitle { font-size:13px; color:var(--ink-light); margin-bottom:2rem; }
+  .deep-row { border-bottom:1px solid var(--border); padding:1.25rem 0; display:grid; grid-template-columns:60px 1fr; gap:1rem; align-items:start; }
+  .deep-row:last-child { border-bottom:none; }
+  .deep-num { font-family:'Noto Serif JP',serif; font-size:28px; font-weight:300; color:var(--gold); line-height:1; }
+  .deep-num.master { color:var(--red); }
+  .deep-body { display:flex; flex-direction:column; gap:0.5rem; }
+  .deep-kw { font-size:15px; font-weight:500; letter-spacing:0.05em; }
+  .deep-block { display:grid; grid-template-columns:90px 1fr; gap:0.25rem 0.75rem; font-size:13px; line-height:1.7; color:var(--ink-mid); }
+  .deep-label { color:var(--ink-light); font-size:12px; padding-top:1px; }
+</style>
+
+<div class="container deep-section">
+  <h2 class="deep-title">鑑定数字の深読み</h2>
+  <p class="deep-subtitle">1〜9・11・22・33 ── 鑑定で使う12の数字の本質</p>
+  <div id="deep-readings-list"></div>
+</div>
+
+<script>
+(function(){
+  const R = READINGS;
+  const NM = NUM_MEANINGS;
+  const nums = [1,2,3,4,5,6,7,8,9,11,22,33];
+  const masters = [11,22,33];
+  let html = '';
+  for(const n of nums){
+    const life = R.life[n] || {};
+    const soul = R.soul[n] || '';
+    const dest = R.destiny[n] || '';
+    const per  = R.persona[n] || '';
+    const isMaster = masters.includes(n);
+    html += `<div class="deep-row">
+      <div class="deep-num${isMaster?' master':''}">${n}</div>
+      <div class="deep-body">
+        <div class="deep-kw">${NM[n]?.title||''} <span style="font-size:12px;color:var(--ink-light);font-weight:400;">${NM[n]?.kw||''}</span></div>
+        <div class="deep-block">
+          <span class="deep-label">本質・才能</span><span>${life.honshitsu||''}</span>
+          <span class="deep-label">役割・使命</span><span>${life.yakuwari||''}</span>
+          <span class="deep-label">関係性</span><span>${life.kankei||''}</span>
+          <span class="deep-label">宿命</span><span>${dest}</span>
+          <span class="deep-label">魂の欲求</span><span>${soul}</span>
+          <span class="deep-label">外からの印象</span><span>${per}</span>
+        </div>
+      </div>
+    </div>`;
+  }
+  document.getElementById('deep-readings-list').innerHTML = html;
+})();
+</script>
 
 </body>
 </html>
